@@ -3,19 +3,20 @@ package com.hit.joonggonara.dto.response;
 import com.hit.joonggonara.error.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 
-@Getter
-@RequiredArgsConstructor
-public class ApiExceptionResponse {
+public record ApiExceptionResponse(
+        boolean success,
+        int httpStatus,
+        String message
+) {
 
-    private final boolean success;
-    private final String httpStatus;
-    private final String message;
+    public static ApiExceptionResponse of(ErrorCode errorCode) {
+        return new ApiExceptionResponse(false, errorCode.getHttpStatus().value(), errorCode.getMessage());
+    }
 
-
-    public static ApiExceptionResponse of(ErrorCode errorCode){
-        return new ApiExceptionResponse(false, errorCode.getHttpStatus().name(), errorCode.getMessage());
+    // Validation 검증 오류를 위한 코드
+    public static ApiExceptionResponse of(int httpStatus, String message) {
+        return new ApiExceptionResponse(false, httpStatus, message);
     }
 
 
