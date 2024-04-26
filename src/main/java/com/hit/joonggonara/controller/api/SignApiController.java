@@ -1,9 +1,8 @@
 package com.hit.joonggonara.controller.api;
 
-import com.hit.joonggonara.custom.validation.ValidationSequence;
-import com.hit.joonggonara.dto.request.SignUpRequest;
-import com.hit.joonggonara.service.user.SignUpService;
-import jakarta.validation.Valid;
+import com.hit.joonggonara.common.custom.validation.ValidationSequence;
+import com.hit.joonggonara.dto.request.login.SignUpRequest;
+import com.hit.joonggonara.service.login.SignUpService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;

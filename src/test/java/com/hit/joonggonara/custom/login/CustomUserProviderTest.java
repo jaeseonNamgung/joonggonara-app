@@ -1,10 +1,13 @@
 package com.hit.joonggonara.custom.login;
 
 
+import com.hit.joonggonara.common.custom.login.CustomUserDetails;
+import com.hit.joonggonara.common.custom.login.CustomUserDetailsService;
+import com.hit.joonggonara.common.custom.login.CustomUserProvider;
 import com.hit.joonggonara.entity.Member;
-import com.hit.joonggonara.error.CustomException;
-import com.hit.joonggonara.error.errorCode.UserErrorCode;
-import com.hit.joonggonara.type.Role;
+import com.hit.joonggonara.common.error.CustomException;
+import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
+import com.hit.joonggonara.common.type.Role;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

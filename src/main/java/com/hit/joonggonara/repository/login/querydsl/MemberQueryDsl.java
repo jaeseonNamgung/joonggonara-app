@@ -1,4 +1,4 @@
-package com.hit.joonggonara.repository.querydsl;
+package com.hit.joonggonara.repository.login.querydsl;
 
 public interface MemberQueryDsl{
 

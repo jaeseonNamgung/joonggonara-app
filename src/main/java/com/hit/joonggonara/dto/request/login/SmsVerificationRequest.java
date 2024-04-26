@@ -1,8 +1,6 @@
 package com.hit.joonggonara.dto.request;
 
-import com.hit.joonggonara.custom.validation.ValidationGroups;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 
 public record SmsVerificationRequest(
 

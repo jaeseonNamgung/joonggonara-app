@@ -1,16 +1,16 @@
 package com.hit.joonggonara.controller.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hit.joonggonara.config.SecurityConfig;
+import com.hit.joonggonara.common.config.SecurityConfig;
 import com.hit.joonggonara.dto.request.LoginRequest;
 import com.hit.joonggonara.dto.request.PhoneNumberRequest;
 import com.hit.joonggonara.dto.request.SmsVerificationRequest;
 import com.hit.joonggonara.dto.response.TokenResponse;
-import com.hit.joonggonara.error.CustomException;
-import com.hit.joonggonara.error.ErrorCode;
-import com.hit.joonggonara.error.errorCode.UserErrorCode;
-import com.hit.joonggonara.properties.JwtProperties;
-import com.hit.joonggonara.service.user.LoginService;
+import com.hit.joonggonara.common.error.CustomException;
+import com.hit.joonggonara.common.error.ErrorCode;
+import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
+import com.hit.joonggonara.common.properties.JwtProperties;
+import com.hit.joonggonara.service.login.LoginService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,7 +30,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;

@@ -1,6 +1,6 @@
 package com.hit.joonggonara.dto.request;
 
-import com.hit.joonggonara.custom.validation.ValidationGroups;
+import com.hit.joonggonara.common.custom.validation.ValidationGroups;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 

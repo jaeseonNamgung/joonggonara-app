@@ -2,12 +2,10 @@ package com.hit.joonggonara.controller.exception;
 
 import com.hit.joonggonara.dto.response.ApiExceptionResponse;
 import com.hit.joonggonara.dto.response.ValidationResponse;
-import com.hit.joonggonara.error.CustomException;
-import com.hit.joonggonara.error.ErrorCode;
-import com.hit.joonggonara.error.errorCode.BaseErrorCode;
-import jakarta.validation.ConstraintViolationException;
+import com.hit.joonggonara.common.error.CustomException;
+import com.hit.joonggonara.common.error.ErrorCode;
+import com.hit.joonggonara.common.error.errorCode.BaseErrorCode;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

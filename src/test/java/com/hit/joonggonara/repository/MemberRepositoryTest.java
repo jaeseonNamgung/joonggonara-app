@@ -1,9 +1,10 @@
 package com.hit.joonggonara.repository;
 
-import com.hit.joonggonara.config.JPAConfig;
+import com.hit.joonggonara.common.config.JPAConfig;
 import com.hit.joonggonara.entity.Member;
-import com.hit.joonggonara.type.LoginType;
-import com.hit.joonggonara.type.Role;
+import com.hit.joonggonara.repository.login.MemberRepository;
+import com.hit.joonggonara.common.type.LoginType;
+import com.hit.joonggonara.common.type.Role;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

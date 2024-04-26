@@ -1,7 +1,5 @@
-package com.hit.joonggonara.repository.querydsl;
+package com.hit.joonggonara.repository.login.querydsl;
 
-import com.hit.joonggonara.entity.Member;
-import com.hit.joonggonara.entity.QMember;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 

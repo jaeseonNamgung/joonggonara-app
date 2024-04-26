@@ -1,8 +1,9 @@
 package com.hit.joonggonara.controller.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hit.joonggonara.dto.request.SignUpRequest;
-import com.hit.joonggonara.service.user.SignUpService;
+
+import com.hit.joonggonara.dto.request.login.SignUpRequest;
+import com.hit.joonggonara.service.login.SignUpService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

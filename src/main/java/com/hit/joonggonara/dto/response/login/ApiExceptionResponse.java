@@ -1,8 +1,6 @@
 package com.hit.joonggonara.dto.response;
 
-import com.hit.joonggonara.error.ErrorCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import com.hit.joonggonara.common.error.ErrorCode;
 
 public record ApiExceptionResponse(
         boolean success,

@@ -1,9 +1,10 @@
 package com.hit.joonggonara.custom.login;
 
 
-import com.hit.joonggonara.properties.JwtProperties;
-import com.hit.joonggonara.util.JwtUtil;
-import com.hit.joonggonara.type.Role;
+import com.hit.joonggonara.common.custom.login.CustomJwtFilter;
+import com.hit.joonggonara.common.properties.JwtProperties;
+import com.hit.joonggonara.common.util.JwtUtil;
+import com.hit.joonggonara.common.type.Role;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,7 +48,7 @@ class CustomJwtFilterTest {
         given(jwtUtil.getEmail(any())).willReturn(email);
         given(jwtUtil.getRole(any())).willReturn(role);
         //when
-        sut.doFilterInternal(mockRequest, mockResponse, mockFilterChain);
+        sut.doFilter(mockRequest, mockResponse, mockFilterChain);
 
         //then
         then(jwtUtil).should().validateToken(any());
