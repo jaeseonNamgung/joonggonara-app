@@ -1,0 +1,2 @@
+1713939749584|1|statement|connection 13|url jdbc:h2:mem:260d53b5-9a98-48a1-9069-4f4940ef4f1a|drop table if exists member cascade |drop table if exists member cascade 
+1713939749702|0|statement|connection 14|url jdbc:h2:tcp:localhost/~/joonggonara-app|drop table if exists member cascade |drop table if exists member cascade 
