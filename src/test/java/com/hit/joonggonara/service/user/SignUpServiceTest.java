@@ -1,9 +1,11 @@
 package com.hit.joonggonara.service.user;
 
-import com.hit.joonggonara.dto.request.SignUpRequest;
-import com.hit.joonggonara.error.CustomException;
-import com.hit.joonggonara.error.errorCode.UserErrorCode;
-import com.hit.joonggonara.repository.MemberRepository;
+
+import com.hit.joonggonara.dto.request.login.SignUpRequest;
+import com.hit.joonggonara.common.error.CustomException;
+import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
+import com.hit.joonggonara.repository.login.MemberRepository;
+import com.hit.joonggonara.service.login.SignUpService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,8 +14,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchRuntimeException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;

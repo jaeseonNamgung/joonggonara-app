@@ -1,9 +1,10 @@
-package com.hit.joonggonara.service.user;
+package com.hit.joonggonara.service.login;
 
-import com.hit.joonggonara.dto.request.SignUpRequest;
-import com.hit.joonggonara.error.CustomException;
-import com.hit.joonggonara.error.errorCode.UserErrorCode;
-import com.hit.joonggonara.repository.MemberRepository;
+
+import com.hit.joonggonara.dto.request.login.SignUpRequest;
+import com.hit.joonggonara.common.error.CustomException;
+import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
+import com.hit.joonggonara.repository.login.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;

@@ -1,7 +1,7 @@
 package com.hit.joonggonara.entity;
 
-import com.hit.joonggonara.type.LoginType;
-import com.hit.joonggonara.type.Role;
+import com.hit.joonggonara.common.type.LoginType;
+import com.hit.joonggonara.common.type.Role;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;

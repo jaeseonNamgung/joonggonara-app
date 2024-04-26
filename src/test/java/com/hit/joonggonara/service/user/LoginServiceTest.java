@@ -1,18 +1,21 @@
 package com.hit.joonggonara.service.user;
 
-import com.hit.joonggonara.custom.login.CustomUserProvider;
+import com.hit.joonggonara.common.custom.login.CustomUserProvider;
 import com.hit.joonggonara.dto.TokenDto;
-import com.hit.joonggonara.dto.request.*;
+import com.hit.joonggonara.dto.request.EmailRequest;
+import com.hit.joonggonara.dto.request.EmailVerificationRequest;
+import com.hit.joonggonara.dto.request.LoginRequest;
+import com.hit.joonggonara.dto.request.PhoneNumberRequest;
+import com.hit.joonggonara.dto.request.SmsVerificationRequest;
 import com.hit.joonggonara.dto.response.TokenResponse;
-import com.hit.joonggonara.error.CustomException;
-import com.hit.joonggonara.error.errorCode.UserErrorCode;
-import com.hit.joonggonara.properties.EmailProperties;
-import com.hit.joonggonara.properties.RedisProperties;
-import com.hit.joonggonara.util.EmailUtil;
-import com.hit.joonggonara.util.JwtUtil;
-import com.hit.joonggonara.type.Role;
-import com.hit.joonggonara.util.RedisUtil;
-import com.hit.joonggonara.util.TwilioUtil;
+import com.hit.joonggonara.common.error.CustomException;
+import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
+import com.hit.joonggonara.service.login.LoginService;
+import com.hit.joonggonara.common.type.Role;
+import com.hit.joonggonara.common.util.EmailUtil;
+import com.hit.joonggonara.common.util.JwtUtil;
+import com.hit.joonggonara.common.util.RedisUtil;
+import com.hit.joonggonara.common.util.TwilioUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -308,7 +311,7 @@ class LoginServiceTest {
         return PhoneNumberRequest.of("12345678");
     }
 
-    private LoginRequest createLoginRequest() {
+    private com.hit.joonggonara.dto.request.LoginRequest createLoginRequest() {
         return LoginRequest.of("test@naver.com", "abc1234");
     }
 

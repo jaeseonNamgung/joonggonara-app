@@ -1,11 +1,9 @@
 package com.hit.joonggonara.util;
 
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
-import com.hit.joonggonara.config.AwsSesConfig;
+import com.hit.joonggonara.common.config.AwsSesConfig;
+import com.hit.joonggonara.common.util.EmailUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
