@@ -1,7 +1,7 @@
-package com.hit.joonggonara.repository;
+package com.hit.joonggonara.repository.login;
 
 import com.hit.joonggonara.entity.Member;
-import com.hit.joonggonara.repository.querydsl.MemberQueryDsl;
+import com.hit.joonggonara.repository.login.querydsl.MemberQueryDsl;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,12 +1,14 @@
-package com.hit.joonggonara.dto.request;
+package com.hit.joonggonara.dto.request.login;
 
-import com.hit.joonggonara.custom.validation.ValidationGroups.EmailGroup;
-import com.hit.joonggonara.custom.validation.ValidationGroups.NotBlankGroup;
+import com.hit.joonggonara.common.custom.validation.ValidationGroups.EmailGroup;
+import com.hit.joonggonara.common.custom.validation.ValidationGroups.NotBlankGroup;
+import com.hit.joonggonara.common.custom.validation.ValidationGroups.PasswordPatternGroup;
 import com.hit.joonggonara.entity.Member;
-import com.hit.joonggonara.type.LoginType;
-import com.hit.joonggonara.type.Role;
+import com.hit.joonggonara.common.type.LoginType;
+import com.hit.joonggonara.common.type.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 public record SignUpRequest(
 
@@ -14,7 +16,9 @@ public record SignUpRequest(
         @Email(message = "이메일 주소를 정확히 입력해주세요.",  groups = EmailGroup.class )
         String email,
 
-        @NotBlank(message = "비밀번호를 입력해주세요")
+        @NotBlank(message = "비밀번호를 입력해주세요", groups = NotBlankGroup.class)
+        @Pattern(regexp = "(?=.*[0-9])(?=.*[a-zA-Z])(?=.*\\W)(?=\\S+$).{8,16}",
+                message = "비밀번호는 8~16자 영문 대 소문자, 숫자, 특수문자를 사용해 주세요.", groups = PasswordPatternGroup.class)
         String password,
 
         @NotBlank(message = "이름을 입력해주세요")

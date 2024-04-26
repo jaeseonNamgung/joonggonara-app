@@ -1,24 +1,17 @@
 package com.hit.joonggonara.util;
 
-import com.hit.joonggonara.error.CustomException;
-import com.hit.joonggonara.error.errorCode.UserErrorCode;
-import org.junit.jupiter.api.BeforeEach;
+import com.hit.joonggonara.common.error.CustomException;
+import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
+import com.hit.joonggonara.common.util.TwilioUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
 import java.security.NoSuchAlgorithmException;
@@ -26,8 +19,6 @@ import java.security.SecureRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchException;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
 
 @TestPropertySource(properties = {"spring.config.location = classpath:application.yml"})
 @ActiveProfiles("test")

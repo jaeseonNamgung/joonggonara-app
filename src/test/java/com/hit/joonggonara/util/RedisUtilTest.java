@@ -1,7 +1,8 @@
 package com.hit.joonggonara.util;
 
-import com.hit.joonggonara.config.RedisConfig;
-import com.hit.joonggonara.properties.RedisProperties;
+import com.hit.joonggonara.common.config.RedisConfig;
+import com.hit.joonggonara.common.properties.RedisProperties;
+import com.hit.joonggonara.common.util.RedisUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

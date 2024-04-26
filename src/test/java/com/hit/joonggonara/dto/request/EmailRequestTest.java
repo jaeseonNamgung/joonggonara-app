@@ -1,6 +1,6 @@
 package com.hit.joonggonara.dto.request;
 
-import com.hit.joonggonara.custom.validation.ValidationSequence;
+import com.hit.joonggonara.common.custom.validation.ValidationSequence;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
