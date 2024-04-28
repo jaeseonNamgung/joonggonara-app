@@ -1,20 +1,17 @@
-package com.hit.joonggonara.dto.request;
+package com.hit.joonggonara.dto.request.login;
 
-import com.hit.joonggonara.common.custom.validation.ValidationGroups.EmailGroup;
-import com.hit.joonggonara.common.custom.validation.ValidationGroups.NotBlankGroup;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+
+import static com.hit.joonggonara.common.properties.ValidationMessageProperties.ID_PASSWORD_NOT_BLANK;
 
 public record LoginRequest(
 
-
-        @NotBlank(message = "이메일 또는 비밀번호를 입력해주세요.", groups = NotBlankGroup.class)
-        @Email(message = "이메일 주소를 정확히 입력해주세요.", groups = EmailGroup.class)
-        String email,
-        @NotBlank(message = "이메일 또는 비밀번호를 입력해주세요.", groups = NotBlankGroup.class)
+        @NotBlank(message = ID_PASSWORD_NOT_BLANK)
+        String userId,
+        @NotBlank(message = ID_PASSWORD_NOT_BLANK)
         String password
 ) {
-    public static LoginRequest of(String email, String password){
-        return new LoginRequest(email, password);
+    public static LoginRequest of(String userId, String password){
+        return new LoginRequest(userId, password);
     }
 }
