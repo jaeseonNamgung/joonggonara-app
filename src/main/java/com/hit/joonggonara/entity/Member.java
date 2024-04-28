@@ -15,13 +15,14 @@ public class Member extends BaseEntity{
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String userId;
     private String email;
     @Column(nullable = false)
     private String name;
     private String nickName;
     private String password;
     private String phoneNumber;
-    private String school;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private LoginType loginType;
@@ -32,20 +33,20 @@ public class Member extends BaseEntity{
 
     @Builder
     public Member (
+            String userId,
             String email,
             String name,
             String nickName,
             String password,
             String phoneNumber,
-            String school,
             LoginType loginType,
             Role role) {
+        this.userId = userId;
         this.email = email;
         this.name = name;
         this.nickName = nickName;
         this.password = password;
         this.phoneNumber = phoneNumber;
-        this.school = school;
         this.loginType = loginType;
         this.role = role;
     }
