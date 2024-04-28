@@ -31,10 +31,10 @@ public class CustomJwtFilter extends OncePerRequestFilter {
         // token 이 null 이라면 로그인 하지 않은 User
         // token이 null 이 아니고 유효성 검증이 true라면 로그인 한 회원
         if(Strings.hasText(token) && jwtUtil.validateToken(token)){
-            String email = jwtUtil.getEmail(token);
+            String userId = jwtUtil.getUserId(token);
             Role role =  jwtUtil.getRole(token);
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(email, "",
+            Authentication authentication = new UsernamePasswordAuthenticationToken(userId, "",
                     Collections.singleton(new SimpleGrantedAuthority(role.name())));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
