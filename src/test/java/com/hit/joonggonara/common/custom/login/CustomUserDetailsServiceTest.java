@@ -1,12 +1,11 @@
-package com.hit.joonggonara.custom.login;
+package com.hit.joonggonara.common.custom.login;
 
-import com.hit.joonggonara.common.custom.login.CustomUserDetailsService;
-import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
-import com.hit.joonggonara.repository.login.MemberRepository;
 import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.type.Role;
+import com.hit.joonggonara.entity.Member;
+import com.hit.joonggonara.repository.login.MemberRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,13 +37,13 @@ class CustomUserDetailsServiceTest {
     {
         //given
         Member member = createMember();
-        given(memberRepository.findByEmail(any())).willReturn(Optional.of(member));
+        given(memberRepository.findByUserId(any())).willReturn(Optional.of(member));
         //when
-        UserDetails expectedUserDetails = sut.loadUserByUsername(member.getEmail());
+        UserDetails expectedUserDetails = sut.loadUserByUsername(member.getUserId());
         //then
-        assertThat(expectedUserDetails.getUsername()).isEqualTo(member.getEmail());
+        assertThat(expectedUserDetails.getUsername()).isEqualTo(member.getUserId());
         assertThat(expectedUserDetails.getPassword()).isEqualTo(member.getPassword());
-        then(memberRepository).should().findByEmail(any());
+        then(memberRepository).should().findByUserId(any());
     }
     
     @Test
@@ -52,23 +51,23 @@ class CustomUserDetailsServiceTest {
     void NotFoundUserTest() throws Exception
     {
         //given
-        given(memberRepository.findByEmail(any())).willReturn(Optional.empty());
+        given(memberRepository.findByUserId(any())).willReturn(Optional.empty());
         //when
         CustomException expectedException = (CustomException) catchRuntimeException(()-> sut.loadUserByUsername("test"));
         //then
         assertThat(expectedException.getErrorCode().getHttpStatus()).isEqualTo(UserErrorCode.USER_NOT_FOUND.getHttpStatus());
         assertThat(expectedException).hasMessage(UserErrorCode.USER_NOT_FOUND.getMessage());
-        then(memberRepository).should().findByEmail(any());
+        then(memberRepository).should().findByUserId(any());
     }
 
     private Member createMember() {
         return Member.builder()
+                .userId("testId")
                 .email("test@naver.com")
                 .name("홍길동")
                 .password("abc1234")
                 .nickName("nickName")
                 .phoneNumber("010-1234-4567")
-                .school("school")
                 .loginType(LoginType.GENERAL)
                 .role(Role.USER)
                 .build();

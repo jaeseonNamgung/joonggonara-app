@@ -1,13 +1,10 @@
-package com.hit.joonggonara.custom.login;
+package com.hit.joonggonara.common.custom.login;
 
 
-import com.hit.joonggonara.common.custom.login.CustomUserDetails;
-import com.hit.joonggonara.common.custom.login.CustomUserDetailsService;
-import com.hit.joonggonara.common.custom.login.CustomUserProvider;
-import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
 import com.hit.joonggonara.common.type.Role;
+import com.hit.joonggonara.entity.Member;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +15,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchRuntimeException;
@@ -44,9 +40,9 @@ class CustomUserProviderTest {
     void userProviderSuccessTest() throws Exception
     {
         //given
-        String email = "test@naver.com";
+        String userId = "testId";
         String password = "abc1234";
-        Authentication authentication = new UsernamePasswordAuthenticationToken(email, password);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userId, password);
         CustomUserDetails userDetails = createUserDetails();
         given(userDetailsService.loadUserByUsername(any()))
                 .willReturn(userDetails);
@@ -70,9 +66,9 @@ class CustomUserProviderTest {
     void passwordMismatchTest() throws Exception
     {
         //given
-        String email = "test@naver.com";
+        String userId = "testId";
         String password = "abc1234";
-        Authentication authentication = new UsernamePasswordAuthenticationToken(email, password);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userId, password);
         CustomUserDetails userDetails = createUserDetails();
         given(userDetailsService.loadUserByUsername(any()))
                 .willReturn(userDetails);
@@ -93,7 +89,7 @@ class CustomUserProviderTest {
 
     private Member createMember() {
         return Member.builder()
-                .email("test@naver.com")
+                .userId("testId")
                 .password("abc1234")
                 .role(Role.USER)
                 .build();

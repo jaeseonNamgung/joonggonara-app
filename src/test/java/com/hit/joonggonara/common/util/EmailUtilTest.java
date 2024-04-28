@@ -1,4 +1,4 @@
-package com.hit.joonggonara.util;
+package com.hit.joonggonara.common.util;
 
 import com.hit.joonggonara.common.config.AwsSesConfig;
 import com.hit.joonggonara.common.util.EmailUtil;

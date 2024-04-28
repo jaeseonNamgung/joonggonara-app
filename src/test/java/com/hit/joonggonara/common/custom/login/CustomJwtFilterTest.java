@@ -1,10 +1,9 @@
-package com.hit.joonggonara.custom.login;
+package com.hit.joonggonara.common.custom.login;
 
 
-import com.hit.joonggonara.common.custom.login.CustomJwtFilter;
 import com.hit.joonggonara.common.properties.JwtProperties;
-import com.hit.joonggonara.common.util.JwtUtil;
 import com.hit.joonggonara.common.type.Role;
+import com.hit.joonggonara.common.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,7 +35,7 @@ class CustomJwtFilterTest {
     {
         //given
         String token = JwtProperties.JWT_TYPE + " " + "token test";
-        String email = "test@naver.com";
+        String userId = "testId";
         Role role = Role.USER;
         MockHttpServletRequest mockRequest = new MockHttpServletRequest();
         MockHttpServletResponse mockResponse = new MockHttpServletResponse();
@@ -45,14 +44,14 @@ class CustomJwtFilterTest {
         mockRequest.addHeader(JwtProperties.AUTHORIZATION, token);
 
         given(jwtUtil.validateToken(any())).willReturn(true);
-        given(jwtUtil.getEmail(any())).willReturn(email);
+        given(jwtUtil.getUserId(any())).willReturn(userId);
         given(jwtUtil.getRole(any())).willReturn(role);
         //when
         sut.doFilter(mockRequest, mockResponse, mockFilterChain);
 
         //then
         then(jwtUtil).should().validateToken(any());
-        then(jwtUtil).should().getEmail(any());
+        then(jwtUtil).should().getUserId(any());
         then(jwtUtil).should().getRole(any());
     }
 

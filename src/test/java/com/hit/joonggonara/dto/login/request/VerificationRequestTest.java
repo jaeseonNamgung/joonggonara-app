@@ -1,5 +1,6 @@
-package com.hit.joonggonara.dto.request;
+package com.hit.joonggonara.dto.login.request;
 
+import com.hit.joonggonara.dto.request.login.VerificationRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -13,37 +14,40 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.hit.joonggonara.common.properties.ValidationMessageProperties.VERIFICATION_CODE_NOT_BLANK;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class PhoneNumberRequestTest {
-    private Validator validator;
+class VerificationRequestTest {
+
+    private Validator sut;
 
     @BeforeEach
     void setUp(){
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
-        validator = validatorFactory.getValidator();
+        sut = validatorFactory.getValidator();
     }
 
     @MethodSource
     @ParameterizedTest
     @DisplayName("[Request][Validation] request 유효성 검증 테스트")
-    void validationTest(String expectedPhoneNumber, String expectedMessage) throws Exception
+    void validationTest(String expectedVerificationCode, String expectedMessage) throws Exception
     {
-        Set<ConstraintViolation<PhoneNumberRequest>> validate =
-                validator.validate(
-                        PhoneNumberRequest.of(expectedPhoneNumber)
+        Set<ConstraintViolation<VerificationRequest>> expectedValidate =
+                sut.validate(
+                        VerificationRequest.of("+8617212345678", expectedVerificationCode)
                 );
-        assertThat(validate).isNotEmpty();
-        validate.forEach(value->{
+        assertThat(expectedValidate).isNotEmpty();
+        expectedValidate.forEach(value->{
             assertThat(value.getMessage()).isEqualTo(expectedMessage);
         });
     }
 
     static Stream<Arguments> validationTest(){
         return Stream.of(
-                Arguments.of("", "전화번호를 입력해주세요."),
-                Arguments.of(null, "전화번호를 입력해주세요."),
-                Arguments.of(" ", "전화번호를 입력해주세요.")
+                Arguments.of("", VERIFICATION_CODE_NOT_BLANK),
+                Arguments.of(null, VERIFICATION_CODE_NOT_BLANK),
+                Arguments.of(" ", VERIFICATION_CODE_NOT_BLANK)
         );
     }
+
 }

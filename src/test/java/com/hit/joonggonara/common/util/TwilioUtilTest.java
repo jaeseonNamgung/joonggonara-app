@@ -1,4 +1,4 @@
-package com.hit.joonggonara.util;
+package com.hit.joonggonara.common.util;
 
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
