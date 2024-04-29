@@ -39,8 +39,4 @@ public class RedisConfig {
         redisTemplate.setEnableTransactionSupport(true);
         return redisTemplate;
     }
-    @Bean
-    public PlatformTransactionManager platformTransactionManager(){
-        return new DataSourceTransactionManager();
-    }
     }
