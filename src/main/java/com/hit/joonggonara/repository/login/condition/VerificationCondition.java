@@ -1,4 +1,4 @@
-package com.hit.joonggonara.service.login.condition;
+package com.hit.joonggonara.repository.login.condition;
 
 public record VerificationCondition(
         String username,
