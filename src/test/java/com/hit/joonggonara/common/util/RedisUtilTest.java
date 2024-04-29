@@ -2,7 +2,9 @@ package com.hit.joonggonara.common.util;
 
 import com.hit.joonggonara.common.config.RedisConfig;
 import com.hit.joonggonara.common.properties.RedisProperties;
-import com.hit.joonggonara.common.util.RedisUtil;
+import com.hit.joonggonara.common.type.LoginType;
+import com.hit.joonggonara.common.type.Role;
+import com.hit.joonggonara.dto.login.TokenDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,6 +27,8 @@ class RedisUtilTest {
 
     @Autowired
     private RedisUtil redisUtil;
+    @Autowired
+    private JwtUtil jwtUtil;
 
 
     @MethodSource
@@ -75,6 +79,20 @@ class RedisUtilTest {
                 Arguments.of(RedisProperties.PHONE_NUMBER_KEY + email, "123456", 5),
                 Arguments.of(RedisProperties.REFRESH_TOKEN_KEY + email, "refreshToken", 5)
         );
+    }
+    
+    @Test
+    @DisplayName("[Redis][BlackList] 블랙리스트에 토큰을 추가하고 기존 토큰에 남은 시간으로 블랙리스트 TTL 을 설정")
+    void addBlackListTest() throws Exception
+    {
+        //given
+        TokenDto tokenDto = jwtUtil.createToken("testId", Role.USER, LoginType.GENERAL);
+        //when
+        redisUtil.addBlackList(tokenDto.accessToken());
+        String expectedValue = redisUtil.get(tokenDto.accessToken()).get();
+        //then
+        assertThat(RedisProperties.BLACK_LIST_VALUE).isEqualTo(expectedValue);
+
     }
 
 
