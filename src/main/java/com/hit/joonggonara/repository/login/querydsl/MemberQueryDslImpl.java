@@ -1,7 +1,7 @@
 package com.hit.joonggonara.repository.login.querydsl;
 
 import com.hit.joonggonara.common.type.VerificationType;
-import com.hit.joonggonara.service.login.condition.VerificationCondition;
+import com.hit.joonggonara.repository.login.condition.VerificationCondition;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
