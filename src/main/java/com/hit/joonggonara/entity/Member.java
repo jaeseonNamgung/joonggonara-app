@@ -6,7 +6,13 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
+import java.time.LocalDateTime;
+
+@SQLDelete(sql = "UPDATE member SET is_deleted = true, deleted_at = now() WHERE id = ?")
+@SQLRestriction("is_deleted = false")
 @Getter
 @RequiredArgsConstructor
 @Entity
@@ -23,6 +29,12 @@ public class Member extends BaseEntity{
     private String nickName;
     private String password;
     private String phoneNumber;
+
+    // 회원 탈퇴 유무 true 일 경우 회원 탈퇴
+    private boolean isDeleted;
+    // 회원 탈퇴한 시작 시간
+    private LocalDateTime deletedAt;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private LoginType loginType;
@@ -49,5 +61,6 @@ public class Member extends BaseEntity{
         this.phoneNumber = phoneNumber;
         this.loginType = loginType;
         this.role = role;
+        this.isDeleted = false;
     }
 }
