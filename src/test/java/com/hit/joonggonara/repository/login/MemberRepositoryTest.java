@@ -1,6 +1,7 @@
 package com.hit.joonggonara.repository.login;
 
 import com.hit.joonggonara.common.config.JPAConfig;
+import com.hit.joonggonara.common.config.P6SpyConfig;
 import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.type.Role;
 import com.hit.joonggonara.common.type.VerificationType;
@@ -13,10 +14,12 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @TestPropertySource(locations = "classpath:/application.yaml")
-@Import(JPAConfig.class)
+@Import({JPAConfig.class, P6SpyConfig.class})
 @DataJpaTest
 class 
 MemberRepositoryTest {
@@ -29,7 +32,7 @@ MemberRepositoryTest {
     void UserExistByUserIdTest() throws Exception
     {
         //given
-        Member member = createMember();
+        Member member = createMember("testId");
         sut.save(member);
         //when
         boolean exceptedValue = sut.existByUserId(member.getUserId());
@@ -42,7 +45,7 @@ MemberRepositoryTest {
     void UserNotExistByUserIdTest() throws Exception
     {
         //given
-        Member member = createMember();
+        Member member = createMember("testId");
         //when
         boolean exceptedValue = sut.existByUserId(member.getUserId());
         //then
@@ -54,7 +57,7 @@ MemberRepositoryTest {
     void UserExistByUserNameAndPhoneNumberTest() throws Exception
     {
         //given
-        Member member = createMember();
+        Member member = createMember("testId");
         VerificationCondition condition = VerificationCondition.of("hong", "+8612345678");
         sut.save(member);
         //when
@@ -86,7 +89,7 @@ MemberRepositoryTest {
     void UserExistByUserNameAndEmailTest() throws Exception
     {
         //given
-        Member member = createMember();
+        Member member = createMember("testId");
         VerificationCondition condition = VerificationCondition.of("hong", "test@email.com");
         sut.save(member);
         //when
@@ -116,7 +119,7 @@ MemberRepositoryTest {
     void UserExistByUserNameAndUserIdAndPhoneNumberTest() throws Exception
     {
         //given
-        Member member = createMember();
+        Member member = createMember("testId");
         VerificationCondition condition = VerificationCondition.of("hong", "testId", "+8612345678");
         sut.save(member);
         //when
@@ -148,7 +151,7 @@ MemberRepositoryTest {
     void UserExistByUserNameAndUserIdAndEmailTest() throws Exception
     {
         //given
-        Member member = createMember();
+        Member member = createMember("testId");
         VerificationCondition condition = VerificationCondition.of("hong", "testId", "test@email.com");
         sut.save(member);
         //when
@@ -172,9 +175,28 @@ MemberRepositoryTest {
         assertThat(expectedValue).isFalse();
     }
 
-    private Member createMember() {
+    @Test
+    @DisplayName("[JPA][SoftDelete] Delete 쿼리 시 Update 쿼리 실행 is_delete가 false일 경우만 조회 ")
+    void deleteByUserIdTest() throws Exception
+    {
+        //given
+        Member member1 = createMember("testId1");
+        Member member2 = createMember("testId2");
+
+        sut.save(member1);
+        sut.save(member2);
+        //when
+        sut.deleteByUserId(member1.getUserId());
+        List<Member> expectedMembers = sut.findAll();
+        //then
+        assertThat(expectedMembers).isNotNull();
+        assertThat(expectedMembers.size()).isEqualTo(1);
+        assertThat(expectedMembers.get(0).isDeleted()).isFalse();
+    }
+
+    private Member createMember(String userId) {
         return Member.builder()
-                .userId("testId")
+                .userId(userId)
                 .email("test@email.com")
                 .name("hong")
                 .phoneNumber("+8612345678")

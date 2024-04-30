@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long>, MemberQueryDsl {
     Optional<Member> findByUserId(String username);
+    void deleteByUserId(String userId);
 }
