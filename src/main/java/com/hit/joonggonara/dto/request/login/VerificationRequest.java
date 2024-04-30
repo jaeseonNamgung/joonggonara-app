@@ -13,9 +13,9 @@ public record VerificationRequest(
 ) {
 
         public static VerificationRequest of(
-                String phoneNumber,
+                String verificationKey,
                 String verificationCode
         ){
-                return new VerificationRequest(phoneNumber, verificationCode);
+                return new VerificationRequest(verificationKey, verificationCode);
         }
 }
