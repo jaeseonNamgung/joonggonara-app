@@ -2,10 +2,12 @@ package com.hit.joonggonara.repository.login;
 
 import com.hit.joonggonara.common.config.JPAConfig;
 import com.hit.joonggonara.common.config.P6SpyConfig;
+import com.hit.joonggonara.common.type.AuthenticationType;
 import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.type.Role;
 import com.hit.joonggonara.common.type.VerificationType;
 import com.hit.joonggonara.entity.Member;
+import com.hit.joonggonara.repository.login.condition.AuthenticationCondition;
 import com.hit.joonggonara.repository.login.condition.VerificationCondition;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,7 +37,7 @@ MemberRepositoryTest {
         Member member = createMember("testId");
         sut.save(member);
         //when
-        boolean exceptedValue = sut.existByUserId(member.getUserId());
+        boolean exceptedValue = sut.existByEmail(member.getEmail());
         //then
         assertThat(exceptedValue).isTrue();
     }
@@ -51,7 +53,57 @@ MemberRepositoryTest {
         //then
         assertThat(exceptedValue).isFalse();
     }
-    
+
+    @Test
+    @DisplayName("[JPA][QueryDsl] 이메일로 검색해서 회원이 없을 경우 false를 리턴")
+    void UserNotExistByEmailTest() throws Exception
+    {
+        //given
+        Member member = createMember("testId");
+        //when
+        boolean exceptedValue = sut.existByEmail(member.getEmail());
+        //then
+        assertThat(exceptedValue).isFalse();
+    }
+    @Test
+    @DisplayName("[JPA][QueryDsl]  이메일로 검색해서 회원이 있을 경우 true를 리턴")
+    void UserExistByEmailTest() throws Exception
+    {
+        //given
+        Member member = createMember("testId");
+        sut.save(member);
+        //when
+        boolean exceptedValue = sut.existByEmail(member.getEmail());
+        //then
+        assertThat(exceptedValue).isTrue();
+    }
+
+
+
+    @Test
+    @DisplayName("[JPA][QueryDsl]  이메일과 로그인 타입(카카오)으로 검색해서 회원이 있을 경우 true를 리턴")
+    void UserExistByEmailAndLoginTest() throws Exception
+    {
+        //given
+        Member member = createMember("testId");
+        sut.save(member);
+        //when
+        boolean exceptedValue = sut.existByEmailAndLoginType(member.getEmail(), member.getLoginType());
+        //then
+        assertThat(exceptedValue).isTrue();
+    }
+
+    @Test
+    @DisplayName("[JPA][QueryDsl] 이메일과 로그인 타입(카카오)으로 검색해서 회원이 없을 경우 false를 리턴")
+    void UserNotExistByEmailAndLoginTypeTest() throws Exception
+    {
+        //given
+        Member member = createMember("testId");
+        //when
+        boolean exceptedValue = sut.existByEmailAndLoginType(member.getUserId(), member.getLoginType());
+        //then
+        assertThat(exceptedValue).isFalse();
+    }
     @Test
     @DisplayName("[JPA][QueryDsl][아이디 찾기] 이름과 전화번호로 검색해서 회원이 있을 경우 true를 리턴")
     void UserExistByUserNameAndPhoneNumberTest() throws Exception
@@ -193,15 +245,76 @@ MemberRepositoryTest {
         assertThat(expectedMembers.size()).isEqualTo(1);
         assertThat(expectedMembers.get(0).isDeleted()).isFalse();
     }
+    
+    @Test
+    @DisplayName("[JPA][QueryDsl] Email 찾기를 통해 회원 아이디를 Optional로 리턴")
+    void ReturnUserIdToOptionalByEmail() throws Exception
+    {
+        //given
+        Member member = createMember("testId");
+        AuthenticationCondition authenticationCondition =
+                AuthenticationCondition.of("test@email.com", VerificationType.EMAIL, AuthenticationType.ID);
+        sut.save(member);
+        //when
+        String expectedUserId = sut.findUserIdOrPasswordByPhoneNumberOrEmail(authenticationCondition).get();
+        //then
+        assertThat(expectedUserId).isEqualTo(member.getUserId());
+    }
+    @Test
+    @DisplayName("[JPA][QueryDsl] Sms 찾기를 통해 회원 아이디를 Optional로 리턴")
+    void ReturnUserIdToOptionalBySMS() throws Exception
+    {
+        //given
+        Member member = createMember("testId");
+        AuthenticationCondition authenticationCondition =
+                AuthenticationCondition.of("+8612345678", VerificationType.SMS, AuthenticationType.ID);
+        sut.save(member);
+        //when
+        String expectedUserId = sut.findUserIdOrPasswordByPhoneNumberOrEmail(authenticationCondition).get();
+        //then
+        assertThat(expectedUserId).isEqualTo(member.getUserId());
+    }
+
+    @Test
+    @DisplayName("[JPA][QueryDsl] Email 찾기를 통해 패스워드를 Optional로 리턴")
+    void ReturnPasswordToOptionalByEmail() throws Exception
+    {
+        //given
+        Member member = createMember("testId");
+        AuthenticationCondition authenticationCondition =
+                AuthenticationCondition.of("test@email.com", VerificationType.EMAIL, AuthenticationType.PASSWORD);
+        sut.save(member);
+        //when
+        String expectedPassword = sut.findUserIdOrPasswordByPhoneNumberOrEmail(authenticationCondition).get();
+        //then
+        assertThat(expectedPassword).isEqualTo(member.getPassword());
+    }
+
+    @Test
+    @DisplayName("[JPA][QueryDsl] Sms 찾기를 통해 패스워드를 Optional로 리턴")
+    void ReturnPasswordToOptionalBySMS() throws Exception
+    {
+        //given
+        Member member = createMember("testId");
+        AuthenticationCondition authenticationCondition =
+                AuthenticationCondition.of("+8612345678", VerificationType.SMS, AuthenticationType.PASSWORD);
+        sut.save(member);
+        //when
+        String expectedPassword = sut.findUserIdOrPasswordByPhoneNumberOrEmail(authenticationCondition).get();
+        //then
+        assertThat(expectedPassword).isEqualTo(member.getPassword());
+    }
+
 
     private Member createMember(String userId) {
         return Member.builder()
                 .userId(userId)
                 .email("test@email.com")
                 .name("hong")
+                .password("Abc1234*")
                 .phoneNumber("+8612345678")
-                .role(Role.USER)
-                .loginType(LoginType.GENERAL)
+                .role(Role.ROLE_USER)
+                .loginType(LoginType.KAKAO)
                 .build();
     }
 

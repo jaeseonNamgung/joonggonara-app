@@ -37,13 +37,13 @@ class CustomUserDetailsServiceTest {
     {
         //given
         Member member = createMember();
-        given(memberRepository.findByUserId(any())).willReturn(Optional.of(member));
+        given(memberRepository.findByUserIdAndLoginType(any(), any())).willReturn(Optional.of(member));
         //when
         UserDetails expectedUserDetails = sut.loadUserByUsername(member.getUserId());
         //then
         assertThat(expectedUserDetails.getUsername()).isEqualTo(member.getUserId());
         assertThat(expectedUserDetails.getPassword()).isEqualTo(member.getPassword());
-        then(memberRepository).should().findByUserId(any());
+        then(memberRepository).should().findByUserIdAndLoginType(any(), any());
     }
     
     @Test
@@ -51,13 +51,13 @@ class CustomUserDetailsServiceTest {
     void NotFoundUserTest() throws Exception
     {
         //given
-        given(memberRepository.findByUserId(any())).willReturn(Optional.empty());
+        given(memberRepository.findByUserIdAndLoginType(any(), any())).willReturn(Optional.empty());
         //when
         CustomException expectedException = (CustomException) catchRuntimeException(()-> sut.loadUserByUsername("test"));
         //then
         assertThat(expectedException.getErrorCode().getHttpStatus()).isEqualTo(UserErrorCode.USER_NOT_FOUND.getHttpStatus());
         assertThat(expectedException).hasMessage(UserErrorCode.USER_NOT_FOUND.getMessage());
-        then(memberRepository).should().findByUserId(any());
+        then(memberRepository).should().findByUserIdAndLoginType(any(), any());
     }
 
     private Member createMember() {
@@ -69,7 +69,7 @@ class CustomUserDetailsServiceTest {
                 .nickName("nickName")
                 .phoneNumber("010-1234-4567")
                 .loginType(LoginType.GENERAL)
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .build();
     }
 

@@ -1,4 +1,4 @@
-package com.hit.joonggonara.dto.login.request;
+package com.hit.joonggonara.dto.request.login;
 
 import com.hit.joonggonara.dto.request.login.LoginRequest;
 import jakarta.validation.ConstraintViolation;

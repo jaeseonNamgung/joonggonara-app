@@ -2,15 +2,12 @@ package com.hit.joonggonara.service.login;
 
 
 import com.hit.joonggonara.common.properties.RedisProperties;
-import com.hit.joonggonara.common.util.RedisUtil;
-import com.hit.joonggonara.common.util.TwilioUtil;
-import com.hit.joonggonara.dto.login.request.SignUpPhoneNumberRequest;
+import com.hit.joonggonara.dto.request.login.SignUpPhoneNumberRequest;
 import com.hit.joonggonara.dto.request.login.SignUpRequest;
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
 import com.hit.joonggonara.dto.request.login.VerificationRequest;
 import com.hit.joonggonara.repository.login.MemberRepository;
-import com.twilio.Twilio;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

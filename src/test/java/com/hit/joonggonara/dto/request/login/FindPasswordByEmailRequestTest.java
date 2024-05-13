@@ -51,16 +51,16 @@ class FindPasswordByEmailRequestTest {
 
     static Stream<Arguments> validationTest(){
         return Stream.of(
-                Arguments.of(" ","testId","test@email.com", NAME_NOT_BLANK),
-                Arguments.of(null,"testId","test@email.com", NAME_NOT_BLANK),
-                Arguments.of("","testId","test@email.com", NAME_NOT_BLANK),
-                Arguments.of("userId"," ","test@email.com", USER_ID_NOT_BLANK),
-                Arguments.of("userId",null,"test@email.com", USER_ID_NOT_BLANK),
-                Arguments.of("userId","","test@email.com", USER_ID_NOT_BLANK),
-                Arguments.of("userId","testId"," ", EMAIL_NOT_BLANK),
-                Arguments.of("userId","testId",null, EMAIL_NOT_BLANK),
-                Arguments.of("userId","testId","", EMAIL_NOT_BLANK),
-                Arguments.of("userId","testId","test", EMAIL)
+                Arguments.of(" ","testId","test@principal.com", NAME_NOT_BLANK),
+                Arguments.of(null,"testId","test@principal.com", NAME_NOT_BLANK),
+                Arguments.of("","testId","test@principal.com", NAME_NOT_BLANK),
+                Arguments.of("principal"," ","test@principal.com", USER_ID_NOT_BLANK),
+                Arguments.of("principal",null,"test@principal.com", USER_ID_NOT_BLANK),
+                Arguments.of("principal","","test@principal.com", USER_ID_NOT_BLANK),
+                Arguments.of("principal","testId"," ", EMAIL_NOT_BLANK),
+                Arguments.of("principal","testId",null, EMAIL_NOT_BLANK),
+                Arguments.of("principal","testId","", EMAIL_NOT_BLANK),
+                Arguments.of("principal","testId","test", EMAIL)
         );
     }
 

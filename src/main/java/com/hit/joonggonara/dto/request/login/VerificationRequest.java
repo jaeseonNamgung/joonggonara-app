@@ -6,8 +6,10 @@ import static com.hit.joonggonara.common.properties.ValidationMessageProperties.
 
 public record VerificationRequest(
 
+        // PhoneNumber of Email
         String verificationKey,
 
+        // 인증 코드
         @NotBlank(message = VERIFICATION_CODE_NOT_BLANK)
         String verificationCode
 ) {

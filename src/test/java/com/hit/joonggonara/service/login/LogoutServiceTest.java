@@ -15,7 +15,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchException;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -37,7 +36,7 @@ class LogoutServiceTest {
         //given
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(JwtProperties.AUTHORIZATION, JwtProperties.JWT_TYPE + "token");
-        given(jwtUtil.getUserId(any())).willReturn("testId");
+        given(jwtUtil.getPrincipal(any())).willReturn("testId");
         //when
         boolean expectedValue = sut.logout(request);
         //then

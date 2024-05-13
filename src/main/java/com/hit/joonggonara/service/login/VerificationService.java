@@ -18,7 +18,7 @@ public class VerificationService {
     private final TwilioUtil twilioUtil;
     private final EmailUtil emailUtil;
 
-    // sms & email 인증 코드 검사
+    // sms & principal 인증 코드 검사
     public boolean checkVerificationCode(String key, String verificationCode){
         String code =  redisUtil.get(key)
                 .orElseThrow(() -> new CustomException(UserErrorCode.VERIFICATION_CODE_TIME_OVER));

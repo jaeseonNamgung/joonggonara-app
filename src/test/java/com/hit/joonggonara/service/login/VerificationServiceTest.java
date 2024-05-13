@@ -127,7 +127,7 @@ class VerificationServiceTest {
     {
         //given
         String verificationCode = "123456";
-        String email = "test@email.com";
+        String email = "test@principal.com";
         given(emailUtil.createMessage(any())).willReturn(Optional.of(verificationCode));
         //when
         sut.sendEmail(email);
@@ -142,7 +142,7 @@ class VerificationServiceTest {
     void nullEmailVerificationCodeTest() throws Exception
     {
         //given
-        String email = "test@email.com";
+        String email = "test@principal.com";
         given(emailUtil.createMessage(any())).willReturn(Optional.empty());
         //when
         CustomException expectedException = (CustomException) catchException(() -> sut.sendEmail(email));

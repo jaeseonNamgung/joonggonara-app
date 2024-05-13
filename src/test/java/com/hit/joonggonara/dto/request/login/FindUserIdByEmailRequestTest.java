@@ -1,4 +1,4 @@
-package com.hit.joonggonara.dto.login.request;
+package com.hit.joonggonara.dto.request.login;
 
 import com.hit.joonggonara.common.custom.validation.ValidationSequence;
 import com.hit.joonggonara.dto.request.login.FindUserIdByEmailRequest;
@@ -48,13 +48,13 @@ class FindUserIdByEmailRequestTest {
 
     static Stream<Arguments> validationTest(){
         return Stream.of(
-                Arguments.of(" ","test@email.com", NAME_NOT_BLANK),
-                Arguments.of(null,"test@email.com", NAME_NOT_BLANK),
-                Arguments.of("","test@email.com", NAME_NOT_BLANK),
-                Arguments.of("userId"," ", EMAIL_NOT_BLANK),
-                Arguments.of("userId",null, EMAIL_NOT_BLANK),
-                Arguments.of("userId","", EMAIL_NOT_BLANK),
-                Arguments.of("userId","test", EMAIL)
+                Arguments.of(" ","test@principal.com", NAME_NOT_BLANK),
+                Arguments.of(null,"test@principal.com", NAME_NOT_BLANK),
+                Arguments.of("","test@principal.com", NAME_NOT_BLANK),
+                Arguments.of("principal"," ", EMAIL_NOT_BLANK),
+                Arguments.of("principal",null, EMAIL_NOT_BLANK),
+                Arguments.of("principal","", EMAIL_NOT_BLANK),
+                Arguments.of("principal","test", EMAIL)
         );
     }
 

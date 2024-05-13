@@ -37,7 +37,7 @@ class VerificationTypeTest {
     @MethodSource
     @ParameterizedTest
     @DisplayName("[Enum] 일치하는 값이 없을 때 INTERNAL_SERVER_ERROR 에러 발생")
-    void toEnumExceptionTest(String sut, VerificationType verificationType) throws Exception
+    void toEnumExceptionTest(String sut) throws Exception
     {
         CustomException customException =
             (CustomException)catchException(()->VerificationType.toEnum(sut));
@@ -49,12 +49,12 @@ class VerificationTypeTest {
     }
     static Stream<Arguments> toEnumExceptionTest(){
         return Stream.of(
-                Arguments.of("sm", VerificationType.SMS),
-                Arguments.of("ms", VerificationType.SMS),
-                Arguments.of("", VerificationType.SMS),
-                Arguments.of("mail", VerificationType.EMAIL),
-                Arguments.of("Emai", VerificationType.EMAIL),
-                Arguments.of("", VerificationType.EMAIL)
+                Arguments.of("sm"),
+                Arguments.of("ms"),
+                Arguments.of(""),
+                Arguments.of("mail"),
+                Arguments.of("Emai"),
+                Arguments.of("")
         );
     }
 

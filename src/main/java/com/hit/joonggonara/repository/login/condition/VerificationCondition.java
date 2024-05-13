@@ -6,7 +6,7 @@ public record VerificationCondition(
         // 패스워드 찾기 일 경우 userId 필요
         String userId,
 
-        // 인증 방식 : email or verificationKey
+        // 인증 방식 : email of sms
         String verificationCode
 ) {
 

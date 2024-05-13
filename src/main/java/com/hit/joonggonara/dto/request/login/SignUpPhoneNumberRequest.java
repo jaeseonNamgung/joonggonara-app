@@ -1,4 +1,4 @@
-package com.hit.joonggonara.dto.login.request;
+package com.hit.joonggonara.dto.request.login;
 
 public record SignUpPhoneNumberRequest(
         String phoneNumber

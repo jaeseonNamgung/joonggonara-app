@@ -2,7 +2,7 @@ package com.hit.joonggonara.controller.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.hit.joonggonara.dto.login.request.SignUpPhoneNumberRequest;
+import com.hit.joonggonara.dto.request.login.SignUpPhoneNumberRequest;
 import com.hit.joonggonara.dto.request.login.SignUpRequest;
 import com.hit.joonggonara.dto.request.login.VerificationRequest;
 import com.hit.joonggonara.service.login.SignUpService;
@@ -43,7 +43,7 @@ class SignApiControllerTest {
         given(signUpService.signUp(any())).willReturn(true);
         //when & then
 
-        mvc.perform(post("/signUp")
+        mvc.perform(post("/user/signUp")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsString(signUpRequest))
                         .with(csrf())
@@ -151,12 +151,13 @@ class SignApiControllerTest {
 
     private SignUpRequest createSignUpRequest() {
         return SignUpRequest.of(
-                "email@naver.com",
+                "testId",
+                "principal@naver.com",
                 "Abc123456*",
                 "hong",
                 "nickName",
-                "hit",
-                "010-1234-1234"
+                "010-1234-1234",
+                "general"
         );
 
     }

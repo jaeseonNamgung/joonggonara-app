@@ -32,7 +32,8 @@ public record SignUpRequest(
         String nickName,
 
         @NotBlank(message = PHONE_NUMBER_NOT_BLANK, groups = NotBlankGroup.class)
-        String phoneNumber
+        String phoneNumber,
+        String loginType
 ) {
 
     public static SignUpRequest of(
@@ -41,9 +42,10 @@ public record SignUpRequest(
             String password,
             String name,
             String nickName,
-            String phoneNumber
+            String phoneNumber,
+            String loginType
     ){
-        return new SignUpRequest(userId, email, password, name, nickName, phoneNumber);
+        return new SignUpRequest(userId, email, password, name, nickName, phoneNumber, loginType);
     }
 
     public Member toEntity(String passwordEncode){
@@ -54,8 +56,8 @@ public record SignUpRequest(
                 .name(name)
                 .nickName(nickName)
                 .phoneNumber(phoneNumber)
-                .role(Role.USER)
-                .loginType(LoginType.GENERAL)
+                .role(Role.ROLE_USER)
+                .loginType(LoginType.checkType(loginType))
                 .build();
     }
 

@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 
-public class CustomUserDetails implements UserDetails {
+public class CustomUserDetails implements UserDetails{
 
     private final Member member;
 

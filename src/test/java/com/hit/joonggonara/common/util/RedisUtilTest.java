@@ -47,7 +47,7 @@ class RedisUtilTest {
         assertThat(expectedNullValue).isEmpty();
     }
     static Stream<Arguments> saveRedisTest(){
-        String email = "test@email.com";
+        String email = "test@principal.com";
         return Stream.of(
                 Arguments.of(RedisProperties.EMAIL_KEY + email, "123456", 5),
                 Arguments.of(RedisProperties.PHONE_NUMBER_KEY + email, "123456", 5),
@@ -73,7 +73,7 @@ class RedisUtilTest {
 
     }
     static Stream<Arguments> redisDeleteAndSaveTest(){
-        String email = "test@email.com";
+        String email = "test@principal.com";
         return Stream.of(
                 Arguments.of(RedisProperties.EMAIL_KEY + email, "123456", 5),
                 Arguments.of(RedisProperties.PHONE_NUMBER_KEY + email, "123456", 5),
@@ -86,7 +86,7 @@ class RedisUtilTest {
     void addBlackListTest() throws Exception
     {
         //given
-        TokenDto tokenDto = jwtUtil.createToken("testId", Role.USER, LoginType.GENERAL);
+        TokenDto tokenDto = jwtUtil.createToken("testId", Role.ROLE_USER, LoginType.GENERAL);
         //when
         redisUtil.addBlackList(tokenDto.accessToken());
         String expectedValue = redisUtil.get(tokenDto.accessToken()).get();

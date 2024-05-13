@@ -1,6 +1,5 @@
-package com.hit.joonggonara.dto.login.request;
+package com.hit.joonggonara.dto.request.login;
 
-import com.hit.joonggonara.dto.request.login.FindPasswordBySmsRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -54,12 +53,12 @@ class FindPasswordBySmsRequestTest {
                 Arguments.of(" ","testId","+8617512345678", NAME_NOT_BLANK),
                 Arguments.of(null,"testId","+8617512345678", NAME_NOT_BLANK),
                 Arguments.of("","testId","+8617512345678", NAME_NOT_BLANK),
-                Arguments.of("userId"," ","+8617512345678", USER_ID_NOT_BLANK),
-                Arguments.of("userId",null,"+8617512345678", USER_ID_NOT_BLANK),
-                Arguments.of("userId","","+8617512345678", USER_ID_NOT_BLANK),
-                Arguments.of("userId","testId"," ", PHONE_NUMBER_NOT_BLANK),
-                Arguments.of("userId","testId",null, PHONE_NUMBER_NOT_BLANK),
-                Arguments.of("userId","testId","", PHONE_NUMBER_NOT_BLANK)
+                Arguments.of("principal"," ","+8617512345678", USER_ID_NOT_BLANK),
+                Arguments.of("principal",null,"+8617512345678", USER_ID_NOT_BLANK),
+                Arguments.of("principal","","+8617512345678", USER_ID_NOT_BLANK),
+                Arguments.of("principal","testId"," ", PHONE_NUMBER_NOT_BLANK),
+                Arguments.of("principal","testId",null, PHONE_NUMBER_NOT_BLANK),
+                Arguments.of("principal","testId","", PHONE_NUMBER_NOT_BLANK)
         );
     }
 

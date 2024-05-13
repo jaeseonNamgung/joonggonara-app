@@ -18,7 +18,6 @@ public class LogoutApiController {
 
     @DeleteMapping("/user/logout")
     public ResponseEntity<Boolean> logout(HttpServletRequest request, HttpServletResponse response){
-
         boolean isLogout = logoutService.logout(request);
         if(isLogout){
             cookieUtil.deleteCookie(request, response);

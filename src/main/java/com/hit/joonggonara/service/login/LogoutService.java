@@ -20,16 +20,17 @@ public class LogoutService {
     private final JwtUtil jwtUtil;
     private final RedisUtil redisUtil;
 
+
     @Transactional
     public boolean logout(HttpServletRequest request){
         String accessToken = getParseJwt(request.getHeader(JwtProperties.AUTHORIZATION));
         if(accessToken == null){
             throw new CustomException(UserErrorCode.ALREADY_LOGGED_OUT_USER);
         }
-        String userId = jwtUtil.getUserId(accessToken);
+        String userId = jwtUtil.getPrincipal(accessToken);
 
-        redisUtil.delete(RedisProperties.REFRESH_TOKEN_KEY+userId);
-        redisUtil.addBlackList(RedisProperties.BLACK_LIST_VALUE+accessToken);
+        redisUtil.delete(RedisProperties.REFRESH_TOKEN_KEY + userId);
+        redisUtil.addBlackList(accessToken);
         return true;
     }
 

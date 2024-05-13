@@ -1,47 +1,47 @@
 package com.hit.joonggonara.controller.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hit.joonggonara.common.config.SecurityConfig;
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.ErrorCode;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
+import com.hit.joonggonara.common.properties.JwtProperties;
+import com.hit.joonggonara.common.util.CookieUtil;
 import com.hit.joonggonara.dto.request.login.*;
+import com.hit.joonggonara.dto.response.login.FindUserIdResponse;
+import com.hit.joonggonara.dto.response.login.OAuth2UserDto;
 import com.hit.joonggonara.dto.response.login.TokenResponse;
 import com.hit.joonggonara.service.login.LoginService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockCookie;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
+import static com.hit.joonggonara.common.properties.JwtProperties.*;
 import static com.hit.joonggonara.common.properties.ValidationMessageProperties.*;
 import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(controllers = LoginApiController.class, excludeFilters = @ComponentScan.Filter(
-        type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class
-
-),
-        excludeAutoConfiguration = SecurityAutoConfiguration.class
-)
+@WebMvcTest(controllers = LoginApiController.class)
 class LoginApiControllerTest {
 
     @Autowired
@@ -49,31 +49,50 @@ class LoginApiControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
     @MockBean
+    private CookieUtil cookieUtil;
+    @MockBean
     private LoginService loginService;
+
+    @BeforeEach
+    public void setup() {
+        doAnswer(invocation -> {
+            HttpServletResponse response = invocation.getArgument(0);
+            String name = invocation.getArgument(1);
+            String value = invocation.getArgument(2);
+            Cookie cookie = new Cookie(name, value);
+            response.addCookie(cookie);
+            return null;
+        }).when(cookieUtil).addCookie(any(HttpServletResponse.class), anyString(), anyString());
+    }
 
     @WithMockUser(roles = "GUEST")
     @Test
-    @DisplayName("[API] login 테스트")
+    @DisplayName("[API][POST] login이 성공적으로 될 경우 accessToken과 refreshToken을 각각 Header와 Cookie에 저장 후 true를 반환")
     void loginSuccessTest() throws Exception
     {
         //given
         LoginRequest loginRequest = createLoginRequest();
         TokenResponse tokenResponse = createTokenResponse();
+
         given(loginService.login(any())).willReturn(tokenResponse);
         //when & then
-        mvc.perform(post("/login")
+        mvc.perform(post("/user/login")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(loginRequest))
                 .with(csrf())
         )
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(header().string(AUTHORIZATION, JWT_TYPE + "accessToken"))
+                .andExpect(cookie().value(REFRESH_TOKEN_NAME, "refreshToken"))
                 .andExpect(jsonPath("$").value(true));
         then(loginService).should().login(any());
+        then(cookieUtil).should().addCookie(any(HttpServletResponse.class), any(), any());
     }
 
 
 
+    @WithMockUser(roles = "GUEST")
     @MethodSource
     @ParameterizedTest
     @DisplayName("Validation 검증 오류 ApiException 에서 테스트 ")
@@ -82,7 +101,7 @@ class LoginApiControllerTest {
         //given
         LoginRequest loginRequest = LoginRequest.of(email, password);
         //when
-        ResultActions resultActions = mvc.perform(post("/login")
+        ResultActions resultActions = mvc.perform(post("/user/login")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsString(loginRequest))
                         .with(csrf())
@@ -113,6 +132,7 @@ class LoginApiControllerTest {
     }
 
 
+    @WithMockUser(roles = "GUEST")
     @MethodSource
     @ParameterizedTest
     @DisplayName("[API][Exception]  ApiException 예의 처리 테스트")
@@ -122,7 +142,7 @@ class LoginApiControllerTest {
         given(loginService.login(any())).willThrow(new CustomException(errorCode));
         LoginRequest loginRequest = createLoginRequest();
         //when & then
-        mvc.perform(post("/login")
+        mvc.perform(post("/user/login")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(loginRequest))
                 .with(csrf())
@@ -132,6 +152,7 @@ class LoginApiControllerTest {
                 .andExpect(jsonPath("$.httpStatus").value(errorCode.getHttpStatus().value()))
                 .andExpect(jsonPath("$.message").value(errorCode.getMessage()));
         then(loginService).should().login(any());
+
     }
 
     static Stream<Arguments> apiExceptionTest(){
@@ -141,10 +162,55 @@ class LoginApiControllerTest {
         );
     }
 
+    @WithMockUser(roles = "GUEST")
+    @Test
+    @DisplayName("[API][GET][소셜 로그인] 이미 가입된 회원이고 성공적으로 로그인 될 경우 AccessToken과 RefreshToken을 Header와 Cookie에 저장 후 " +
+            "ResponseEntity에 OAUth2UserResponse Body를 반환")
+    void ShouldReturnOAUth2UserResponseWhenAlreadySignedUpAndLoginIsSuccessFull() throws Exception
+    {
+        //given
+        OAuth2UserDto oAuth2UserDto = createOAuth2UserDto(true);
+        given(loginService.oAuth2Login(any(), any())).willReturn(oAuth2UserDto);
+        //when & then
+        mvc.perform(get("/user/login/oauth2/code/kakao")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .queryParam("code", "test-code")
+                        .with(csrf())
+        ).andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(header().string(AUTHORIZATION, JWT_TYPE + "accessToken"))
+                .andExpect(cookie().value(REFRESH_TOKEN_NAME, "refreshToken"))
+                .andExpect(jsonPath("$.email").value("test@email.com"))
+                .andExpect(jsonPath("$.signUpStatus").value(true));
+
+        then(loginService).should().oAuth2Login(any(), any());
+        then(cookieUtil).should().addCookie(any(HttpServletResponse.class), any(), any());
+    }
 
     @WithMockUser(roles = "GUEST")
     @Test
-    @DisplayName("[API][POST] 핸드폰 번호로 아이디 찾기")
+    @DisplayName("[API][GET][소셜 로그인] 가입되어 있지 않은 회원이면 ResponseEntity에 OAUth2UserResponse에 signUpStatus에 false를 넣고 반환")
+    void IfNotSignUpUserTest() throws Exception
+    {
+        //given
+        OAuth2UserDto oAuth2UserDto = createOAuth2UserDto(false);
+        given(loginService.oAuth2Login(any(), any())).willReturn(oAuth2UserDto);
+        //when & then
+        mvc.perform(get("/user/login/oauth2/code/kakao")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .queryParam("code", "test-code")
+                        .with(csrf())
+                ).andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.email").value("test@email.com"))
+                .andExpect(jsonPath("$.signUpStatus").value(false));
+
+        then(loginService).should().oAuth2Login(any(), any());
+    }
+
+    @WithMockUser(roles = "GUEST")
+    @Test
+    @DisplayName("[API][POST] SMS 인증 코드 요청 - 아이디 찾기")
     void findUserIdBySmsTest() throws Exception
     {
         //given
@@ -152,7 +218,7 @@ class LoginApiControllerTest {
                 FindUserIdBySmsRequest.of("hong", "+8617512345678");
         given(loginService.findUserIdBySms(any())).willReturn(true);
         //when & then
-        mvc.perform(post("/login/findId/sms")
+        mvc.perform(post("/user/login/findId/sms")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(findUserIdBySmsRequest))
                 .with(csrf())
@@ -166,14 +232,14 @@ class LoginApiControllerTest {
 
     @WithMockUser(roles = "GUEST")
     @Test
-    @DisplayName("[API][POST] 이메일로 아이디 찾기")
+    @DisplayName("[API][POST] Email 인증 코드 요청 - 아이디 찾기")
     void findUserIdByEmailTest() throws Exception
     {
         //given
-        FindUserIdByEmailRequest findUserIdByEmailRequest = FindUserIdByEmailRequest.of("hong", "test@email.com");
+        FindUserIdByEmailRequest findUserIdByEmailRequest = FindUserIdByEmailRequest.of("hong", "test@principal.com");
         given(loginService.findUserIdByEmail(any())).willReturn(true);
         //when & then
-        mvc.perform(post("/login/findId/email")
+        mvc.perform(post("/user/login/findId/email")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(findUserIdByEmailRequest))
                 .with(csrf())
@@ -187,7 +253,7 @@ class LoginApiControllerTest {
 
     @WithMockUser(roles = "GUEST")
     @Test
-    @DisplayName("[API][POST] 핸드폰 번호로 패스워드 찾기")
+    @DisplayName("[API][POST] SMS 인증 코드 요청 - 비밀번호 찾기")
     void findPasswordBySmsTest() throws Exception
     {
         //given
@@ -195,7 +261,7 @@ class LoginApiControllerTest {
                 FindPasswordBySmsRequest.of("hong", "testId", "+8617512345678");
         given(loginService.findPasswordBySms(any())).willReturn(true);
         //when & then
-        mvc.perform(post("/login/findPassword/sms")
+        mvc.perform(post("/user/login/findPassword/sms")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsString(findPasswordBySmsRequest))
                         .with(csrf())
@@ -209,15 +275,15 @@ class LoginApiControllerTest {
 
     @WithMockUser(roles = "GUEST")
     @Test
-    @DisplayName("[API][POST] 이메일로 패스워드 찾기")
+    @DisplayName("[API][POST] Email 인증 코드 요청 - 비밀번호 찾기")
     void findPasswordByEmailTest() throws Exception
     {
         //given
         FindPasswordByEmailRequest findPasswordByEmailRequest =
-                FindPasswordByEmailRequest.of("hong", "testId", "test@email.com");
+                FindPasswordByEmailRequest.of("hong", "testId", "test@principal.com");
         given(loginService.findPasswordByEmail(any())).willReturn(true);
         //when & then
-        mvc.perform(post("/login/findPassword/email")
+        mvc.perform(post("/user/login/findPassword/email")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsString(findPasswordByEmailRequest))
                         .with(csrf())
@@ -230,45 +296,70 @@ class LoginApiControllerTest {
     }
 
     @WithMockUser(roles = "GUEST")
-    @Test
-    @DisplayName("[API][POST] 핸드폰 인증 코드 검사 성공")
-    void successfulPhoneNumberVerificationTest() throws Exception
+    @MethodSource
+    @ParameterizedTest
+    @DisplayName("[API][POST] Email 또는 Sms 인증 코드 검사 후 아이디 반환")
+    void returnUserIdWhenIfSuccessfullyAnEmailOrSms(String verificationType,
+                                               String expectedValue,
+                                               String verificationKey) throws Exception
     {
         //given
         VerificationRequest verificationRequest =
-                VerificationRequest.of("+8617512345678", "123456");
-        given(loginService.checkVerificationCode(any(), any())).willReturn(true);
+                VerificationRequest.of(verificationKey, "123456");
+        FindUserIdResponse findUserIdResponse = FindUserIdResponse.of("testId");
+        given(loginService.checkUserIdVerificationCode(any(), any())).willReturn(findUserIdResponse);
         //when & then
-        mvc.perform(post("/login/checkVerificationCode")
-                .contentType(MediaType.APPLICATION_JSON_VALUE).param("verificationType", "sms")
+        mvc.perform(post("/user/login/checkVerificationCode/userId")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .param("verificationType", verificationType)
                 .content(objectMapper.writeValueAsString(verificationRequest))
                 .with(csrf())
         ).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$").value(true));
-        then(loginService).should().checkVerificationCode(any(), any());
+                .andExpect(jsonPath("$.userId").value(expectedValue));
+        then(loginService).should().checkUserIdVerificationCode(any(), any());
     }
+
+    static Stream<Arguments> returnUserIdWhenIfSuccessfullyAnEmailOrSms(){
+        return Stream.of(
+                Arguments.of("sms", "testId", "+8612345678"),
+                Arguments.of("email", "testId", "test@email.com")
+        );
+    }
+
     @WithMockUser(roles = "GUEST")
-    @Test
-    @DisplayName("[API][POST] 이메일 인증 코드 검사 성공")
-    void successfulEmailVerificationTest() throws Exception
+    @MethodSource
+    @ParameterizedTest
+    @DisplayName("[API][POST][Password] Email 또는 Sms 인증 코드 검사 후 true를 리턴")
+    void returnTrueWhenIfSuccessfullyAnEmailOrSms(String verificationType,
+                                               String verificationKey) throws Exception
     {
         //given
         VerificationRequest verificationRequest =
-                VerificationRequest.of("test@email.com", "123456");
-        given(loginService.checkVerificationCode(any(), any())).willReturn(true);
+                VerificationRequest.of(verificationKey, "123456");
+        FindUserIdResponse findUserIdResponse = FindUserIdResponse.of("testId");
+        given(loginService.checkPasswordVerificationCode(any(), any())).willReturn(true);
         //when & then
-        mvc.perform(post("/login/checkVerificationCode")
-                .contentType(MediaType.APPLICATION_JSON_VALUE).param("verificationType", "email")
-                .content(objectMapper.writeValueAsString(verificationRequest))
-                .with(csrf())
-        ).andExpect(status().isOk())
+        mvc.perform(post("/user/login/checkVerificationCode/password")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .param("verificationType", verificationType)
+                        .content(objectMapper.writeValueAsString(verificationRequest))
+                        .with(csrf())
+                ).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$").value(true));
-        then(loginService).should().checkVerificationCode(any(), any());
+        then(loginService).should().checkPasswordVerificationCode(any(), any());
     }
 
+    static Stream<Arguments> returnTrueWhenIfSuccessfullyAnEmailOrSms(){
+        return Stream.of(
+                Arguments.of("sms", "+8612345678"),
+                Arguments.of("email", "test@email.com")
+        );
+    }
+    
 
+    @WithMockUser(roles = "GUEST")
     @MethodSource
     @ParameterizedTest
     @DisplayName("이메일로 아이디 찾기 Validation 검증 오류 ApiException 에서 테스트 ")
@@ -277,7 +368,7 @@ class LoginApiControllerTest {
         //given
         FindUserIdByEmailRequest findUserIdByEmailRequest = FindUserIdByEmailRequest.of(name, email);
         //when
-        ResultActions resultActions = mvc.perform(post("/login/findId/email")
+        ResultActions resultActions = mvc.perform(post("/user/login/findId/email")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsString(findUserIdByEmailRequest))
                         .with(csrf())
@@ -308,6 +399,52 @@ class LoginApiControllerTest {
         );
     }
 
+    @WithMockUser(roles = "USER")
+    @Test
+    @DisplayName("[API][PUT] Refresh Token 정상적으로 재발급 되면 true를 리턴")
+    void refreshTokenTest() throws Exception
+    {
+        //given
+        String refreshToken = "refreshToken";
+        Cookie cookie = new MockCookie(JwtProperties.REFRESH_TOKEN_NAME, refreshToken);
+        TokenResponse tokenResponse = createTokenResponse();
+        given(cookieUtil.getCookie(any())).willReturn(Optional.of(cookie));
+        given(loginService.reissueToken(any())).willReturn(tokenResponse);
+        //when & then
+        mvc.perform(put("/user/login/reissue")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .with(csrf())
+                        .cookie(cookie)
+                ).andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$").value(true));
+
+        then(cookieUtil).should().getCookie(any());
+        then(loginService).should().reissueToken(any());
+        then(cookieUtil).should().addCookie(any(),any(),any());
+    }
+
+    @WithMockUser(roles = "USER")
+    @Test
+    @DisplayName("[API][PUT] Cookie에 값이 없다면 ALREADY_LOGGED_OUT_USER 에러 발생")
+    void refreshTokenNoRefreshTokenInCookieTest() throws Exception
+    {
+        //given
+        given(cookieUtil.getCookie(any())).willReturn(Optional.empty());
+        //when & then
+        mvc.perform(put("/user/login/reissue")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .with(csrf())
+                ).andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.httpStatus")
+                        .value(UserErrorCode.ALREADY_LOGGED_OUT_USER.getHttpStatus().value()))
+                .andExpect(jsonPath("$.message").value(UserErrorCode.ALREADY_LOGGED_OUT_USER.getMessage()));
+
+        then(cookieUtil).should().getCookie(any());
+    }
+
 
     private LoginRequest createLoginRequest() {
         return LoginRequest.of("test@naver.com", "abc1234*");
@@ -318,5 +455,11 @@ class LoginApiControllerTest {
     }
 
 
-
+    private OAuth2UserDto createOAuth2UserDto(Boolean signUpStatus) {
+        return OAuth2UserDto.of(
+                "accessToken",
+                "refreshToken",
+                "test@email.com",
+                signUpStatus);
+    }
 }

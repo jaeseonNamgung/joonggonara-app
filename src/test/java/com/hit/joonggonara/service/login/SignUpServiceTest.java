@@ -3,9 +3,7 @@ package com.hit.joonggonara.service.login;
 
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
-import com.hit.joonggonara.common.util.RedisUtil;
-import com.hit.joonggonara.common.util.TwilioUtil;
-import com.hit.joonggonara.dto.login.request.SignUpPhoneNumberRequest;
+import com.hit.joonggonara.dto.request.login.SignUpPhoneNumberRequest;
 import com.hit.joonggonara.dto.request.login.SignUpRequest;
 import com.hit.joonggonara.dto.request.login.VerificationRequest;
 import com.hit.joonggonara.repository.login.MemberRepository;
@@ -17,12 +15,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchRuntimeException;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
@@ -157,12 +152,13 @@ class SignUpServiceTest {
 
     private SignUpRequest createSignUpRequest() {
         return SignUpRequest.of(
-                "email@naver.com",
+                "principal@naver.com",
                 "Abc123456*",
                 "hong",
                 "nickName",
                 "hit",
-                "010-1234-1234"
+                "010-1234-1234",
+                "general"
         );
     }
 

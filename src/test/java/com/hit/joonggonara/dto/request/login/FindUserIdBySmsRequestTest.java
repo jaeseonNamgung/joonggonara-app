@@ -1,6 +1,6 @@
-package com.hit.joonggonara.dto.login.request;
+package com.hit.joonggonara.dto.request.login;
 
-import com.hit.joonggonara.dto.request.login.VerificationRequest;
+import com.hit.joonggonara.dto.request.login.FindUserIdBySmsRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -14,11 +14,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static com.hit.joonggonara.common.properties.ValidationMessageProperties.VERIFICATION_CODE_NOT_BLANK;
+import static com.hit.joonggonara.common.properties.ValidationMessageProperties.NAME_NOT_BLANK;
+import static com.hit.joonggonara.common.properties.ValidationMessageProperties.PHONE_NUMBER_NOT_BLANK;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class VerificationRequestTest {
-
+class FindUserIdBySmsRequestTest {
     private Validator sut;
 
     @BeforeEach
@@ -30,24 +30,27 @@ class VerificationRequestTest {
     @MethodSource
     @ParameterizedTest
     @DisplayName("[Request][Validation] request 유효성 검증 테스트")
-    void validationTest(String expectedVerificationCode, String expectedMessage) throws Exception
+    void validationTest(String userId, String phoneNumber, String message) throws Exception
     {
-        Set<ConstraintViolation<VerificationRequest>> expectedValidate =
+        Set<ConstraintViolation<FindUserIdBySmsRequest>> expectedValidate =
                 sut.validate(
-                        VerificationRequest.of("+8617212345678", expectedVerificationCode)
+                        FindUserIdBySmsRequest.of(userId, phoneNumber)
                 );
         assertThat(expectedValidate).isNotEmpty();
         expectedValidate.forEach(value->{
-            assertThat(value.getMessage()).isEqualTo(expectedMessage);
+            assertThat(value.getMessage()).isEqualTo(message);
         });
     }
 
     static Stream<Arguments> validationTest(){
         return Stream.of(
-                Arguments.of("", VERIFICATION_CODE_NOT_BLANK),
-                Arguments.of(null, VERIFICATION_CODE_NOT_BLANK),
-                Arguments.of(" ", VERIFICATION_CODE_NOT_BLANK)
+                Arguments.of("", "+8612345678", NAME_NOT_BLANK),
+                Arguments.of(null, "+8612345678", NAME_NOT_BLANK),
+                Arguments.of(" ", "+8612345678", NAME_NOT_BLANK),
+                Arguments.of("hong","", PHONE_NUMBER_NOT_BLANK),
+                Arguments.of("hong",null, PHONE_NUMBER_NOT_BLANK),
+                Arguments.of("hong", " ", PHONE_NUMBER_NOT_BLANK)
+
         );
     }
-
 }

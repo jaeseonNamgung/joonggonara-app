@@ -1,6 +1,7 @@
 package com.hit.joonggonara.common.custom.login;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hit.joonggonara.common.error.errorCode.BaseErrorCode;
 import com.hit.joonggonara.dto.response.ApiExceptionResponse;
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.ErrorCode;
@@ -10,11 +11,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+
 
 @RequiredArgsConstructor
 public class CustomExceptionFilter extends OncePerRequestFilter {
@@ -28,7 +31,7 @@ public class CustomExceptionFilter extends OncePerRequestFilter {
         }catch (CustomException ex){
             sendErrorResponse(response, ex);
         }catch (Exception ex){
-            ErrorCode errorCode = UserErrorCode.INTERNAL_SERVER_ERROR;
+            ErrorCode errorCode = BaseErrorCode.INTERNAL_SERVER_ERROR;
             CustomException exception = new CustomException(errorCode);
             sendErrorResponse(response,exception);
         }

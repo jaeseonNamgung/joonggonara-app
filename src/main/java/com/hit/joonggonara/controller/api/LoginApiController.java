@@ -1,50 +1,132 @@
 package com.hit.joonggonara.controller.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hit.joonggonara.common.custom.validation.ValidationSequence;
-import com.hit.joonggonara.dto.request.LoginRequest;
-import com.hit.joonggonara.dto.request.PhoneNumberRequest;
-import com.hit.joonggonara.dto.request.SmsVerificationRequest;
-import com.hit.joonggonara.dto.response.TokenResponse;
-import com.hit.joonggonara.common.properties.JwtProperties;
-import com.hit.joonggonara.service.login.LoginService;
+import com.hit.joonggonara.common.error.CustomException;
+import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
+import com.hit.joonggonara.common.type.LoginType;
+import com.hit.joonggonara.common.type.VerificationType;
 import com.hit.joonggonara.common.util.CookieUtil;
+import com.hit.joonggonara.dto.request.login.*;
+import com.hit.joonggonara.dto.response.login.FindUserIdResponse;
+import com.hit.joonggonara.dto.response.login.OAUth2UserResponse;
+import com.hit.joonggonara.dto.response.login.OAuth2UserDto;
+import com.hit.joonggonara.dto.response.login.TokenResponse;
+import com.hit.joonggonara.service.login.LoginService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+
+import static com.hit.joonggonara.common.properties.JwtProperties.*;
+
+
 
 @RequiredArgsConstructor
 @RestController
 public class LoginApiController {
 
     private final LoginService loginService;
+    private final CookieUtil cookieUtil;
 
 
-    @PostMapping("/login")
+    @PostMapping("/user/login")
     public ResponseEntity<Boolean> login(
             HttpServletResponse response,
-            // ValidationSequence를 사용하기 위해서 @Valid -> Validated 로 교체
-            @RequestBody @Validated(ValidationSequence.class) LoginRequest loginRequest){
+            @RequestBody @Valid LoginRequest loginRequest){
         TokenResponse tokenResponse = loginService.login(loginRequest);
-        response.addHeader(JwtProperties.JWT_TYPE, JwtProperties.JWT_TYPE  + " " + tokenResponse.accessToken());
-        CookieUtil.addCookie(response, JwtProperties.REFRESH_TOKEN_NAME, tokenResponse.refreshToken());
-
+        saveAccessTokenAndRefreshToken(response, tokenResponse.accessToken(), tokenResponse.refreshToken());
         return ResponseEntity.ok(true);
     }
 
 
-    @PostMapping("/login/checkPhoneNumber")
-    public ResponseEntity<Boolean> checkPhoneNumber(@RequestBody @Valid PhoneNumberRequest phoneNumberRequest){
-        return ResponseEntity.ok(loginService.checkPhoneNumber(phoneNumberRequest));
+    @GetMapping("/user/login/oauth2")
+    public void sendOAuth2LoginPage(HttpServletResponse response, @RequestParam(name = "loginType") String loginType) throws IOException {
+        response.sendRedirect(loginService.sendRedirect(LoginType.checkType(loginType)));
     }
 
-    @PostMapping("/login/checkVerificationCode")
-    public ResponseEntity<Boolean> checkVerificationCode(@RequestBody @Valid SmsVerificationRequest smsVerificationRequest){
-        return ResponseEntity.ok(loginService.checkSmsVerificationCode(smsVerificationRequest));
+    @GetMapping("/user/login/oauth2/code/{loginType}")
+    public ResponseEntity<OAUth2UserResponse> OAuth2Login(@RequestParam(name = "code") String code,
+                                                          @PathVariable(name = "loginType") String loginType,
+                                                          HttpServletResponse response) throws JsonProcessingException {
+        OAuth2UserDto oAuth2UserDto = loginService.oAuth2Login(code, LoginType.checkType(loginType));
+        if(oAuth2UserDto.signUpStatus()){
+            saveAccessTokenAndRefreshToken(response, oAuth2UserDto.accessToken(), oAuth2UserDto.refreshToken());
+            return ResponseEntity.ok(OAUth2UserResponse.fromResponse(oAuth2UserDto.principal(), true));
+        }
+        return ResponseEntity.ok(OAUth2UserResponse.fromResponse(oAuth2UserDto.principal(), false));
+    }
+
+    @PutMapping("/user/login/reissue")
+    public ResponseEntity<Boolean> reissue(HttpServletRequest request, HttpServletResponse response){
+        String refreshToken = cookieUtil.getCookie(request)
+                .map(Cookie::getValue)
+                .orElseThrow(() -> new CustomException(UserErrorCode.ALREADY_LOGGED_OUT_USER));
+        TokenResponse tokenResponse = loginService.reissueToken(refreshToken);
+
+        // 새로 발급 받은 AccessToken Header에 저장
+        response.setHeader(AUTHORIZATION, JWT_TYPE + tokenResponse.accessToken());
+        
+        // 새로 발급 받은 RefreshToken Cookie에 저장
+        cookieUtil.addCookie(response, REFRESH_TOKEN_NAME, tokenResponse.refreshToken());
+        return ResponseEntity.ok(true);
+    }
+
+    // 핸드폰 번호로 아이디 찾기
+    @PostMapping("/user/login/findId/sms")
+    public ResponseEntity<Boolean> findUserIdBySms(@RequestBody @Valid FindUserIdBySmsRequest findUserIdBySmsRequest){
+        return ResponseEntity.ok(loginService.findUserIdBySms(findUserIdBySmsRequest));
+    }
+    // 이메일로 아이디 찾기
+    @PostMapping("/user/login/findId/email")
+    public ResponseEntity<Boolean> findUserIdByEmail(@RequestBody @Validated(ValidationSequence.class)
+                                                         FindUserIdByEmailRequest findUserIdByEmailRequest){
+        return ResponseEntity.ok(loginService.findUserIdByEmail(findUserIdByEmailRequest));
+    }
+    // 핸드폰 번호로 패스워드 찾기
+    @PostMapping("/user/login/findPassword/sms")
+    public ResponseEntity<Boolean> findPasswordBySms(@RequestBody @Valid FindPasswordBySmsRequest findPasswordBySmsRequest){
+        return ResponseEntity.ok(loginService.findPasswordBySms(findPasswordBySmsRequest));
+    }
+    // 이메일로 패스워드 찾기
+    @PostMapping("/user/login/findPassword/email")
+    public ResponseEntity<Boolean> findPasswordByEmail(@RequestBody @Validated(ValidationSequence.class)
+                                                           FindPasswordByEmailRequest findPasswordByEmailRequest){
+        return ResponseEntity.ok(loginService.findPasswordByEmail(findPasswordByEmailRequest));
+    }
+
+    @PostMapping("/user/login/checkVerificationCode/userId")
+    public ResponseEntity<FindUserIdResponse> checkUserIdVerificationCode(
+            @RequestBody @Valid VerificationRequest verificationRequest,
+            @RequestParam(name = "verificationType") String verificationType
+    ){
+
+        return ResponseEntity.ok(
+                loginService.checkUserIdVerificationCode(
+                        verificationRequest, VerificationType.toEnum(verificationType)
+                ));
+    }
+
+    @PostMapping("/user/login/checkVerificationCode/password")
+    public ResponseEntity<Boolean> checkPasswordVerificationCode(
+            @RequestBody @Valid VerificationRequest verificationRequest,
+            @RequestParam(name = "verificationType") String verificationType
+    ){
+        return ResponseEntity.ok(
+                loginService.checkPasswordVerificationCode(
+                        verificationRequest, VerificationType.toEnum(verificationType)
+                ));
+    }
+
+    private void saveAccessTokenAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
+        response.addHeader(AUTHORIZATION, JWT_TYPE + accessToken);
+        cookieUtil.addCookie(response, REFRESH_TOKEN_NAME, refreshToken);
     }
 
 }

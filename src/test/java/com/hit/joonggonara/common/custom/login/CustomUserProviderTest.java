@@ -54,7 +54,7 @@ class CustomUserProviderTest {
         assertThat(expectedAuthentication.getPrincipal()).isEqualTo(userDetails.getUsername());
         assertThat(expectedAuthentication.getCredentials()).isEqualTo(userDetails.getPassword());
         String role = expectedAuthentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).findFirst().get();
-        assertThat(role).isEqualTo(Role.USER.name());
+        assertThat(role).isEqualTo(Role.ROLE_USER.name());
 
 
         then(userDetailsService).should().loadUserByUsername(any());
@@ -91,7 +91,7 @@ class CustomUserProviderTest {
         return Member.builder()
                 .userId("testId")
                 .password("abc1234")
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .build();
     }
 

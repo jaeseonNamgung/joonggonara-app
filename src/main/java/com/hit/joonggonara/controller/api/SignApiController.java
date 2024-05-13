@@ -1,10 +1,11 @@
 package com.hit.joonggonara.controller.api;
 
 import com.hit.joonggonara.common.custom.validation.ValidationSequence;
-import com.hit.joonggonara.common.type.VerificationType;
-import com.hit.joonggonara.dto.login.request.SignUpPhoneNumberRequest;
+import com.hit.joonggonara.common.properties.JwtProperties;
+import com.hit.joonggonara.dto.request.login.SignUpPhoneNumberRequest;
 import com.hit.joonggonara.dto.request.login.SignUpRequest;
 import com.hit.joonggonara.dto.request.login.VerificationRequest;
+import com.hit.joonggonara.dto.response.login.SignUpOAuth2Response;
 import com.hit.joonggonara.service.login.SignUpService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class SignApiController {
         return ResponseEntity.ok(isTrue);
     }
 
+
     @GetMapping("/user/signUp/duplicateUserId")
     public ResponseEntity<Boolean> duplicateUserId(@RequestParam("userId") String userId){
         boolean isDuplicate = signUpService.checkDuplicateUserId(userId);
@@ -44,4 +46,6 @@ public class SignApiController {
         boolean isCode = signUpService.checkCode(verificationRequest);
         return ResponseEntity.ok(isCode);
     }
+
+
 }
