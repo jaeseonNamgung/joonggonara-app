@@ -20,6 +20,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 
 @RequiredArgsConstructor
 @Service
@@ -59,7 +60,7 @@ public class OAuth2Service {
                 "&" + oAuth2PropertiesDto.redirectUriName() + "=" + oAuth2PropertiesDto.redirectUriValue()
                 + "&response_type=code";
 
-        if(loginType.equals(LoginType.GOGGLE)){
+        if(loginType.equals(LoginType.GOGGLE) || loginType.equals(LoginType.KAKAO)){
             uri = uri + "&scope=" + oAuth2PropertiesDto.scope();
         } else if (loginType.equals(LoginType.NAVER)) {
             uri = uri + "&" + oAuth2PropertiesDto.stateName() + "=" + oAuth2PropertiesDto.stateValue();
@@ -68,7 +69,7 @@ public class OAuth2Service {
     }
 
 
-    public String getUserInfoFromAccessToken(String accessToken, OAuth2PropertiesDto oAuth2PropertiesDto) {
+    public Map<String, String> getUserInfoFromAccessToken(String accessToken, OAuth2PropertiesDto oAuth2PropertiesDto) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.add(oAuth2PropertiesDto.headerName(), oAuth2PropertiesDto.headerValue());
@@ -78,6 +79,7 @@ public class OAuth2Service {
 
         ResponseEntity<HashMap> responseEntity = restTemplate.postForEntity(oAuth2PropertiesDto.userInfoUrl(), httpEntity, HashMap.class);
         Map<String, String> map = (Map<String, String>) responseEntity.getBody().get("response");
-        return map.get("email");
+        log.info(map.toString());
+        return Map.of("email", map.get("email"), "profile", map.get("profile_image"));
     }
 }

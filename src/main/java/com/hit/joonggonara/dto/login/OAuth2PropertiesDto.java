@@ -95,7 +95,7 @@ public record OAuth2PropertiesDto(
                 kakaoProperties.getKakaoSecurityConfig().getClientId(),
                 kakaoProperties.getKakaoSecurityConfig().getRedirectUri(),
                 kakaoProperties.getKakaoSecurityConfig().getClientSecret(),
-                null,
+                kakaoProperties.getKakaoSecurityConfig().getScope(),
                 null,
                 null,
                 null

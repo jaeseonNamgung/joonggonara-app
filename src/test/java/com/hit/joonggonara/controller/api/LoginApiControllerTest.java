@@ -460,6 +460,7 @@ class LoginApiControllerTest {
                 "accessToken",
                 "refreshToken",
                 "test@email.com",
+                "profile",
                 signUpStatus);
     }
 }

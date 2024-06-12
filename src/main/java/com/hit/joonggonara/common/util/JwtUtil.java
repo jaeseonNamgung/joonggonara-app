@@ -185,13 +185,13 @@ public class JwtUtil {
     }
 
     public String getKid(String token, String issuer, String audience) {
-            log.info((String) validateIdToken(token, issuer, audience).getHeader().get(KID));
             return (String) validateIdToken(token, issuer, audience).getHeader().get(KID);
     }
 
-    public String getOidcTokenBody(String token, String modulus, String exponent) {
+    public Map<String, String> getOidcTokenBody(String token, String modulus, String exponent) {
         Claims claims = validationIdToken(token, modulus, exponent).getBody();
-        return String.valueOf(claims.get("email"));
+        log.info(claims.toString());
+        return Map.of("email", String.valueOf(claims.get("email")), "profile", String.valueOf(claims.get("picture")));
     }
 
 }

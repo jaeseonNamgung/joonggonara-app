@@ -2,6 +2,7 @@ package com.hit.joonggonara.entity;
 
 import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.type.Role;
+import com.hit.joonggonara.dto.request.login.MemberUpdateRequest;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,11 +31,16 @@ public class Member extends BaseEntity{
     private String nickName;
     private String password;
     private String phoneNumber;
+    private String profile;
+    @Column(nullable = false)
+    private boolean isNotification;
 
     // 회원 탈퇴 유무 true 일 경우 회원 탈퇴
     private boolean isDeleted;
     // 회원 탈퇴한 시작 시간
     private LocalDateTime deletedAt;
+
+
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -52,6 +58,8 @@ public class Member extends BaseEntity{
             String nickName,
             String password,
             String phoneNumber,
+            String profile,
+            boolean isNotification,
             LoginType loginType,
             Role role) {
         this.userId = userId;
@@ -60,8 +68,17 @@ public class Member extends BaseEntity{
         this.nickName = nickName;
         this.password = password;
         this.phoneNumber = phoneNumber;
+        this.profile = profile;
+        this.isNotification = isNotification;
         this.loginType = loginType;
         this.role = role;
-        this.isDeleted = false;
+    }
+
+    public void update(MemberUpdateRequest memberUpdateRequest) {
+        this.nickName = memberUpdateRequest.nickName();
+        this.email = memberUpdateRequest.email();
+        this.profile = memberUpdateRequest.profile();
+        this.phoneNumber = memberUpdateRequest.phoneNumber();
+        this.isNotification = memberUpdateRequest.isNotification();
     }
 }

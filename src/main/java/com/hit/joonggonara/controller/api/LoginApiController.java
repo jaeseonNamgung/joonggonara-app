@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hit.joonggonara.common.custom.validation.ValidationSequence;
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
+import com.hit.joonggonara.common.properties.JwtProperties;
 import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.type.VerificationType;
 import com.hit.joonggonara.common.util.CookieUtil;
@@ -13,12 +14,14 @@ import com.hit.joonggonara.dto.response.login.OAUth2UserResponse;
 import com.hit.joonggonara.dto.response.login.OAuth2UserDto;
 import com.hit.joonggonara.dto.response.login.TokenResponse;
 import com.hit.joonggonara.service.login.LoginService;
+import feign.Headers;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,9 +61,9 @@ public class LoginApiController {
         OAuth2UserDto oAuth2UserDto = loginService.oAuth2Login(code, LoginType.checkType(loginType));
         if(oAuth2UserDto.signUpStatus()){
             saveAccessTokenAndRefreshToken(response, oAuth2UserDto.accessToken(), oAuth2UserDto.refreshToken());
-            return ResponseEntity.ok(OAUth2UserResponse.fromResponse(oAuth2UserDto.principal(), true));
+            return ResponseEntity.ok(OAUth2UserResponse.fromResponse(oAuth2UserDto.principal(), oAuth2UserDto.profile(),true));
         }
-        return ResponseEntity.ok(OAUth2UserResponse.fromResponse(oAuth2UserDto.principal(), false));
+        return ResponseEntity.ok(OAUth2UserResponse.fromResponse(oAuth2UserDto.principal(),oAuth2UserDto.profile(), false));
     }
 
     @PutMapping("/user/login/reissue")
@@ -124,9 +127,11 @@ public class LoginApiController {
                 ));
     }
 
+
     private void saveAccessTokenAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
         response.addHeader(AUTHORIZATION, JWT_TYPE + accessToken);
         cookieUtil.addCookie(response, REFRESH_TOKEN_NAME, refreshToken);
     }
+
 
 }

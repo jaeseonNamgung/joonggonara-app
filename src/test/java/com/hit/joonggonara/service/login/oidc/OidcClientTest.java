@@ -22,10 +22,10 @@ import static org.mockito.Mockito.*;
 
 
 @SpringBootTest
-class KakaoOidcClientTest {
+class OidcClientTest {
     
     @Autowired
-    private KakaoOidcClient sut;
+    private OidcClient sut;
 
     @MockBean
     private RestTemplate restTemplate;

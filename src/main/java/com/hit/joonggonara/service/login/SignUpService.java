@@ -2,6 +2,7 @@ package com.hit.joonggonara.service.login;
 
 
 import com.hit.joonggonara.common.properties.RedisProperties;
+import com.hit.joonggonara.dto.request.login.MemberUpdateRequest;
 import com.hit.joonggonara.dto.request.login.SignUpPhoneNumberRequest;
 import com.hit.joonggonara.dto.request.login.SignUpRequest;
 import com.hit.joonggonara.common.error.CustomException;
@@ -56,5 +57,8 @@ public class SignUpService {
     }
 
 
+    public Boolean checkNickName(String nickName) {
+        return memberRepository.existByNickName(nickName);
+    }
 
 }

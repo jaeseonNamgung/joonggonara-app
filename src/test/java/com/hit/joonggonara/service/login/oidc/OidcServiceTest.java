@@ -2,6 +2,7 @@ package com.hit.joonggonara.service.login.oidc;
 
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
+import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.util.JwtUtil;
 import com.hit.joonggonara.dto.login.JwkDto;
 import com.hit.joonggonara.dto.login.OAuth2PropertiesDto;
@@ -14,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchException;
@@ -27,7 +29,7 @@ class OidcServiceTest {
     @Mock
     private JwtUtil jwtUtil;
     @Mock
-    private KakaoOidcClient kakaoOidcClient;
+    private OidcClient oidcClient;
     @InjectMocks
     private OidcService sut;
 
@@ -38,23 +40,25 @@ class OidcServiceTest {
     {
         //given
         String email = "test@email.com";
+        String profile = "profile";
         String kid = "test-kid";
         String token = "token";
         String modulus = "mod123";
         String exponent = "exp123";
         OidcKidDto oidcKidDto = new OidcKidDto(List.of(new JwkDto(kid, "RSA", "RS256", "sig", modulus, exponent)));
-
+        LoginType loginType = LoginType.KAKAO;
         OAuth2PropertiesDto oAuth2PropertiesDto = createOAuth2PropertiesDto();
-        given(kakaoOidcClient.getKakaoKids(any())).willReturn(oidcKidDto);
+        given(oidcClient.getKakaoKids(any())).willReturn(oidcKidDto);
         given(jwtUtil.getKid(any(), any(), any())).willReturn(kid);
-        given(jwtUtil.getOidcTokenBody(any(), any(), any())).willReturn(email);
+        given(jwtUtil.getOidcTokenBody(any(), any(), any())).willReturn(Map.of("email", "test@email.com", "profile", "profile"));
         //when
-        String expectedValue = sut.getUserInfoFromIdToken(token, oAuth2PropertiesDto);
+        Map<String, String> expectedMap = sut.getUserInfoFromIdToken(token, oAuth2PropertiesDto, loginType);
         //then
 
-        assertThat(expectedValue).isEqualTo(email);
+        assertThat(expectedMap.get("email")).isEqualTo(email);
+        assertThat(expectedMap.get("profile")).isEqualTo(profile);
 
-        then(kakaoOidcClient).should().getKakaoKids(any());
+        then(oidcClient).should().getKakaoKids(any());
         then(jwtUtil).should().getKid(any(), any(), any());
         then(jwtUtil).should().getOidcTokenBody(any(), any(), any());
     }
@@ -68,18 +72,19 @@ class OidcServiceTest {
         String token = "token";
         String modulus = "mod123";
         String exponent = "exp123";
+        LoginType loginType = LoginType.KAKAO;
         OidcKidDto oidcKidDto = new OidcKidDto(List.of(new JwkDto("not match test-kid", "RSA", "RS256", "sig", modulus, exponent)));
         OAuth2PropertiesDto oAuth2PropertiesDto = createOAuth2PropertiesDto();
-        given(kakaoOidcClient.getKakaoKids(any())).willReturn(oidcKidDto);
+        given(oidcClient.getKakaoKids(any())).willReturn(oidcKidDto);
         given(jwtUtil.getKid(any(), any(), any())).willReturn(kid);
         //when
         CustomException expectedException =
-            (CustomException) catchException(()->sut.getUserInfoFromIdToken(token, oAuth2PropertiesDto));
+            (CustomException) catchException(()->sut.getUserInfoFromIdToken(token, oAuth2PropertiesDto, loginType));
         //then
         assertThat(expectedException.getErrorCode().getHttpStatus())
                 .isEqualTo(UserErrorCode.KID_REQUEST_FAILED.getHttpStatus());
         assertThat(expectedException).hasMessage(UserErrorCode.KID_REQUEST_FAILED.getMessage());
-        then(kakaoOidcClient).should().getKakaoKids(any());
+        then(oidcClient).should().getKakaoKids(any());
         then(jwtUtil).should().getKid(any(), any(), any());
     }
 

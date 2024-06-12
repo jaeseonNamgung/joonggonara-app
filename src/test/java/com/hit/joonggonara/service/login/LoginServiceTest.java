@@ -19,6 +19,7 @@ import com.hit.joonggonara.dto.request.login.*;
 import com.hit.joonggonara.dto.response.login.FindUserIdResponse;
 import com.hit.joonggonara.dto.response.login.OAuth2UserDto;
 import com.hit.joonggonara.dto.response.login.TokenResponse;
+import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.repository.login.MemberRepository;
 import com.hit.joonggonara.service.login.oidc.OidcService;
 import org.junit.jupiter.api.DisplayName;
@@ -36,6 +37,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -145,11 +147,10 @@ class LoginServiceTest {
         //given
         String code = "test-code";
         OAuth2TokenDto OAuth2TokenDto = createKakaoOAuth2TokenDto();
-        String email = "test@email.com";
         TokenDto tokenDto = createTokenDto();
         LoginType loginType = LoginType.KAKAO;
         given(oAuth2Service.requestAccessToken(any(), any())).willReturn(OAuth2TokenDto);
-        given(oidcService.getUserInfoFromIdToken(any(), any())).willReturn(email);
+        given(oidcService.getUserInfoFromIdToken(any(), any(), any())).willReturn(Map.of("test@email.com", "profile"));
         given(memberRepository.existByEmail(any())).willReturn(true);
         given(jwtUtil.createToken(any(), any(), any())).willReturn(tokenDto);
         //when
@@ -160,7 +161,7 @@ class LoginServiceTest {
         assertThat(oAuth2UserDto.principal()).isEqualTo(tokenDto.principal());
         assertThat(oAuth2UserDto.signUpStatus()).isEqualTo(true);
         then(oAuth2Service).should().requestAccessToken(any(), any());
-        then(oidcService).should().getUserInfoFromIdToken(any(), any());
+        then(oidcService).should().getUserInfoFromIdToken(any(), any(), any());
         then(memberRepository).should().existByEmail(any());
         then(jwtUtil).should().createToken(any(), any(), any());
         then(redisUtil).should().save(any(), any(), any());
@@ -176,7 +177,7 @@ class LoginServiceTest {
         String email = "test@email.com";
         LoginType loginType = LoginType.KAKAO;
         given(oAuth2Service.requestAccessToken(any(), any())).willReturn(OAuth2TokenDto);
-        given(oidcService.getUserInfoFromIdToken(any(), any())).willReturn(email);
+        given(oidcService.getUserInfoFromIdToken(any(), any(), any())).willReturn(Map.of("email", "test@email.com", "profile", "profile"));
         given(memberRepository.existByEmail(any())).willReturn(false);
         //when
         OAuth2UserDto oAuth2UserDto = sut.oAuth2Login(code, loginType);
@@ -186,7 +187,7 @@ class LoginServiceTest {
         assertThat(oAuth2UserDto.principal()).isEqualTo(email);
         assertThat(oAuth2UserDto.signUpStatus()).isEqualTo(false);
         then(oAuth2Service).should().requestAccessToken(any(), any());
-        then(oidcService).should().getUserInfoFromIdToken(any(), any());
+        then(oidcService).should().getUserInfoFromIdToken(any(), any(), any());
         then(memberRepository).should().existByEmail(any());
     }
 
@@ -197,11 +198,10 @@ class LoginServiceTest {
         //given
         String code = "test-code";
         OAuth2TokenDto OAuth2TokenDto = createKakaoOAuth2TokenDto();
-        String email = "test@email.com";
         TokenDto tokenDto = createTokenDto();
         LoginType loginType = LoginType.NAVER;
         given(oAuth2Service.requestAccessToken(any(), any())).willReturn(OAuth2TokenDto);
-        given(oAuth2Service.getUserInfoFromAccessToken(any(), any())).willReturn(email);
+        given(oAuth2Service.getUserInfoFromAccessToken(any(), any())).willReturn(Map.of("test@email.com", "profile"));
         given(memberRepository.existByEmail(any())).willReturn(true);
         given(jwtUtil.createToken(any(), any(), any())).willReturn(tokenDto);
         //when
@@ -228,7 +228,7 @@ class LoginServiceTest {
         String email = "test@email.com";
         LoginType loginType = LoginType.NAVER;
         given(oAuth2Service.requestAccessToken(any(), any())).willReturn(OAuth2TokenDto);
-        given(oAuth2Service.getUserInfoFromAccessToken(any(), any())).willReturn(email);
+        given(oAuth2Service.getUserInfoFromAccessToken(any(), any())).willReturn(Map.of("email", "test@email.com", "profile", "profile"));
         given(memberRepository.existByEmail(any())).willReturn(false);
         //when
         OAuth2UserDto oAuth2UserDto = sut.oAuth2Login(code, loginType);
@@ -632,6 +632,74 @@ class LoginServiceTest {
                 .isEqualTo(UserErrorCode.ALREADY_LOGGED_OUT_USER.getHttpStatus());
         assertThat(expectedException).hasMessage(UserErrorCode.ALREADY_LOGGED_OUT_USER.getMessage());
 
+    }
+    
+    @Test
+    @DisplayName("[Service][Update] 회원 정보 정상적으로 업데이트")
+    void UpdateMemberSuccessfully() throws Exception
+    {
+        //given
+        String principal = "userId";
+        LoginType loginType = LoginType.GENERAL;
+        Member member = createMember(principal, loginType);
+        String token = JwtProperties.JWT_TYPE + "token";
+        MemberUpdateRequest memberUpdateRequest = createMemberUpdateRequest();
+        given(jwtUtil.getPrincipal(any())).willReturn(principal);
+        given(jwtUtil.getLoginType(any())).willReturn(loginType);
+        given(memberRepository.findByPrincipalAndLoginType(any(), any())).willReturn(Optional.of(member));
+        //when
+        sut.memberUpdateInfo(token, memberUpdateRequest);
+        //then
+        then(jwtUtil).should().getPrincipal(any());
+        then(jwtUtil).should().getLoginType(any());
+        then(memberRepository).should().findByPrincipalAndLoginType(any(), any());
+    }
+
+    @Test
+    @DisplayName("[Service][Update] 존재하지 않은 회원일 경우 USER_NOT_FOUND 에러를 던진다")
+    void throwUSER_NOT_FOUNDIfNotFoundMember() throws Exception
+    {
+        //given
+        String principal = "userId";
+        LoginType loginType = LoginType.GENERAL;
+        String token = JwtProperties.JWT_TYPE + "token";
+        MemberUpdateRequest memberUpdateRequest = createMemberUpdateRequest();
+        given(jwtUtil.getPrincipal(any())).willReturn(principal);
+        given(jwtUtil.getLoginType(any())).willReturn(loginType);
+        given(memberRepository.findByPrincipalAndLoginType(any(), any())).willReturn(Optional.empty());
+        //when
+        CustomException customException =
+                (CustomException)catchException(()->sut.memberUpdateInfo(token, memberUpdateRequest));
+        //then
+        assertThat(customException.getMessage()).isEqualTo(UserErrorCode.USER_NOT_FOUND.getMessage());
+        assertThat(customException.getErrorCode().getHttpStatus())
+                .isEqualTo(UserErrorCode.USER_NOT_FOUND.getHttpStatus());
+        then(jwtUtil).should().getPrincipal(any());
+        then(jwtUtil).should().getLoginType(any());
+        then(memberRepository).should().findByPrincipalAndLoginType(any(), any());
+    }
+
+    private MemberUpdateRequest createMemberUpdateRequest() {
+        return MemberUpdateRequest.of(
+                "nickName",
+                "test@email.com",
+                "+8617545562261",
+                "profile",
+                true
+        );
+    }
+
+    private Member createMember(String userId, LoginType loginType) {
+        return Member.builder()
+                .userId(userId)
+                .email("test@email.com")
+                .name("hong")
+                .nickName("nickName")
+                .password("Abc1234*")
+                .phoneNumber("+8612345678")
+                .role(Role.ROLE_USER)
+                .loginType(loginType)
+                .build();
     }
     private VerificationRequest createVerificationCodeRequest() {
         return VerificationRequest.of("+8612345678", "123456");
