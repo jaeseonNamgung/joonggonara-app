@@ -30,6 +30,11 @@ public class SignApiController {
     public ResponseEntity<Boolean> duplicateUserId(@RequestParam("userId") String userId){
         return ResponseEntity.ok(signUpService.checkDuplicateUserId(userId));
     }
+    @GetMapping("/user/signUp/duplicateNickName")
+    public ResponseEntity<Boolean> duplicateNickName(@RequestParam("nickName") String nickName){
+        boolean isDuplicate = signUpService.checkDuplicateNickName(nickName);
+        return ResponseEntity.ok(isDuplicate);
+    }
 
     @PostMapping("/user/signUp/sms/verification")
     public ResponseEntity<Boolean> sendSms(@RequestBody SignUpPhoneNumberRequest phoneNumberRequest){

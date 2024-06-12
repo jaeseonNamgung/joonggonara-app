@@ -45,9 +45,9 @@ public class SecurityConfig {
                 .cors(cors->cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(request->{
-                    request.requestMatchers("/","/login","/login/**", "/user/login",
+                    request.requestMatchers("/", "/ws/**", "/css/**","/js/**", "/favicon.ico",
+                                    "/login","/login/**", "/user/login",
                                     "/user/login/**", "/user/signUp", "/user/signUp/**").permitAll()
-                            .requestMatchers("/user/logout").hasRole("USER")
                             .anyRequest().authenticated();
                 })
                 .exceptionHandling(exception -> {

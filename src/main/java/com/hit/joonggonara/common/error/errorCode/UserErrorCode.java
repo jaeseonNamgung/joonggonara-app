@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 public enum UserErrorCode implements ErrorCode {
 
     USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "존재하지 않은 회원입니다."),
+    RECIPIENT_NOT_FOUND(HttpStatus.BAD_REQUEST, "사용자를 찾을 수 없습니다."),
     ACCESS_DENIED_ERROR(HttpStatus.FORBIDDEN, "해당 서비스에 대한 권한이 없습니다."),
     AUTHENTICATION_ERROR(HttpStatus.UNAUTHORIZED, "인증 오류입니다."),
     NOT_EXIST_AUTHORIZATION(HttpStatus.BAD_REQUEST, "권한이 존재하지 않습니다."),
@@ -20,6 +21,7 @@ public enum UserErrorCode implements ErrorCode {
     EXPIRED_TOKEN(HttpStatus.BAD_REQUEST, "만료된 토큰 정보입니다."),
     UNSUPPORTED_TOKEN(HttpStatus.BAD_REQUEST, "지원되지 않는 토큰 정보입니다."),
     EXIST_USER_ID(HttpStatus.BAD_REQUEST, "이미 사용중인 아이디입니다."),
+    EXIST_NICK_NAME(HttpStatus.BAD_REQUEST, "이미 사용중인 닉네임입니다."),
     NOT_EXIST_USER(HttpStatus.BAD_REQUEST, "존재하지 않은 회원입니다."),
     VERIFICATION_CODE_MISMATCH(HttpStatus.BAD_REQUEST, "인증 코드가 일치 하지 않습니다." ),
     VERIFICATION_CODE_TIME_OVER(HttpStatus.BAD_REQUEST, "입력 시간을 초과했습니다. 인증 코드를 다시 요청해주세요."),
