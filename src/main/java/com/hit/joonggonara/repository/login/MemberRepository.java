@@ -13,17 +13,4 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberQue
     Optional<Member> findBuyerByNickName(String nickName);
     void deleteByUserId(String userId);
     void deleteByEmail(String email);
-
-<<<<<<< Updated upstream
-
-=======
-<<<<<<< Updated upstream
-    Optional<Member> findByEmail(String email);
-=======
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 }

@@ -64,12 +64,10 @@ public class SignUpService {
         return verificationService.checkVerificationCode(key, verificationRequest.verificationCode());
     }
 
-<<<<<<< Updated upstream
 
     public Boolean checkNickName(String nickName) {
         return memberRepository.existByNickName(nickName);
     }
 
-=======
->>>>>>> Stashed changes
+
 }

@@ -1,18 +1,12 @@
 package com.hit.joonggonara.repository.chat.querydsl;
 
-import com.hit.joonggonara.dto.chat.ChatRoomDto;
-import com.hit.joonggonara.entity.Chat;
-import com.hit.joonggonara.entity.Member;
-import com.hit.joonggonara.entity.QChat;
+import com.hit.joonggonara.entity.ChatRoom;
 import com.hit.joonggonara.entity.QChatRoom;
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.Projections;
-import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.hit.joonggonara.entity.QChat.chat;
@@ -24,26 +18,33 @@ public class ChatRoomQueryDslImpl implements ChatRoomQueryDsl{
 
     private final JPAQueryFactory jpaQueryFactory;
 
+    
+    // buyer과 seller 에 속한 모든 채팅방을 조회하는데 삭제되지 않은 채팅방만 조회
+    @Override
+    public List<ChatRoom> findAllByNickName(String nickName) {
+        return jpaQueryFactory
+                .selectFrom(chatRoom)
+                .join(chatRoom.chats).fetchJoin()
+                .where(
+                        findBuyerCondition(nickName).or(findSellerCondition(nickName))
+                ).orderBy(chatRoom.createdDate.desc()).fetch();
+    }
 
     @Override
-    public Optional<ChatRoomDto> findBuyerOrSellerByNickName(String nickName) {
-        Chat lastChat = getLastMessage();
-        jpaQueryFactory.select(
-                Projections.constructor(ChatRoomDto.class,
-                        chatRoom.id,
-                        chatRoom.buyer.nickName,
-                        chatRoom.seller.nickName,
-                        lastChat.getMessage(),
-                        lastChat.getCreatedDate().toString()
-                        )
-        )
+    public Optional<ChatRoom> findChatInChatRoomAllByRoomId(Long roomId) {
+        ChatRoom chatRoom = jpaQueryFactory.selectFrom(QChatRoom.chatRoom)
+                .join(QChatRoom.chatRoom.chats).fetchJoin()
+                .where(QChatRoom.chatRoom.id.eq(roomId)).fetchOne();
+
+        return Optional.ofNullable(chatRoom);
     }
 
-    private Chat getLastMessage() {
-        QChat subChat = new QChat("chat");
-        return JPAExpressions.selectFrom(chat)
-                .where(chat.createdDate.eq(
-                        JPAExpressions.select(chat.createdDate.max())
-                )).fetchOne();
+    BooleanExpression findBuyerCondition(String nickName){
+        return chatRoom.buyerNickName.eq(nickName).and(chatRoom.buyerDeleted.eq(false));
     }
+    BooleanExpression findSellerCondition(String nickName){
+        return chatRoom.sellerNickName.eq(nickName).and(chatRoom.sellerDeleted.eq(false));
+    }
+
+
 }

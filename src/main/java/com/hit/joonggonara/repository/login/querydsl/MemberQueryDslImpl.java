@@ -7,7 +7,6 @@ import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.repository.login.condition.AuthenticationCondition;
 import com.hit.joonggonara.repository.login.condition.LoginCondition;
 import com.hit.joonggonara.repository.login.condition.VerificationCondition;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -16,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.Optional;
 
 import static com.hit.joonggonara.entity.QMember.member;
+
 
 @RequiredArgsConstructor
 public class MemberQueryDslImpl implements MemberQueryDsl{
@@ -66,14 +66,6 @@ public class MemberQueryDslImpl implements MemberQueryDsl{
         return exist != null;
     }
 
-    @Override
-    public boolean existByNickName(String nickName) {
-        Integer exist = jpaQueryFactory.selectOne()
-                .from(member)
-                .where(member.nickName.eq(nickName))
-                .fetchOne();
-        return exist != null;
-    }
 
     @Override
     public Optional<String> findUserIdOrPasswordByPhoneNumberOrEmail(AuthenticationCondition condition) {

@@ -5,34 +5,25 @@ import com.hit.joonggonara.entity.ChatRoom;
 
 public record ChatRoomResponse(
         Long roomId,
-        String message,
-        String lastChatTime,
-        String senderNickName,
-        String recipientNickName
+        String roomName,
+        String profile,
+        String nickName
 ) {
     public static ChatRoomResponse of(
             Long roomId,
-            String message,
-            String lastChatTime,
-            String senderNickName,
-            String recipientNickName
+            String roomName,
+            String profile,
+            String nickName
     ){
-        return new ChatRoomResponse(roomId,message, lastChatTime,senderNickName, recipientNickName);
+        return new ChatRoomResponse(roomId, roomName, profile, nickName);
     }
 
-    public static ChatRoomResponse empty(){
-        return new ChatRoomResponse(null, null,null, null, null);
-    }
-    public static ChatRoomResponse fromResponse(Chat chat){
-        if(chat == null){
-            return ChatRoomResponse.empty();
-        }
+    public static ChatRoomResponse fromResponse(ChatRoom chatRoom){
         return ChatRoomResponse.of(
-                chat.getChatRoom().getId(),
-                chat.getMessage(),
-                chat.getCreatedMassageDate(),
-                null,
-                null
-        );
+                chatRoom.getId(),
+                chatRoom.getSellerNickName(),
+                chatRoom.getProfile(),
+                chatRoom.getBuyerNickName());
     }
+
 }

@@ -1,6 +1,9 @@
 package com.hit.joonggonara.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,7 +12,7 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
 public class ChatRoom extends BaseEntity{
@@ -18,20 +21,28 @@ public class ChatRoom extends BaseEntity{
     @Id @GeneratedValue
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "buyer_id")
-    private Member buyer;
+    private String profile;
+    private String buyerNickName;
+    private String sellerNickName;
+    private boolean buyerDeleted;
+    private boolean sellerDeleted;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seller_id")
-    private Member seller;
-
-    @OneToMany(mappedBy = "chats")
+    @OneToMany(mappedBy = "chatRoom")
     private List<Chat> chats = new ArrayList<>();
 
     @Builder
-    public ChatRoom(Member buyer, Member seller) {
-        this.buyer = buyer;
-        this.seller = seller;
+    public ChatRoom(String profile, String buyerNickName, String sellerNickName) {
+        this.profile = profile;
+        this.buyerNickName = buyerNickName;
+        this.sellerNickName = sellerNickName;
+        this.buyerDeleted = false;
+        this.sellerDeleted = false;
+    }
+
+    public void setBuyerDeleted(){
+        this.buyerDeleted = true;
+    }
+    public void setSellerDeleted(){
+        this.sellerDeleted = true;
     }
 }

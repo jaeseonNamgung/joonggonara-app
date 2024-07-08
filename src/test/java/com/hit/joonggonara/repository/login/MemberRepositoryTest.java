@@ -25,8 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestPropertySource(locations = "classpath:/application.yaml")
 @Import({JPAConfig.class, P6SpyConfig.class})
 @DataJpaTest
-class 
-MemberRepositoryTest {
+class MemberRepositoryTest {
 
     @Autowired
     private MemberRepository sut;
@@ -36,19 +35,9 @@ MemberRepositoryTest {
     void UserExistByUserIdTest() throws Exception
     {
         //given
-<<<<<<< Updated upstream
+
         Member member = createMember("testId", LoginType.KAKAO);
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId");
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId", LoginType.KAKAO);
-=======
-        Member member = createMember("testId", LoginType.GENERAL);
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
         sut.save(member);
         //when
         boolean exceptedValue = sut.existByEmail(member.getEmail());
@@ -56,24 +45,15 @@ MemberRepositoryTest {
         assertThat(exceptedValue).isTrue();
     }
 
+
     @Test
     @DisplayName("[JPA][QueryDsl] 아이디로 검색해서 회원이 없을 경우 false를 리턴")
     void UserNotExistByUserIdTest() throws Exception
     {
         //given
-<<<<<<< Updated upstream
+
         Member member = createMember("testId", LoginType.KAKAO);
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId");
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId", LoginType.KAKAO);
-=======
-        Member member = createMember("testId", LoginType.GENERAL);
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
         //when
         boolean exceptedValue = sut.existByUserId(member.getUserId());
         //then
@@ -85,19 +65,9 @@ MemberRepositoryTest {
     void UserNotExistByEmailTest() throws Exception
     {
         //given
-<<<<<<< Updated upstream
+
         Member member = createMember("testId", LoginType.KAKAO);
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId");
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId", LoginType.KAKAO);
-=======
-        Member member = createMember("testId", LoginType.GENERAL);
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
         //when
         boolean exceptedValue = sut.existByEmail(member.getEmail());
         //then
@@ -108,19 +78,9 @@ MemberRepositoryTest {
     void UserExistByEmailTest() throws Exception
     {
         //given
-<<<<<<< Updated upstream
+
         Member member = createMember("testId", LoginType.KAKAO);
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId");
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId", LoginType.KAKAO);
-=======
-        Member member = createMember("testId", LoginType.GENERAL);
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
         sut.save(member);
         //when
         boolean exceptedValue = sut.existByEmail(member.getEmail());
@@ -135,19 +95,9 @@ MemberRepositoryTest {
     void UserExistByEmailAndLoginTest() throws Exception
     {
         //given
-<<<<<<< Updated upstream
+
         Member member = createMember("testId", LoginType.KAKAO);
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId");
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId", LoginType.KAKAO);
-=======
-        Member member = createMember("testId", LoginType.GENERAL);
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
         sut.save(member);
         //when
         boolean exceptedValue = sut.existByEmailAndLoginType(member.getEmail(), member.getLoginType());
@@ -160,19 +110,9 @@ MemberRepositoryTest {
     void UserNotExistByEmailAndLoginTypeTest() throws Exception
     {
         //given
-<<<<<<< Updated upstream
+
         Member member = createMember("testId", LoginType.KAKAO);
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId");
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId", LoginType.KAKAO);
-=======
-        Member member = createMember("testId", LoginType.GENERAL);
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
         //when
         boolean exceptedValue = sut.existByEmailAndLoginType(member.getUserId(), member.getLoginType());
         //then
@@ -183,19 +123,9 @@ MemberRepositoryTest {
     void UserExistByUserNameAndPhoneNumberTest() throws Exception
     {
         //given
-<<<<<<< Updated upstream
+
         Member member = createMember("testId", LoginType.KAKAO);
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId");
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId", LoginType.KAKAO);
-=======
-        Member member = createMember("testId", LoginType.GENERAL);
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
         VerificationCondition condition = VerificationCondition.of("hong", "+8612345678");
         sut.save(member);
         //when
@@ -227,19 +157,9 @@ MemberRepositoryTest {
     void UserExistByUserNameAndEmailTest() throws Exception
     {
         //given
-<<<<<<< Updated upstream
+
         Member member = createMember("testId", LoginType.KAKAO);
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId");
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId", LoginType.KAKAO);
-=======
-        Member member = createMember("testId", LoginType.GENERAL);
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
         VerificationCondition condition = VerificationCondition.of("hong", "test@email.com");
         sut.save(member);
         //when
@@ -269,19 +189,9 @@ MemberRepositoryTest {
     void UserExistByUserNameAndUserIdAndPhoneNumberTest() throws Exception
     {
         //given
-<<<<<<< Updated upstream
+
         Member member = createMember("testId", LoginType.KAKAO);
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId");
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId", LoginType.KAKAO);
-=======
-        Member member = createMember("testId", LoginType.GENERAL);
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
         VerificationCondition condition = VerificationCondition.of("hong", "testId", "+8612345678");
         sut.save(member);
         //when
@@ -313,19 +223,9 @@ MemberRepositoryTest {
     void UserExistByUserNameAndUserIdAndEmailTest() throws Exception
     {
         //given
-<<<<<<< Updated upstream
+
         Member member = createMember("testId", LoginType.KAKAO);
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId");
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId", LoginType.KAKAO);
-=======
-        Member member = createMember("testId", LoginType.GENERAL);
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
         VerificationCondition condition = VerificationCondition.of("hong", "testId", "test@email.com");
         sut.save(member);
         //when
@@ -354,23 +254,8 @@ MemberRepositoryTest {
     void deleteByUserIdTest() throws Exception
     {
         //given
-<<<<<<< Updated upstream
         Member member1 = createMember("testId1", LoginType.KAKAO);
         Member member2 = createMember("testId2", LoginType.KAKAO);
-=======
-<<<<<<< Updated upstream
-        Member member1 = createMember("testId1");
-        Member member2 = createMember("testId2");
-=======
-<<<<<<< Updated upstream
-        Member member1 = createMember("testId1", LoginType.KAKAO);
-        Member member2 = createMember("testId2", LoginType.KAKAO);
-=======
-        Member member1 = createMember("testId1", LoginType.GENERAL);
-        Member member2 = createMember("testId2", LoginType.GENERAL);
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 
         sut.save(member1);
         sut.save(member2);
@@ -388,19 +273,9 @@ MemberRepositoryTest {
     void ReturnUserIdToOptionalByEmail() throws Exception
     {
         //given
-<<<<<<< Updated upstream
+
         Member member = createMember("testId", LoginType.KAKAO);
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId");
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId", LoginType.KAKAO);
-=======
-        Member member = createMember("testId", LoginType.GENERAL);
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
         AuthenticationCondition authenticationCondition =
                 AuthenticationCondition.of("test@email.com", VerificationType.EMAIL, AuthenticationType.ID);
         sut.save(member);
@@ -414,19 +289,10 @@ MemberRepositoryTest {
     void ReturnUserIdToOptionalBySMS() throws Exception
     {
         //given
-<<<<<<< Updated upstream
+
         Member member = createMember("testId", LoginType.KAKAO);
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId");
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId", LoginType.KAKAO);
-=======
-        Member member = createMember("testId", LoginType.GENERAL);
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
+
         AuthenticationCondition authenticationCondition =
                 AuthenticationCondition.of("+8612345678", VerificationType.SMS, AuthenticationType.ID);
         sut.save(member);
@@ -441,19 +307,9 @@ MemberRepositoryTest {
     void ReturnPasswordToOptionalByEmail() throws Exception
     {
         //given
-<<<<<<< Updated upstream
+
         Member member = createMember("testId", LoginType.KAKAO);
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId");
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId", LoginType.KAKAO);
-=======
-        Member member = createMember("testId", LoginType.GENERAL);
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
         AuthenticationCondition authenticationCondition =
                 AuthenticationCondition.of("test@email.com", VerificationType.EMAIL, AuthenticationType.PASSWORD);
         sut.save(member);
@@ -468,19 +324,9 @@ MemberRepositoryTest {
     void ReturnPasswordToOptionalBySMS() throws Exception
     {
         //given
-<<<<<<< Updated upstream
+
         Member member = createMember("testId", LoginType.KAKAO);
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId");
-=======
-<<<<<<< Updated upstream
-        Member member = createMember("testId", LoginType.KAKAO);
-=======
-        Member member = createMember("testId", LoginType.GENERAL);
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
         AuthenticationCondition authenticationCondition =
                 AuthenticationCondition.of("+8612345678", VerificationType.SMS, AuthenticationType.PASSWORD);
         sut.save(member);

@@ -17,7 +17,6 @@ public class SignApiController {
 
     private final SignUpService signUpService;
 
-
     @PostMapping("/user/signUp")
     public ResponseEntity<Boolean> signUp(
             @RequestBody @Validated(ValidationSequence.class) SignUpRequest signUpRequest

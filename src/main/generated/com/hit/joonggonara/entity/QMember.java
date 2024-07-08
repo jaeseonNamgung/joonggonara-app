@@ -30,23 +30,10 @@ public class QMember extends EntityPathBase<Member> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-<<<<<<< Updated upstream
     public final BooleanPath isDeleted = createBoolean("isDeleted");
 
     public final BooleanPath isNotification = createBoolean("isNotification");
 
-=======
-<<<<<<< Updated upstream
-=======
-    public final BooleanPath isDeleted = createBoolean("isDeleted");
-
-<<<<<<< Updated upstream
-    public final BooleanPath isNotification = createBoolean("isNotification");
-
-=======
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> Stashed changes
     public final EnumPath<com.hit.joonggonara.common.type.LoginType> loginType = createEnum("loginType", com.hit.joonggonara.common.type.LoginType.class);
 
     public final StringPath name = createString("name");
@@ -57,24 +44,10 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath phoneNumber = createString("phoneNumber");
 
-<<<<<<< Updated upstream
-    public final StringPath profile = createString("profile");
-=======
-<<<<<<< Updated upstream
-    public final EnumPath<com.hit.joonggonara.common.type.Role> role = createEnum("role", com.hit.joonggonara.common.type.Role.class);
->>>>>>> Stashed changes
-
-    public final EnumPath<com.hit.joonggonara.common.type.Role> role = createEnum("role", com.hit.joonggonara.common.type.Role.class);
-
-=======
     public final StringPath profile = createString("profile");
 
-<<<<<<< Updated upstream
     public final EnumPath<com.hit.joonggonara.common.type.Role> role = createEnum("role", com.hit.joonggonara.common.type.Role.class);
 
-=======
->>>>>>> Stashed changes
->>>>>>> Stashed changes
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedDate = _super.updatedDate;
 

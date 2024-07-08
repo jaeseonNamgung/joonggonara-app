@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request->{
                     request.requestMatchers("/", "/ws/**", "/css/**","/js/**", "/favicon.ico",
                                     "/login","/login/**", "/user/login",
-                                    "/user/login/**", "/user/signUp", "/user/signUp/**").permitAll()
+                                    "/user/login/**", "/user/signUp", "/user/signUp/**", "/chat/**").permitAll()
                             .anyRequest().authenticated();
                 })
                 .exceptionHandling(exception -> {

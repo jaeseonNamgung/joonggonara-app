@@ -2,36 +2,37 @@ package com.hit.joonggonara.dto.response.chat;
 
 import com.hit.joonggonara.entity.Chat;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public record ChatResponse(
-        Long roomId,
+        Long chatId,
         String message,
-        String image,
         String createdMessageDate,
-        String senderNickName,
-        String recipientNickName
+        String senderNickName
+
 ) {
 
     public static ChatResponse of(
-            Long roomId,
+            Long chatId,
             String message,
-            String image,
             String createdMessageDate,
-            String senderNickName,
-            String recipientNickName
+            String senderNickName
+
     ){
-        return new ChatResponse(roomId, message, image, createdMessageDate, senderNickName, recipientNickName);
+        return new ChatResponse(chatId, message, createdMessageDate, senderNickName);
     }
 
-    public static ChatResponse fromResponse(Chat chat){
-        return new ChatResponse(
+    public static List<ChatResponse> fromResponse(List<Chat> chats){
+
+        return chats.stream().map(chat -> ChatResponse.of(
                 chat.getId(),
                 chat.getMessage(),
-                chat.getImage(),
                 chat.getCreatedMassageDate(),
-                null,
-              null
-        );
+                chat.getSenderNickName()
+        )).collect(Collectors.toList());
     }
+
 
 
 }

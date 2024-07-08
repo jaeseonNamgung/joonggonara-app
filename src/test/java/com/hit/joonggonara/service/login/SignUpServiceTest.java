@@ -158,7 +158,8 @@ class SignUpServiceTest {
                 "nickName",
                 "hit",
                 "010-1234-1234",
-                "general"
+                "general",
+                true
         );
     }
 

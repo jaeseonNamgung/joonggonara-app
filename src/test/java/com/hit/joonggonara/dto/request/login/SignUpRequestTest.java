@@ -40,7 +40,7 @@ class SignUpRequestTest {
             String phoneNumber,
             String message) throws Exception {
         //given
-        SignUpRequest signUpRequest = SignUpRequest.of(userId, email, password, name, nickName, phoneNumber, "general");
+        SignUpRequest signUpRequest = SignUpRequest.of(userId, email, password, name, nickName, phoneNumber, "general", true);
         //when
 
         Set<ConstraintViolation<SignUpRequest>> expectedValidate = sut.validate(signUpRequest, ValidationSequence.class);
