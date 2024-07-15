@@ -5,6 +5,7 @@ import com.hit.joonggonara.dto.response.ValidationResponse;
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.ErrorCode;
 import com.hit.joonggonara.common.error.errorCode.BaseErrorCode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;

@@ -1,5 +1,6 @@
 package com.hit.joonggonara.common.custom.login;
 
+import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
@@ -18,7 +19,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Member member = memberRepository.findByEmail(username)
+        Member member = memberRepository.findByUserIdAndLoginType(username, LoginType.GENERAL)
                 .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
 
         return new CustomUserDetails(member);

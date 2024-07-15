@@ -1,6 +1,7 @@
-package com.hit.joonggonara.dto.response;
+package com.hit.joonggonara.dto.response.login;
 
-import com.hit.joonggonara.dto.TokenDto;
+
+import com.hit.joonggonara.dto.login.TokenDto;
 
 public record TokenResponse(
         String accessToken,
@@ -10,7 +11,7 @@ public record TokenResponse(
         return new TokenResponse(accessToken, refreshToken);
     }
 
-    public static TokenResponse ToResponse(TokenDto tokenDto){
+    public static TokenResponse toResponse(TokenDto tokenDto){
         return TokenResponse.of(tokenDto.accessToken(), tokenDto.refreshToken());
     }
 }

@@ -3,57 +3,65 @@ package com.hit.joonggonara.dto.request.login;
 import com.hit.joonggonara.common.custom.validation.ValidationGroups.EmailGroup;
 import com.hit.joonggonara.common.custom.validation.ValidationGroups.NotBlankGroup;
 import com.hit.joonggonara.common.custom.validation.ValidationGroups.PasswordPatternGroup;
-import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.type.Role;
+import com.hit.joonggonara.entity.Member;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
+import static com.hit.joonggonara.common.properties.ValidationMessageProperties.*;
+
 public record SignUpRequest(
 
-        @NotBlank(message = "이메일을 입력해주세요", groups = NotBlankGroup.class)
-        @Email(message = "이메일 주소를 정확히 입력해주세요.",  groups = EmailGroup.class )
+
+        @NotBlank(message = USER_ID_NOT_BLANK, groups = NotBlankGroup.class)
+        String userId,
+        @NotBlank(message = EMAIL_NOT_BLANK, groups = NotBlankGroup.class)
+        @Email(message = EMAIL,  groups = EmailGroup.class )
         String email,
 
-        @NotBlank(message = "비밀번호를 입력해주세요", groups = NotBlankGroup.class)
+        @NotBlank(message = PASSWORD_NOT_BLANK, groups = NotBlankGroup.class)
         @Pattern(regexp = "(?=.*[0-9])(?=.*[a-zA-Z])(?=.*\\W)(?=\\S+$).{8,16}",
-                message = "비밀번호는 8~16자 영문 대 소문자, 숫자, 특수문자를 사용해 주세요.", groups = PasswordPatternGroup.class)
+                message = PASSWORD_PATTERN, groups = PasswordPatternGroup.class)
         String password,
 
-        @NotBlank(message = "이름을 입력해주세요")
+        @NotBlank(message = NAME_NOT_BLANK, groups = NotBlankGroup.class)
         String name,
-        @NotBlank(message = "닉네임을 입력해주세요")
+        @NotBlank(message = NICK_NAME_NOT_BLANK, groups = NotBlankGroup.class)
         String nickName,
 
-        @NotBlank(message = "학교를 입력해주세요")
-        String school,
-
-        @NotBlank(message = "전화번호를 입력해주세요", groups = NotBlankGroup.class)
-        String phoneNumber
+        @NotBlank(message = PHONE_NUMBER_NOT_BLANK, groups = NotBlankGroup.class)
+        String phoneNumber,
+        String loginType,
+        Boolean isNotification
 ) {
 
     public static SignUpRequest of(
+            String userId,
             String email,
             String password,
             String name,
             String nickName,
-            String school,
-            String phoneNumber
+            String phoneNumber,
+            String loginType,
+            Boolean isNotification
     ){
-        return new SignUpRequest(email, password, name, nickName, school, phoneNumber);
+        return new SignUpRequest(userId, email, password, name, nickName, phoneNumber, loginType,isNotification);
     }
 
     public Member toEntity(String passwordEncode){
         return Member.builder()
+                .userId(userId)
                 .email(email)
                 .password(passwordEncode)
                 .name(name)
                 .nickName(nickName)
-                .school(school)
                 .phoneNumber(phoneNumber)
-                .role(Role.USER)
-                .loginType(LoginType.GENERAL)
+                .profile(null)
+                .isNotification(isNotification)
+                .role(Role.ROLE_USER)
+                .loginType(LoginType.checkType(loginType))
                 .build();
     }
 

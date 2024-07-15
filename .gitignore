@@ -40,6 +40,4 @@ org.springframework.boot.autoconfigure.AutoConfiguration.imports
 
 src/main/java/com/hit/joonggonara/config/P6SpyConfig.java
 
-src/main/resources/data.sql
-
 src/main/resources/application.yaml

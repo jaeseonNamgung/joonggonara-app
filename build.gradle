@@ -29,7 +29,7 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	runtimeOnly 'com.h2database:h2'
+	runtimeOnly 'com.mysql:mysql-connector-j'
 
 	// p6spy
 	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
@@ -38,6 +38,9 @@ dependencies {
 	// security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	testImplementation 'org.springframework.security:spring-security-test'
+	// OAuth2
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
 	// jwt
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
@@ -66,6 +69,13 @@ dependencies {
 	implementation 'com.amazonaws:aws-java-sdk-ses:1.12.3'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'javax.mail:javax.mail-api:1.6.2'
+
+	// feign client
+	implementation 'io.github.openfeign:feign-core:13.2.1'
+
+	// gson
+	implementation 'com.google.code.gson:gson:2.10.1'
+
 }
 
 tasks.named('test') {
@@ -80,4 +90,7 @@ tasks.withType(JavaCompile) {
 
 clean {
 	delete file(querydslSrcDir)
+}
+jar {
+	enabled = false
 }
