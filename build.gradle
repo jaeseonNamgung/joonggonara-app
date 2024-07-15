@@ -29,7 +29,7 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	runtimeOnly 'com.h2database:h2'
+	runtimeOnly 'com.mysql:mysql-connector-j'
 
 	// p6spy
 	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
@@ -90,4 +90,7 @@ tasks.withType(JavaCompile) {
 
 clean {
 	delete file(querydslSrcDir)
+}
+jar {
+	enabled = false
 }
