@@ -25,6 +25,7 @@ import com.hit.joonggonara.dto.request.login.*;
 import com.hit.joonggonara.dto.response.login.FindUserIdResponse;
 import com.hit.joonggonara.dto.response.login.OAuth2UserDto;
 import com.hit.joonggonara.dto.response.login.TokenResponse;
+import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.repository.login.MemberRepository;
 import com.hit.joonggonara.repository.login.condition.AuthenticationCondition;
 import com.hit.joonggonara.repository.login.condition.VerificationCondition;
@@ -39,6 +40,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static com.hit.joonggonara.common.properties.JwtProperties.*;
@@ -84,20 +86,21 @@ public class LoginService {
     public OAuth2UserDto oAuth2Login(String code, LoginType loginType) throws JsonProcessingException {
         OAuth2PropertiesDto oAuth2PropertiesDto = checkLoginType(loginType);
         OAuth2TokenDto oAuth2TokenDto = oAuth2Service.requestAccessToken(code, oAuth2PropertiesDto);
-        String email;
+        Map<String, String> map;
         if(loginType.equals(LoginType.NAVER)){
-            email = oAuth2Service.getUserInfoFromAccessToken(oAuth2TokenDto.access_token(), oAuth2PropertiesDto);
+            map = oAuth2Service.getUserInfoFromAccessToken(oAuth2TokenDto.access_token(), oAuth2PropertiesDto);
         }
         else{
-            email = oidcService.getUserInfoFromIdToken(oAuth2TokenDto.id_token(), oAuth2PropertiesDto);
+            map = oidcService.getUserInfoFromIdToken(oAuth2TokenDto.id_token(), oAuth2PropertiesDto, loginType);
+
         }
-        boolean existMember = memberRepository.existByEmail(email);
+        boolean existMember = memberRepository.existByEmail(map.get("email"));
         // 이미 가입된 회원인 경우 토큰 생성
         if(existMember){
-            TokenDto tokenDto = createToken(email, Role.ROLE_USER, loginType);
-            return OAuth2UserDto.fromOAuth2UserDto(tokenDto);
+            TokenDto tokenDto = createToken(map.get("email"), Role.ROLE_USER, loginType);
+            return OAuth2UserDto.fromOAuth2UserDto(tokenDto, map.get("profile"));
         }
-        return OAuth2UserDto.fromOAuth2UserDto(email);
+        return OAuth2UserDto.fromOAuth2UserDto(map.get("email"), map.get("profile"));
     }
 
     private OAuth2PropertiesDto checkLoginType(LoginType loginType) {
@@ -283,12 +286,22 @@ public class LoginService {
         return true;
     }
 
+    @Transactional
+    public void memberUpdateInfo(String token, MemberUpdateRequest memberUpdateRequest) {
+        String parseJwt = getParseJwt(token);
+        String principal = jwtUtil.getPrincipal(parseJwt);
+        LoginType loginType = jwtUtil.getLoginType(parseJwt);
+        Member member = memberRepository.findByPrincipalAndLoginType(principal, loginType)
+                .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
+        member.update(memberUpdateRequest);
+    }
     private String getParseJwt(String token) {
         if(Strings.hasText(token) && token.startsWith(JWT_TYPE)){
             return token.substring(7);
         }
         return null;
     }
+
 
 
 }

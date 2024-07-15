@@ -24,9 +24,15 @@ public class QMember extends EntityPathBase<Member> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdDate = _super.createdDate;
 
+    public final DateTimePath<java.time.LocalDateTime> deletedAt = createDateTime("deletedAt", java.time.LocalDateTime.class);
+
     public final StringPath email = createString("email");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
+
+    public final BooleanPath isDeleted = createBoolean("isDeleted");
+
+    public final BooleanPath isNotification = createBoolean("isNotification");
 
     public final EnumPath<com.hit.joonggonara.common.type.LoginType> loginType = createEnum("loginType", com.hit.joonggonara.common.type.LoginType.class);
 
@@ -38,12 +44,14 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath phoneNumber = createString("phoneNumber");
 
-    public final EnumPath<com.hit.joonggonara.common.type.Role> role = createEnum("role", com.hit.joonggonara.common.type.Role.class);
+    public final StringPath profile = createString("profile");
 
-    public final StringPath school = createString("school");
+    public final EnumPath<com.hit.joonggonara.common.type.Role> role = createEnum("role", com.hit.joonggonara.common.type.Role.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedDate = _super.updatedDate;
+
+    public final StringPath userId = createString("userId");
 
     public QMember(String variable) {
         super(Member.class, forVariable(variable));

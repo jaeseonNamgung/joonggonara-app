@@ -3,8 +3,10 @@ package com.hit.joonggonara.repository.login.querydsl;
 import com.hit.joonggonara.common.type.AuthenticationType;
 import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.type.VerificationType;
+import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.repository.login.condition.AuthenticationCondition;
 import com.hit.joonggonara.repository.login.condition.VerificationCondition;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -56,6 +58,15 @@ public class MemberQueryDslImpl implements MemberQueryDsl{
     }
 
     @Override
+    public boolean existByNickName(String nickName) {
+        Integer exist = jpaQueryFactory.selectOne()
+                .from(member)
+                .where(member.nickName.eq(nickName))
+                .fetchOne();
+        return exist != null;
+    }
+
+    @Override
     public Optional<String> findUserIdOrPasswordByPhoneNumberOrEmail(AuthenticationCondition condition) {
         String authentication = jpaQueryFactory.select(checkIdOfPassword(condition.authenticationType()))
                 .from(member)
@@ -63,6 +74,20 @@ public class MemberQueryDslImpl implements MemberQueryDsl{
                 .fetchFirst();
 
         return Optional.ofNullable(authentication);
+    }
+    @Override
+    public Optional<Member> findByPrincipalAndLoginType(String principal, LoginType loginType) {
+        Member fetchMember = jpaQueryFactory.selectFrom(member)
+                .where(principalAndLoginTypeCondition(principal, loginType))
+                .fetchFirst();
+        return Optional.of(fetchMember);
+    }
+
+    private BooleanExpression principalAndLoginTypeCondition(String principal, LoginType loginType) {
+        if(LoginType.GENERAL.equals(loginType)){
+            return member.userId.eq(principal);
+        }
+        return member.email.eq(principal);
     }
 
     private BooleanExpression verificationType(VerificationCondition condition, VerificationType verificationType) {
@@ -94,5 +119,7 @@ public class MemberQueryDslImpl implements MemberQueryDsl{
         }
 
     }
+
+
 
 }

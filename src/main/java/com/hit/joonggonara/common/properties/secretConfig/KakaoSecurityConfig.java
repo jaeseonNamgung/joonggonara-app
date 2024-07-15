@@ -9,7 +9,8 @@ import org.springframework.stereotype.Component;
 public class KakaoSecurityConfig {
     private final String clientId;
     private final String clientSecret;
-    private final  String redirectUri;
+    private final String redirectUri;
+    private final String scope;
 
     public KakaoSecurityConfig(
             @Value("${kakao.client-id}")
@@ -17,9 +18,14 @@ public class KakaoSecurityConfig {
             @Value("${kakao.client-secret}")
             String clientSecret,
             @Value("${kakao.redirect-uri}")
-            String redirectUri) {
+            String redirectUri,
+            @Value("${kakao.scope}")
+            String scope
+
+    ) {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.redirectUri = redirectUri;
+        this.scope = scope;
     }
 }
