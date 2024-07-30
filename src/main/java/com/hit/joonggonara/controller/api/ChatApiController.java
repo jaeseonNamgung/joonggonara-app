@@ -23,7 +23,7 @@ public class ChatApiController {
     private final ChatService chatService;
     @MessageMapping("/{roomId}") //여기로 전송되면 메서드 호출 -> WebSocketConfig prefixes 에서 적용한건 앞에 생략
     @SendTo("/sub/{roomId}") //구독하고 있는 장소로 메시지 전송 (목적지)  -> WebSocketConfig Broker 에서 적용한건 앞에 붙어줘야됨
-    public ResponseEntity<Boolean> saveChat(@DestinationVariable("roomId") Long roomId, ChatRequest chatRequest){
+    public ResponseEntity<ChatResponse> saveChat(@DestinationVariable("roomId") Long roomId, ChatRequest chatRequest){
         return ResponseEntity.ok(chatService.saveChatHistory(roomId, chatRequest));
     }
 
@@ -44,7 +44,6 @@ public class ChatApiController {
     @GetMapping("/chat/room")
     public ResponseEntity<List<ChatRoomAllResponse>> getAllChatRoom(@RequestParam(name = "nickName") String nickName){
         List<ChatRoomAllResponse> allChatRoom = chatService.getAllChatRoom(nickName);
-        System.out.println(allChatRoom);
         return ResponseEntity.ok(allChatRoom);
     }
 

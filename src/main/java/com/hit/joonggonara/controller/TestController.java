@@ -1,5 +1,6 @@
 package com.hit.joonggonara.controller;
 
+import com.hit.joonggonara.common.type.ChatRoomStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +12,12 @@ public class TestController {
 
     @GetMapping("/")
     public String test(){
+        return "user";
+    }
+
+    @GetMapping("/chatRoom/move")
+    public String moveChatRoomPage(@RequestParam("userName") String userName, Model model){
+        model.addAttribute("userName", userName);
         return "chatRoomList";
     }
     @GetMapping("/chat/move")

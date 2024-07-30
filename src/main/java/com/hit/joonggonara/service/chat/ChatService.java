@@ -29,16 +29,20 @@ public class ChatService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRepository chatRepository;
-    private final MemberRepository memberRepository;
 
 
     // 채팅 기록 저장
     @Transactional
-    public boolean saveChatHistory(Long roomId, ChatRequest chatRequest){
+    public ChatResponse saveChatHistory(Long roomId, ChatRequest chatRequest){
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new CustomException(ChatErrorCode.NOT_FOUND_CHATROOM));
-        chatRepository.save(chatRequest.toEntity(chatRoom));
-        return true;
+        System.out.println(chatRequest.chatRoomStatus());
+        if(chatRequest.chatRoomStatus().equals(ChatRoomStatus.BUYER.name()) && chatRoom.isSellerDeleted()){
+            chatRoom.setSellerDeleted(false);
+        } else if (chatRequest.chatRoomStatus().equals(ChatRoomStatus.SELLER.name()) && chatRoom.isBuyerDeleted()) {
+            chatRoom.setBuyerDeleted(false);
+        }
+        return ChatResponse.fromResponse(chatRepository.save(chatRequest.toEntity(chatRoom)));
     }
 
 
@@ -88,9 +92,9 @@ public class ChatService {
                 .orElseThrow(() -> new CustomException(ChatErrorCode.NOT_FOUND_CHATROOM));
 
         if(chatRoomStatus.equals(ChatRoomStatus.BUYER)){
-            chatRoom.setBuyerDeleted();
+            chatRoom.setBuyerDeleted(true);
         }else{
-            chatRoom.setSellerDeleted();
+            chatRoom.setSellerDeleted(true);
         }
         return true;
     }

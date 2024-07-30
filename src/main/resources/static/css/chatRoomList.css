@@ -44,7 +44,6 @@ body{
     display: flex;
     flex-direction: row;
     align-items: center;
-    cursor:pointer;
 }
 
 .chat-body .content-box{
@@ -61,6 +60,7 @@ body{
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
+    cursor:pointer;
 }
 
 .chat-body .profile-box{

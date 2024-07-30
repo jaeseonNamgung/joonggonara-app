@@ -10,7 +10,6 @@ public record ChatResponse(
         String message,
         String createdMessageDate,
         String senderNickName
-
 ) {
 
     public static ChatResponse of(
@@ -31,6 +30,15 @@ public record ChatResponse(
                 chat.getCreatedMassageDate(),
                 chat.getSenderNickName()
         )).collect(Collectors.toList());
+    }
+
+    public static ChatResponse fromResponse(Chat chat){
+        return ChatResponse.of(
+                chat.getId(),
+                chat.getMessage(),
+                chat.getCreatedMassageDate(),
+                chat.getSenderNickName()
+        );
     }
 
 

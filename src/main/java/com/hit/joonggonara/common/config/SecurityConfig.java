@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request->{
                     request.requestMatchers("/", "/ws/**", "/css/**","/js/**", "/favicon.ico",
                                     "/login","/login/**", "/user/login",
-                                    "/user/login/**", "/user/signUp", "/user/signUp/**", "/chat/**").permitAll()
+                                    "/user/login/**", "/user/signUp", "/user/signUp/**", "/chat/**", "/chatRoom/**").permitAll()
                             .anyRequest().authenticated();
                 })
                 .exceptionHandling(exception -> {
@@ -64,7 +64,7 @@ public class SecurityConfig {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.setAllowedMethods(Arrays.asList("HEAD","POST","GET","DELETE","PUT"));
-        corsConfiguration.addAllowedOrigin("http://localhost:9090");
+        corsConfiguration.addAllowedOrigin("https://hit-joonggo.shop");
         corsConfiguration.addExposedHeader(JwtProperties.AUTHORIZATION);
         corsConfiguration.setAllowCredentials(true);
 

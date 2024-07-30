@@ -1,10 +1,12 @@
 document.addEventListener('DOMContentLoaded',()=>{
-    getChatRooms('namgung')
+    const userName = document.getElementById('user-name').value;
+    console.log('userName: ', userName)
+    getChatRooms(userName)
 });
 
 document.addEventListener('submit', e=>{
     e.preventDefault();
-    let nickName = 'namgung';
+    let nickName = document.querySelector("#user-name").value;
     let text = document.querySelector("#create-chatRoom").value;
     let chatRoomRequest = {
         buyerNickName: nickName,
@@ -45,7 +47,7 @@ function getChatRooms(nickName){
         for (let i = 0; i < data.length; i++) {
             let chatRoomBox = document.createElement("div");
             chatRoomBox.className = 'chatroom-box'
-            chatRoomBox.onclick = ()=> moveChatPage(data[i].roomId, data[i].roomName, data[i].profile, nickName)
+
             let profileBox = document.createElement("div");
             profileBox.className = 'profile-box'
             let contentBox = document.createElement("div");
@@ -55,6 +57,8 @@ function getChatRooms(nickName){
             let h1 = document.createElement("h1");
             let content = document.createElement("div");
             content.className = 'content';
+            console.log(data)
+            content.onclick = ()=> moveChatPage(data[i].roomId, data[i].roomName, data[i].profile, nickName)
             let p1 = document.createElement("p");
             let p2 = document.createElement("p");
             let deleteBox = document.createElement("div");
@@ -92,7 +96,7 @@ function getChatRooms(nickName){
         }
         fetch(url, options)
             .then(data => data.json)
-            .then(data => {
+            .then(() => {
                 alert('삭제되었습니다')
             })
     }

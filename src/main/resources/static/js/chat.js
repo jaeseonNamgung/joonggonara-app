@@ -5,29 +5,28 @@ document.addEventListener('DOMContentLoaded',()=>{
     let profile = document.getElementById('profile').value
     let roomName = document.getElementById('roomName').value
     let senderName = document.getElementById('senderName').value
+    let chatRoomStatus = roomName === senderName ? 'BUYER' : 'SELLER';
+    console.log(chatRoomStatus)
     getAllChats(roomId, senderName, roomName, profile)
     stompClient.connect({}, function (options) {
         stompClient.subscribe('/sub/' + roomId, greeting => {
-            console.log('subscribe: ', greeting.body)
-            showChatMessage(JSON.parse(greeting.body), )
+            showChatMessage(JSON.parse(greeting.body), profile, senderName)
         })
     } )
 
-    function showChatMessage (chatResponse, profile){
+    function showChatMessage (chatResponse, profile, senderName){
         let chatBox = document.getElementById('chat-body');
         let pDate = document.createElement('p');
-        addChatMessage(chatBox,pDate, true, data[i], senderName, roomName, profile)
+        addChatMessage(chatBox,pDate, false, chatResponse.body, profile, senderName)
     }
 
     document.getElementById("send-message").addEventListener("click", ev => {
-        console.log('ev: ', ev)
         let message = document.getElementById('chat-message').value;
         const chatRequest = {
             message : message,
             senderNickName : senderName,
-            recipientNickName: roomName
+            chatRoomStatus: chatRoomStatus
         }
-        console.log(chatRequest)
         stompClient.send("/pub/"+roomId, {}, JSON.stringify(chatRequest))
     })
 });
@@ -42,12 +41,12 @@ function getAllChats(roomId, senderName, roomName, profile){
             let pDate = document.createElement('p');
             let flag = false;
             for (let i = 0; i < data.length; i++) {
-                flag = addChatMessage(chatBox,pDate, flag, data[i], senderName, roomName, profile)
+                flag = addChatsMessage(chatBox,pDate, flag, data[i], senderName, roomName, profile)
             }
         })
 }
 
-function addChatMessage(chatBox,pDate, flag, data,  senderName, roomName, profile){
+function addChatsMessage(chatBox,pDate, flag, data,  senderName, roomName, profile){
     let dateBox = document.createElement("div");
     dateBox.className='date-box';
     let senderBox = document.createElement("div");
@@ -59,6 +58,9 @@ function addChatMessage(chatBox,pDate, flag, data,  senderName, roomName, profil
     let date = document.createElement("div");
     date.className='date';
     let createdMessageDate = new Date(data.createdMessageDate);
+    let deleteBtn = document.createElement('button');
+    deleteBtn.onclick = ()=> deleteChat(data.chatId)
+    deleteBtn.innerText = '삭제';
     if(!flag){
         flag = true;
         pDate.innerText = dateFormat(createdMessageDate);
@@ -78,6 +80,7 @@ function addChatMessage(chatBox,pDate, flag, data,  senderName, roomName, profil
     if(senderName === data.senderNickName){
         senderBox.appendChild(message);
         senderBox.appendChild(date);
+        senderBox.appendChild(deleteBtn)
         chatBox.appendChild(senderBox);
     }else{
         let img = new Image();
@@ -85,6 +88,63 @@ function addChatMessage(chatBox,pDate, flag, data,  senderName, roomName, profil
         recipientBox.appendChild(img);
         recipientBox.appendChild(message);
         recipientBox.appendChild(date);
+        recipientBox.appendChild(deleteBtn)
+        chatBox.appendChild(recipientBox);
+    }
+
+    return flag;
+}
+
+function deleteChat(chatId){
+    const url = '/chat/delete/'+chatId
+    fetch(url, {method: 'delete'})
+        .then(()=>alert('삭제되었습니다.'));
+}
+
+function addChatMessage(chatBox,pDate, flag, chatResponse, profile, senderName){
+    console.log(chatResponse)
+    let dateBox = document.createElement("div");
+    dateBox.className='date-box';
+    let senderBox = document.createElement("div");
+    senderBox.className='sender-box';
+    let recipientBox = document.createElement("div");
+    recipientBox.className='recipient-box';
+    let message = document.createElement("div");
+    message.className='message';
+    let date = document.createElement("div");
+    date.className='date';
+    let createdMessageDate = new Date(chatResponse.createdMessageDate);
+    let deleteBtn = document.createElement('button');
+    deleteBtn.onclick = ()=> deleteChat(chatResponse.chatId)
+    deleteBtn.innerText = '삭제';
+    if(!flag){
+        flag = true;
+        pDate.innerText = dateFormat(createdMessageDate);
+        dateBox.appendChild(pDate);
+        chatBox.appendChild(dateBox);
+    }else{
+        let isNowDate = checkDate(pDate.innerText, createdMessageDate)
+        if(!isNowDate){
+            pDate = document.createElement('p');
+            pDate.innerText = dateFormat(createdMessageDate);
+            dateBox.appendChild(pDate);
+            chatBox.appendChild(dateBox);
+        }
+    }
+    message.innerText = chatResponse.message;
+    date.innerText = timeFormat(createdMessageDate);
+    if(senderName === chatResponse.senderNickName){
+        senderBox.appendChild(message);
+        senderBox.appendChild(date);
+        senderBox.appendChild(deleteBtn);
+        chatBox.appendChild(senderBox);
+    }else{
+        let img = new Image();
+        img.src = profile;
+        recipientBox.appendChild(img);
+        recipientBox.appendChild(message);
+        recipientBox.appendChild(date);
+        recipientBox.appendChild(deleteBtn);
         chatBox.appendChild(recipientBox);
     }
     return flag;
@@ -113,6 +173,3 @@ function timeFormat(date){
         return timeStr+" "+hours+":"+time;
 }
 
-function sendMessage(){
-
-}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
   <meta charset="UTF-8">
   <title>Chat</title>
@@ -10,6 +10,7 @@
   <div class="chat-box">
     <div class="chat-header">
       <h1>채팅</h1>
+      <input type="hidden" id="user-name" th:value="${userName}">
       <form>
         <label for="create-chatRoom">방 생성</label>
         <input type="text" id="create-chatRoom"/>

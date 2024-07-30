@@ -39,10 +39,10 @@ public class ChatRoom extends BaseEntity{
         this.sellerDeleted = false;
     }
 
-    public void setBuyerDeleted(){
-        this.buyerDeleted = true;
+    public void setBuyerDeleted(Boolean deleteStatus){
+        this.buyerDeleted = deleteStatus;
     }
-    public void setSellerDeleted(){
-        this.sellerDeleted = true;
+    public void setSellerDeleted(Boolean deleteStatus){
+        this.sellerDeleted = deleteStatus;
     }
 }
