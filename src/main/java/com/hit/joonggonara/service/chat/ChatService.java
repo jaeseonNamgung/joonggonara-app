@@ -36,7 +36,6 @@ public class ChatService {
     public ChatResponse saveChatHistory(Long roomId, ChatRequest chatRequest){
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new CustomException(ChatErrorCode.NOT_FOUND_CHATROOM));
-        System.out.println(chatRequest.chatRoomStatus());
         if(chatRequest.chatRoomStatus().equals(ChatRoomStatus.BUYER.name()) && chatRoom.isSellerDeleted()){
             chatRoom.setSellerDeleted(false);
         } else if (chatRequest.chatRoomStatus().equals(ChatRoomStatus.SELLER.name()) && chatRoom.isBuyerDeleted()) {

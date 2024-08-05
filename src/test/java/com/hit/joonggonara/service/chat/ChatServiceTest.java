@@ -45,7 +45,7 @@ class ChatServiceTest {
     private ChatService sut;
     
     @Test
-    @DisplayName("[Save][Chat] 채팅 기록이 정상적으로 저장 될 경우 true를 반환")
+    @DisplayName("[Save][Chat] 채팅 기록이 정상적으로 저장 될 경우 response를 반환")
     void IfTheChatHistoryIsSavedNormallyReturnTrue() throws Exception
     {
         //given
@@ -56,14 +56,17 @@ class ChatServiceTest {
         ChatRequest chatRequest = createChatRequest();
         Chat chat = Chat.builder()
                 .message("message")
+                .senderNickName(buyerNickName)
                 .createdMassageDate(LocalDateTime.now().toString())
                 .chatRoom(chatRoom).build();
         given(chatRoomRepository.findById(any())).willReturn(Optional.of(chatRoom));
         given(chatRepository.save(any())).willReturn(chat);
         //when
-        boolean expectedTrue = sut.saveChatHistory(roomId, chatRequest);
+        ChatResponse chatResponse = sut.saveChatHistory(roomId, chatRequest);
         //then
-        assertThat(expectedTrue).isTrue();
+        assertThat(chatResponse.message()).isEqualTo(chat.getMessage());
+        assertThat(chatResponse.createdMessageDate()).isEqualTo(chat.getCreatedMassageDate());
+        assertThat(chatResponse.senderNickName()).isEqualTo(buyerNickName);
 
         then(chatRoomRepository).should().findById(any());
         then(chatRepository).should().save(any());
@@ -226,7 +229,7 @@ class ChatServiceTest {
 
 
     private ChatRequest createChatRequest() {
-        return ChatRequest.of("message","senderNickName");
+        return ChatRequest.of("message","senderNickName", "buyer");
     }
     private Chat createChat(ChatRoom chatRoom, int i) {
         return Chat.builder()

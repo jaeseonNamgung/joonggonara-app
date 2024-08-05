@@ -2,7 +2,6 @@ package com.hit.joonggonara.common.util;
 
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
-import com.hit.joonggonara.common.util.TwilioUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,46 +21,47 @@ import static org.assertj.core.api.Assertions.catchException;
 
 @TestPropertySource(properties = {"spring.config.location = classpath:application.yml"})
 @ActiveProfiles("test")
-@Import(TwilioUtil.class)
+@Import(CoolSmsUtil.class)
 @ExtendWith(MockitoExtension.class)
-class TwilioUtilTest {
+class CoolSmsUtilTest {
 
 
     @InjectMocks
-    private TwilioUtil twilioUtil;
+    private CoolSmsUtil coolSmsUtil;
 
     
     @Test
-    @DisplayName("[Twilio] 문자 인증 테스트")
+    @DisplayName("[CoolSms] 메세지 전송 오류")
     void sendMessageTest() throws Exception
     {
 
         //given
         String authToken = "test_auth_token";
         String accountSid = "test_account_sid";
-        String phoneNumber = "test_phone_number";
-        String toPhoneNumber = "+8617545562261";
+        String phoneNumber = "01097175449";
+        String toPhoneNumber = "01097175449";
         //when
-        twilioUtil = new TwilioUtil(accountSid, authToken, phoneNumber);
-        String expectedNumber = twilioUtil.sendMessage(toPhoneNumber).get();
+        coolSmsUtil = new CoolSmsUtil(accountSid, authToken, phoneNumber);
+        CustomException customException =
+                (CustomException) catchException(() -> coolSmsUtil.sendMessage(toPhoneNumber));
 
         //then
-        assertThat(expectedNumber).isNotEmpty();
-        assertThat(expectedNumber).hasSize(6);
+        assertThat(customException.getMessage()).isEqualTo(UserErrorCode.SEND_ERROR.getMessage());
+        assertThat(customException.getErrorCode().getHttpStatus()).isEqualTo(UserErrorCode.SEND_ERROR.getHttpStatus());
     }
 
     @Test
-    @DisplayName("[Twilio][Exception] NoSuchAlgorithmException 테스트")
+    @DisplayName("[CoolSms][Exception] NoSuchAlgorithmException 테스트")
     void testNoSuchAlgorithmExceptionHandling() throws Exception
     {
         //given
-        String phoneNumber = "+8612345678";
+        String phoneNumber = "01097175449";
 
         try(MockedStatic<SecureRandom> mock = Mockito.mockStatic(SecureRandom.class)){
             mock.when(SecureRandom::getInstanceStrong).thenThrow(NoSuchAlgorithmException.class);
             //when
             CustomException expectedException =
-                    (CustomException)catchException(()->twilioUtil.sendMessage(phoneNumber));
+                    (CustomException)catchException(()-> coolSmsUtil.sendMessage(phoneNumber));
             //then
             assertThat(expectedException.getErrorCode().getHttpStatus())
                     .isEqualTo(UserErrorCode.NO_SUCH_ALGORITHM.getHttpStatus());
