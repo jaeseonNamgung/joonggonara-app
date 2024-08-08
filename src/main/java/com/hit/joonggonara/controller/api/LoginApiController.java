@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hit.joonggonara.common.custom.validation.ValidationSequence;
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
-import com.hit.joonggonara.common.properties.JwtProperties;
 import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.type.VerificationType;
 import com.hit.joonggonara.common.util.CookieUtil;
@@ -14,14 +13,12 @@ import com.hit.joonggonara.dto.response.login.OAUth2UserResponse;
 import com.hit.joonggonara.dto.response.login.OAuth2UserDto;
 import com.hit.joonggonara.dto.response.login.TokenResponse;
 import com.hit.joonggonara.service.login.LoginService;
-import feign.Headers;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,14 +47,15 @@ public class LoginApiController {
 
 
     @GetMapping("/user/login/oauth2")
-    public void sendOAuth2LoginPage(HttpServletResponse response, @RequestParam(name = "loginType") String loginType) throws IOException {
-        response.sendRedirect(loginService.sendRedirect(LoginType.checkType(loginType)));
+    public ResponseEntity<String> sendOAuth2LoginPage(@RequestParam(name = "loginType") String loginType) throws IOException {
+        return ResponseEntity.ok(loginService.sendRedirect(LoginType.checkType(loginType)));
     }
 
     @GetMapping("/user/login/oauth2/code/{loginType}")
     public ResponseEntity<OAUth2UserResponse> OAuth2Login(@RequestParam(name = "code") String code,
                                                           @PathVariable(name = "loginType") String loginType,
                                                           HttpServletResponse response) throws JsonProcessingException {
+        System.out.println("code: " + code);
         OAuth2UserDto oAuth2UserDto = loginService.oAuth2Login(code, LoginType.checkType(loginType));
         if(oAuth2UserDto.signUpStatus()){
             saveAccessTokenAndRefreshToken(response, oAuth2UserDto.accessToken(), oAuth2UserDto.refreshToken());
@@ -75,7 +73,7 @@ public class LoginApiController {
 
         // 새로 발급 받은 AccessToken Header에 저장
         response.setHeader(AUTHORIZATION, JWT_TYPE + tokenResponse.accessToken());
-        
+
         // 새로 발급 받은 RefreshToken Cookie에 저장
         cookieUtil.addCookie(response, REFRESH_TOKEN_NAME, tokenResponse.refreshToken());
         return ResponseEntity.ok(true);
