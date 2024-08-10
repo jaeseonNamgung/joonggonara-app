@@ -1,22 +1,16 @@
 package com.hit.joonggonara.dto.response;
 
-import com.hit.joonggonara.error.ErrorCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import com.hit.joonggonara.common.error.ErrorCode;
 
-@Getter
-@RequiredArgsConstructor
-public class ApiExceptionResponse {
+public record ApiExceptionResponse(
+        boolean success,
+        int httpStatus,
+        String errorType,
+        String message
+) {
 
-    private final boolean success;
-    private final String httpStatus;
-    private final String message;
-
-
-    public static ApiExceptionResponse of(ErrorCode errorCode){
-        return new ApiExceptionResponse(false, errorCode.getHttpStatus().name(), errorCode.getMessage());
+    public static ApiExceptionResponse of(ErrorCode errorCode) {
+        return new ApiExceptionResponse(false, errorCode.getHttpStatus().value(), errorCode.getName(), errorCode.getMessage());
     }
-
 
 }

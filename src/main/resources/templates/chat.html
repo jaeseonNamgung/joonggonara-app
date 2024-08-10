@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <link href="/css/chat.css" rel="stylesheet" type="text/css">
+    <script src="/js/chat.js" defer th:inline="javascript"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+    <input type="hidden" id="roomId" th:value="${roomId}">
+    <input type="hidden" id="roomName" th:value="${roomName}">
+    <input type="hidden" id="profile" th:value="${profile}">
+    <input type="hidden" id="senderName" th:value="${senderName}">
+    <div class="chat-box">
+        <div class="chat-header">
+            <h1 th:text="${roomName}"></h1>
+        </div>
+        <div id="chat-body" class="chat-body">
+            <div class="date-box">
+                <p>2024년07월02일</p>
+            </div>
+            <div class="sender-box">
+                <div class="message">
+                    <p >안녕하세요</p>
+                </div>
+                <p class="date">15:09</p>
+            </div>
+            <div class="recipient-box">
+                <img th:src="${profile}">
+                <div class="message">
+                    <p >네 안녕하세요네 안녕하세요네 안녕하세요네 안녕하세요네 안녕하세요네 안녕하세요네 안녕하세요네 안녕하세요네 안녕하세요네 안녕하세요네 안녕하세요네 안녕하세요네 안녕하세요네 안녕하세요네 안녕하세요네 안녕하세요</p>
+                </div>
+                <p class="date">15:15</p>
+                <button onclick="">삭제</button>
+            </div>
+        </div>
+        <div class="chat-footer">
+            <div>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                    <rect width="20" height="20" fill="url(#pattern0_79_440)"/>
+                    <defs>
+                        <pattern id="pattern0_79_440" patternContentUnits="objectBoundingBox" width="1" height="1">
+                            <use xlink:href="#image0_79_440" transform="scale(0.03125)"/>
+                        </pattern>
+                        <image id="image0_79_440" width="32" height="32" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAADsAAAA7AF5KHG9AAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAH5JREFUWIXt1sENgCAMheEf53AgjPsvQN0DD2oknrRFvbyXNOFC8xEOLfgzAwtgwBTo444Bda/ibZICgNqj1xAAdIkAAggggAAD51SrD+uap/cNmNJ+GN943Y3Y718A2zLRzvavqgBZ+4AAAggggAARwNKcLQrx5JiiBcjeJitnrEbQMPyH+QAAAABJRU5ErkJggg=="/>
+                    </defs>
+                </svg>
+            </div>
+            <div>
+                <label>
+                    <input placeholder="메세지를 입력해주세요" id="chat-message"/>
+                </label>
+            </div>
+            <div id="send-message">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                    <rect width="20" height="20" fill="url(#pattern0_79_441)"/>
+                    <defs>
+                        <pattern id="pattern0_79_441" patternContentUnits="objectBoundingBox" width="1" height="1">
+                            <use xlink:href="#image0_79_441" transform="scale(0.0416667)"/>
+                        </pattern>
+                        <image id="image0_79_441" width="24" height="24" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAIVSURBVEiJtZRRS5NhGIav+9ln6UGQRRFEmeRSUIrKzUYFkgTVWSdBf6aDjjsL+glB9QMiLDMqLGdRodV0EgaC7KAOgrB079PB5tym25zN++zlu7/rfp77/fjEf8rnzx4lHyWCMSQnAd4PyikfpdT3+peagi1c6OTvSgJX0hWSoARwqMqWE+GS4ukZ/3p+T80A/zbczurv07glgkJSBVgcqDfUOnwu0e9u90tmn7u6G/24HpyLgiHgJNDWxIKVcGwMMAH4fHLQXY9wjjUBbAQ/CIxHnk0c8aAnwL4Ww3Fp0oLrVkvg2cGBcjiABZ80oWstgXvsWTkcgNhq2sD37wgclnT83XfDldkBOMAkgMn0cAfgyJUGMLzzDvCxlfBiQnGD+OM/isIV4EtduPIjiqdnPJPqc4+N1oWDs6utuAGg7vSSgl0GFmpO3jM17dnBAbfwgo3/n2pl1fXqZykAQL0Tiy492BS+1VpK4xfqAYiqnqxWwJUfUc9UsZbQqJaSzK0UYDU8a/Bpz6T63MJzGteyLnmNAHme7XVerhWijg+bBljg5XY6r9IndY8vrx0q7kAn3o4CFOA2BhxoEl5xwRsC1pNie911D0J74SyTcwPoahRgbk8rUFueLJM67BbGgZ46tllFHafKK6r1FW2QeicWFWwY+FzDkhO6WQ5vKqAUko/OOdwG5oBlYNbd7yrYGcXfvK9+5x/XiywtAjsaYwAAAABJRU5ErkJggg=="/>
+                    </defs>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
