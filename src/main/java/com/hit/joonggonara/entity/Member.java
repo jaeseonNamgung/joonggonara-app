@@ -79,4 +79,8 @@ public class Member extends BaseEntity{
         this.phoneNumber = memberUpdateRequest.phoneNumber();
         this.isNotification = memberUpdateRequest.isNotification();
     }
+
+    public void updatePassword(String password){
+        this.password = password;
+    }
 }

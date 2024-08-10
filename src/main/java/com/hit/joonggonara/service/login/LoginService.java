@@ -18,8 +18,8 @@ import com.hit.joonggonara.common.type.Role;
 import com.hit.joonggonara.common.type.VerificationType;
 import com.hit.joonggonara.common.util.JwtUtil;
 import com.hit.joonggonara.common.util.RedisUtil;
-import com.hit.joonggonara.dto.login.OAuth2TokenDto;
 import com.hit.joonggonara.dto.login.OAuth2PropertiesDto;
+import com.hit.joonggonara.dto.login.OAuth2TokenDto;
 import com.hit.joonggonara.dto.login.TokenDto;
 import com.hit.joonggonara.dto.request.login.*;
 import com.hit.joonggonara.dto.response.login.FindUserIdResponse;
@@ -37,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,6 +62,7 @@ public class LoginService {
     private final GoogleSecurityConfig googleSecurityConfig;
     private final KakaoSecurityConfig kakaoSecurityConfig;
     private final NaverSecurityConfig naverSecurityConfig;
+    private final PasswordEncoder passwordEncoder;
 
 
     @Transactional
@@ -182,7 +184,7 @@ public class LoginService {
         String userId = findPasswordByEmailRequest.userId();
         String email = findPasswordByEmailRequest.email();
         VerificationCondition condition = VerificationCondition.of(name, userId, email);
-        checkExistUser(condition, VerificationType.PASSWORD_SMS);
+        checkExistUser(condition, VerificationType.PASSWORD_EMAIL);
         verificationService.sendEmail(email);
 
         return true;
@@ -254,7 +256,7 @@ public class LoginService {
 
         // 기존 Refresh Token 제거
         redisUtil.delete(RedisProperties.REFRESH_TOKEN_KEY + principal);
-        
+
         // 새로 발급 받은 Refresh Token 추가
         redisUtil.save(
                 RedisProperties.REFRESH_TOKEN_KEY + principal,
@@ -281,7 +283,7 @@ public class LoginService {
         }else{
             memberRepository.deleteByEmail(principal);
         }
-        
+
         redisUtil.delete(REFRESH_TOKEN_NAME + principal);
         return true;
     }
@@ -301,6 +303,17 @@ public class LoginService {
         }
         return null;
     }
+
+    @Transactional
+    public boolean updatePassword(UpdatePasswordRequest updatePasswordRequest){
+        Member member = memberRepository.findByUserId(updatePasswordRequest.userId())
+                .orElseThrow(() -> new CustomException(UserErrorCode.NOT_EXIST_USER));
+
+        member.updatePassword(passwordEncoder.encode(updatePasswordRequest.password()));
+
+        return true;
+    }
+
 
 
 

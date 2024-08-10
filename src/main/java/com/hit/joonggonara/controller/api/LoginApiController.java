@@ -125,11 +125,19 @@ public class LoginApiController {
                 ));
     }
 
+    @PutMapping("/user/login/update/password")
+    public ResponseEntity<Boolean> updatePassword(@RequestBody @Valid UpdatePasswordRequest updatePasswordRequest){
+        return ResponseEntity.ok(loginService.updatePassword(updatePasswordRequest));
+    }
+
+
 
     private void saveAccessTokenAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
         response.addHeader(AUTHORIZATION, JWT_TYPE + accessToken);
         cookieUtil.addCookie(response, REFRESH_TOKEN_NAME, refreshToken);
     }
+
+
 
 
 }

@@ -357,7 +357,7 @@ class LoginApiControllerTest {
                 Arguments.of("email", "test@email.com")
         );
     }
-    
+
 
     @WithMockUser(roles = "GUEST")
     @MethodSource
@@ -443,6 +443,25 @@ class LoginApiControllerTest {
                 .andExpect(jsonPath("$.message").value(UserErrorCode.ALREADY_LOGGED_OUT_USER.getMessage()));
 
         then(cookieUtil).should().getCookie(any());
+    }
+
+    @WithMockUser(roles = "USER")
+    @Test
+    @DisplayName("[API][PUT] 패스워드가 정상적으로 변경될 경우 true를 리턴")
+    void returnTrueIfTheUpdatePasswordIsSuccessful() throws Exception {
+        //given
+        UpdatePasswordRequest updatePasswordRequest = UpdatePasswordRequest.of("userId", "newPassword");
+        given(loginService.updatePassword(any())).willReturn(true);
+        //when & then
+        mvc.perform(put("/user/login/update/password")
+                .content(objectMapper.writeValueAsString(updatePasswordRequest))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .with(csrf())
+        ).andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$").value(true));
+
+        then(loginService).should().updatePassword(any());
     }
 
 
