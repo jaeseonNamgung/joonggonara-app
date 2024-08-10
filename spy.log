@@ -3,3 +3,13 @@
 1714117269842|0|statement|connection 12|url jdbc:h2:mem:0beafefb-2ef7-4822-ad08-ba58f239c754|drop table if exists member cascade |drop table if exists member cascade 
 1714368320919|1|statement|connection 20|url jdbc:h2:mem:e7ac9ef7-e7da-4319-92a5-e60389664c0c|drop table if exists member cascade |drop table if exists member cascade 
 1714368455429|1|statement|connection 20|url jdbc:h2:mem:e6418e8a-7938-4d36-a871-626c51718db6|drop table if exists member cascade |drop table if exists member cascade 
+1718601237114|0|statement|connection 48|url jdbc:h2:mem:f1a0fa93-f6bf-4cf0-a554-4a033c035bcd|drop table if exists chat cascade |drop table if exists chat cascade 
+1718601237116|0|statement|connection 48|url jdbc:h2:mem:f1a0fa93-f6bf-4cf0-a554-4a033c035bcd|drop table if exists chat_room cascade |drop table if exists chat_room cascade 
+1718601237117|0|statement|connection 48|url jdbc:h2:mem:f1a0fa93-f6bf-4cf0-a554-4a033c035bcd|drop table if exists member cascade |drop table if exists member cascade 
+1718601237117|0|statement|connection 48|url jdbc:h2:mem:f1a0fa93-f6bf-4cf0-a554-4a033c035bcd|drop sequence if exists chat_room_seq|drop sequence if exists chat_room_seq
+1718601237117|0|statement|connection 48|url jdbc:h2:mem:f1a0fa93-f6bf-4cf0-a554-4a033c035bcd|drop sequence if exists chat_seq|drop sequence if exists chat_seq
+1718698212904|0|statement|connection 52|url jdbc:h2:mem:d65d918d-2753-4bbd-a0b1-67a4078ea0be|drop table if exists chat cascade |drop table if exists chat cascade 
+1718698212915|0|statement|connection 52|url jdbc:h2:mem:d65d918d-2753-4bbd-a0b1-67a4078ea0be|drop table if exists chat_room cascade |drop table if exists chat_room cascade 
+1718698212915|0|statement|connection 52|url jdbc:h2:mem:d65d918d-2753-4bbd-a0b1-67a4078ea0be|drop table if exists member cascade |drop table if exists member cascade 
+1718698212916|0|statement|connection 52|url jdbc:h2:mem:d65d918d-2753-4bbd-a0b1-67a4078ea0be|drop sequence if exists chat_room_seq|drop sequence if exists chat_room_seq
+1718698212916|0|statement|connection 52|url jdbc:h2:mem:d65d918d-2753-4bbd-a0b1-67a4078ea0be|drop sequence if exists chat_seq|drop sequence if exists chat_seq

@@ -42,6 +42,14 @@ public class SignUpService {
         return true;
     }
 
+    // 닉네임 중복 검사
+    public boolean checkDuplicateNickName(String nickName){
+        if(memberRepository.existByNickName(nickName)){
+            throw new CustomException(UserErrorCode.EXIST_NICK_NAME);
+        }
+        return true;
+    }
+
     // sms 인증 코드 발송
     @Transactional
     public boolean sendSmsVerificationCode(SignUpPhoneNumberRequest phoneNumberRequest){
@@ -60,5 +68,6 @@ public class SignUpService {
     public Boolean checkNickName(String nickName) {
         return memberRepository.existByNickName(nickName);
     }
+
 
 }

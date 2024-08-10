@@ -1,14 +1,16 @@
 package com.hit.joonggonara.common.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hit.joonggonara.common.custom.login.*;
-import com.hit.joonggonara.common.util.JwtUtil;
+import com.hit.joonggonara.common.custom.login.CustomAccessDeniedHandler;
+import com.hit.joonggonara.common.custom.login.CustomAuthenticationEntryPoint;
+import com.hit.joonggonara.common.custom.login.CustomExceptionFilter;
+import com.hit.joonggonara.common.custom.login.CustomJwtFilter;
 import com.hit.joonggonara.common.properties.JwtProperties;
+import com.hit.joonggonara.common.util.JwtUtil;
 import com.hit.joonggonara.common.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -22,6 +24,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 
 @RequiredArgsConstructor
@@ -45,9 +48,9 @@ public class SecurityConfig {
                 .cors(cors->cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(request->{
-                    request.requestMatchers("/","/login","/login/**", "/user/login",
-                                    "/user/login/**", "/user/signUp", "/user/signUp/**").permitAll()
-                            .requestMatchers("/user/logout").hasRole("USER")
+                    request.requestMatchers("/", "/ws/**", "/css/**","/js/**", "/favicon.ico",
+                                    "/login","/login/**", "/user/login",
+                                    "/user/login/**", "/user/signUp", "/user/signUp/**", "/chat/**", "/chatRoom/**").permitAll()
                             .anyRequest().authenticated();
                 })
                 .exceptionHandling(exception -> {
@@ -64,7 +67,7 @@ public class SecurityConfig {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.setAllowedMethods(Arrays.asList("HEAD","POST","GET","DELETE","PUT"));
-        corsConfiguration.addAllowedOrigin("http://localhost:9090");
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:9090", "http://localhost:8081"));
         corsConfiguration.addExposedHeader(JwtProperties.AUTHORIZATION);
         corsConfiguration.setAllowCredentials(true);
 

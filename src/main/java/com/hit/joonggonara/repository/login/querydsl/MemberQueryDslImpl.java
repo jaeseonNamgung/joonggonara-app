@@ -5,8 +5,8 @@ import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.type.VerificationType;
 import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.repository.login.condition.AuthenticationCondition;
+import com.hit.joonggonara.repository.login.condition.LoginCondition;
 import com.hit.joonggonara.repository.login.condition.VerificationCondition;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.Optional;
 
 import static com.hit.joonggonara.entity.QMember.member;
+
 
 @RequiredArgsConstructor
 public class MemberQueryDslImpl implements MemberQueryDsl{
@@ -30,6 +31,14 @@ public class MemberQueryDslImpl implements MemberQueryDsl{
         return isExist != null;
     }
 
+    @Override
+    public boolean existByNickName(String nickName) {
+        Integer isExist = jpaQueryFactory.selectOne()
+                .from(member)
+                .where(member.nickName.eq(nickName))
+                .fetchFirst();
+        return isExist != null;
+    }
     @Override
     public boolean existByEmail(String email) {
         Integer isExist = jpaQueryFactory.selectOne()
@@ -57,14 +66,6 @@ public class MemberQueryDslImpl implements MemberQueryDsl{
         return exist != null;
     }
 
-    @Override
-    public boolean existByNickName(String nickName) {
-        Integer exist = jpaQueryFactory.selectOne()
-                .from(member)
-                .where(member.nickName.eq(nickName))
-                .fetchOne();
-        return exist != null;
-    }
 
     @Override
     public Optional<String> findUserIdOrPasswordByPhoneNumberOrEmail(AuthenticationCondition condition) {
@@ -88,6 +89,24 @@ public class MemberQueryDslImpl implements MemberQueryDsl{
             return member.userId.eq(principal);
         }
         return member.email.eq(principal);
+    }
+
+
+
+    @Override
+    public Optional<Member> findByPrincipal(LoginCondition condition) {
+        Member fetchOne = jpaQueryFactory.selectFrom(member)
+                .where(loginCondition(condition).and(member.loginType.eq(condition.loginType())))
+                .fetchOne();
+        return Optional.ofNullable(fetchOne);
+    }
+
+    private BooleanExpression loginCondition(LoginCondition condition) {
+        if (condition.loginType().equals(LoginType.GENERAL)){
+            return member.userId.eq(condition.principal());
+        }else{
+            return member.email.eq(condition.principal());
+        }
     }
 
     private BooleanExpression verificationType(VerificationCondition condition, VerificationType verificationType) {

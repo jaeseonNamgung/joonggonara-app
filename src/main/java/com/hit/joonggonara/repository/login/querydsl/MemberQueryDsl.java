@@ -4,6 +4,7 @@ import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.type.VerificationType;
 import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.repository.login.condition.AuthenticationCondition;
+import com.hit.joonggonara.repository.login.condition.LoginCondition;
 import com.hit.joonggonara.repository.login.condition.VerificationCondition;
 
 import java.util.Optional;
@@ -21,4 +22,8 @@ public interface MemberQueryDsl{
 
     Optional<String> findUserIdOrPasswordByPhoneNumberOrEmail(AuthenticationCondition condition);
     Optional<Member> findByPrincipalAndLoginType(String principal, LoginType loginType);
+
+
+    Optional<Member> findByPrincipal(LoginCondition condition);
+
 }

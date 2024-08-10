@@ -8,6 +8,7 @@ import com.hit.joonggonara.common.type.Role;
 import com.hit.joonggonara.common.type.VerificationType;
 import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.repository.login.condition.AuthenticationCondition;
+import com.hit.joonggonara.repository.login.condition.LoginCondition;
 import com.hit.joonggonara.repository.login.condition.VerificationCondition;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,14 +18,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @TestPropertySource(locations = "classpath:/application.yaml")
 @Import({JPAConfig.class, P6SpyConfig.class})
 @DataJpaTest
-class 
-MemberRepositoryTest {
+class MemberRepositoryTest {
 
     @Autowired
     private MemberRepository sut;
@@ -34,7 +35,9 @@ MemberRepositoryTest {
     void UserExistByUserIdTest() throws Exception
     {
         //given
+
         Member member = createMember("testId", LoginType.KAKAO);
+
         sut.save(member);
         //when
         boolean exceptedValue = sut.existByEmail(member.getEmail());
@@ -42,12 +45,15 @@ MemberRepositoryTest {
         assertThat(exceptedValue).isTrue();
     }
 
+
     @Test
     @DisplayName("[JPA][QueryDsl] 아이디로 검색해서 회원이 없을 경우 false를 리턴")
     void UserNotExistByUserIdTest() throws Exception
     {
         //given
+
         Member member = createMember("testId", LoginType.KAKAO);
+
         //when
         boolean exceptedValue = sut.existByUserId(member.getUserId());
         //then
@@ -59,7 +65,9 @@ MemberRepositoryTest {
     void UserNotExistByEmailTest() throws Exception
     {
         //given
+
         Member member = createMember("testId", LoginType.KAKAO);
+
         //when
         boolean exceptedValue = sut.existByEmail(member.getEmail());
         //then
@@ -70,7 +78,9 @@ MemberRepositoryTest {
     void UserExistByEmailTest() throws Exception
     {
         //given
+
         Member member = createMember("testId", LoginType.KAKAO);
+
         sut.save(member);
         //when
         boolean exceptedValue = sut.existByEmail(member.getEmail());
@@ -85,7 +95,9 @@ MemberRepositoryTest {
     void UserExistByEmailAndLoginTest() throws Exception
     {
         //given
+
         Member member = createMember("testId", LoginType.KAKAO);
+
         sut.save(member);
         //when
         boolean exceptedValue = sut.existByEmailAndLoginType(member.getEmail(), member.getLoginType());
@@ -98,7 +110,9 @@ MemberRepositoryTest {
     void UserNotExistByEmailAndLoginTypeTest() throws Exception
     {
         //given
+
         Member member = createMember("testId", LoginType.KAKAO);
+
         //when
         boolean exceptedValue = sut.existByEmailAndLoginType(member.getUserId(), member.getLoginType());
         //then
@@ -109,7 +123,9 @@ MemberRepositoryTest {
     void UserExistByUserNameAndPhoneNumberTest() throws Exception
     {
         //given
+
         Member member = createMember("testId", LoginType.KAKAO);
+
         VerificationCondition condition = VerificationCondition.of("hong", "+8612345678");
         sut.save(member);
         //when
@@ -141,7 +157,9 @@ MemberRepositoryTest {
     void UserExistByUserNameAndEmailTest() throws Exception
     {
         //given
+
         Member member = createMember("testId", LoginType.KAKAO);
+
         VerificationCondition condition = VerificationCondition.of("hong", "test@email.com");
         sut.save(member);
         //when
@@ -171,7 +189,9 @@ MemberRepositoryTest {
     void UserExistByUserNameAndUserIdAndPhoneNumberTest() throws Exception
     {
         //given
+
         Member member = createMember("testId", LoginType.KAKAO);
+
         VerificationCondition condition = VerificationCondition.of("hong", "testId", "+8612345678");
         sut.save(member);
         //when
@@ -203,7 +223,9 @@ MemberRepositoryTest {
     void UserExistByUserNameAndUserIdAndEmailTest() throws Exception
     {
         //given
+
         Member member = createMember("testId", LoginType.KAKAO);
+
         VerificationCondition condition = VerificationCondition.of("hong", "testId", "test@email.com");
         sut.save(member);
         //when
@@ -251,7 +273,9 @@ MemberRepositoryTest {
     void ReturnUserIdToOptionalByEmail() throws Exception
     {
         //given
+
         Member member = createMember("testId", LoginType.KAKAO);
+
         AuthenticationCondition authenticationCondition =
                 AuthenticationCondition.of("test@email.com", VerificationType.EMAIL, AuthenticationType.ID);
         sut.save(member);
@@ -265,7 +289,10 @@ MemberRepositoryTest {
     void ReturnUserIdToOptionalBySMS() throws Exception
     {
         //given
+
         Member member = createMember("testId", LoginType.KAKAO);
+
+
         AuthenticationCondition authenticationCondition =
                 AuthenticationCondition.of("+8612345678", VerificationType.SMS, AuthenticationType.ID);
         sut.save(member);
@@ -280,7 +307,9 @@ MemberRepositoryTest {
     void ReturnPasswordToOptionalByEmail() throws Exception
     {
         //given
+
         Member member = createMember("testId", LoginType.KAKAO);
+
         AuthenticationCondition authenticationCondition =
                 AuthenticationCondition.of("test@email.com", VerificationType.EMAIL, AuthenticationType.PASSWORD);
         sut.save(member);
@@ -295,7 +324,9 @@ MemberRepositoryTest {
     void ReturnPasswordToOptionalBySMS() throws Exception
     {
         //given
+
         Member member = createMember("testId", LoginType.KAKAO);
+
         AuthenticationCondition authenticationCondition =
                 AuthenticationCondition.of("+8612345678", VerificationType.SMS, AuthenticationType.PASSWORD);
         sut.save(member);
@@ -304,6 +335,51 @@ MemberRepositoryTest {
         //then
         assertThat(expectedPassword).isEqualTo(member.getPassword());
     }
+    
+    @Test
+    @DisplayName("[JPA][QueryDsl] 일반 로그인 회원 일 경우 userId 를 통해 조회 후 Optional 객체를 반환")
+    void returnOptionalMemberWhenUserIsAGeneralUser() throws Exception
+    {
+        //given
+        LoginCondition loginCondition =  LoginCondition.of("testId", LoginType.GENERAL);
+        Member member = createMember("testId", LoginType.GENERAL);
+        sut.save(member);
+        //when
+        Member expectedMember = sut.findByPrincipal(loginCondition).get();
+        //then
+        assertThat(expectedMember).isNotNull();
+        assertThat(expectedMember.getUserId()).isEqualTo(loginCondition.principal());
+        assertThat(expectedMember.getLoginType()).isEqualTo(loginCondition.loginType());
+    }
+
+    @Test
+    @DisplayName("[JPA][QueryDsl] 일반 로그인 회원 일 경우 userId 를 통해 조회 후 존재하지 않은 회원 일 경우 Optional에 빈 객체를 반환")
+    void returnOptionalEmptyWhenGeneralUserIsNotExist() throws Exception
+    {
+        //given
+        LoginCondition loginCondition = LoginCondition.of("testId", LoginType.GENERAL);
+        //when
+        Optional<Member> expectedMember = sut.findByPrincipal(loginCondition);
+        //then
+        assertThat(expectedMember).isEmpty();
+    }
+
+    @Test
+    @DisplayName("[JPA][QueryDsl] 소셜 로그인 회원 일 경우 email 를 통해 조회 후 Optional 객체를 반환")
+    void returnOptionalMemberWhenUserIsSocialUser() throws Exception
+    {
+        //given
+        LoginCondition loginCondition = LoginCondition.of("test@email.com", LoginType.KAKAO);
+        Member member = createMember("test@email.com", LoginType.KAKAO);
+        sut.save(member);
+        //when
+        Member expectedMember = sut.findByPrincipal(loginCondition).get();
+        //then
+        assertThat(expectedMember).isNotNull();
+        assertThat(expectedMember.getUserId()).isEqualTo(loginCondition.principal());
+        assertThat(expectedMember.getLoginType()).isEqualTo(loginCondition.loginType());
+    }
+
 
     @Test
     @DisplayName("[JPA][QueryDsl] 존재하는 닉네임일 경우 true를 반환")

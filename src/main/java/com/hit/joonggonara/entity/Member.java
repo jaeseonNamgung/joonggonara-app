@@ -4,9 +4,7 @@ import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.type.Role;
 import com.hit.joonggonara.dto.request.login.MemberUpdateRequest;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -14,12 +12,12 @@ import java.time.LocalDateTime;
 
 @SQLDelete(sql = "UPDATE member SET is_deleted = true, deleted_at = now() WHERE id = ?")
 @SQLRestriction("is_deleted = false")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@RequiredArgsConstructor
 @Entity
 public class Member extends BaseEntity{
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue
     private Long id;
 
 
@@ -80,5 +78,9 @@ public class Member extends BaseEntity{
         this.profile = memberUpdateRequest.profile();
         this.phoneNumber = memberUpdateRequest.phoneNumber();
         this.isNotification = memberUpdateRequest.isNotification();
+    }
+
+    public void updatePassword(String password){
+        this.password = password;
     }
 }
