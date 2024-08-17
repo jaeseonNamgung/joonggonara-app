@@ -29,7 +29,6 @@ public class AwsSesConfig {
                 .withCredentials(credentialsProvider)
                 .withRegion(Regions.AP_NORTHEAST_2)
                 .build();
-
     }
 
 }

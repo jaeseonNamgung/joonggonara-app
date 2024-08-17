@@ -5,13 +5,14 @@ import lombok.Getter;
 @Getter
 public enum Role {
 
-    USER, GUEST, ADMIN;
+    ROLE_USER, ROLE_GUEST, ROLE_ADMIN;
 
     public static Role checkRole(String role) {
+        role = role.toUpperCase();
         return switch (role){
-            case "USER" ->  Role.USER;
-            case "ADMIN" -> Role.ADMIN;
-            default -> Role.GUEST;
+            case "ROLE_USER" ->  Role.ROLE_USER;
+            case "ROLE_ADMIN" -> Role.ROLE_ADMIN;
+            default -> Role.ROLE_GUEST;
         };
     }
 }

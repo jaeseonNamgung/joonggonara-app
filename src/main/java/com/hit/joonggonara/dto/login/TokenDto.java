@@ -1,17 +1,17 @@
-package com.hit.joonggonara.dto;
+package com.hit.joonggonara.dto.login;
 
 public record TokenDto(
         String accessToken,
         String refreshToken,
-        String email
+        String principal
 ) {
 
     public static TokenDto of(
             String accessToken,
             String refreshToken,
-            String email
+            String principal
     ){
-        return new TokenDto(accessToken, refreshToken, email);
+        return new TokenDto(accessToken, refreshToken, principal);
     }
 
 }
