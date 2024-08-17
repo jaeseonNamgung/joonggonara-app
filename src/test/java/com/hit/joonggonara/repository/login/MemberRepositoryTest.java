@@ -13,8 +13,10 @@ import com.hit.joonggonara.repository.login.condition.VerificationCondition;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
@@ -22,6 +24,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@ActiveProfiles("test")
 @TestPropertySource(locations = "classpath:/application.yaml")
 @Import({JPAConfig.class, P6SpyConfig.class})
 @DataJpaTest
@@ -151,7 +155,7 @@ class MemberRepositoryTest {
         //then
         assertThat(expectedValue).isFalse();
     }
-    
+
     @Test
     @DisplayName("[JPA][QueryDsl][아이디 찾기] 이름과 이메일로 검색해서 회원이 있을 경우 true를 리턴")
     void UserExistByUserNameAndEmailTest() throws Exception
@@ -267,7 +271,7 @@ class MemberRepositoryTest {
         assertThat(expectedMembers.size()).isEqualTo(1);
         assertThat(expectedMembers.get(0).isDeleted()).isFalse();
     }
-    
+
     @Test
     @DisplayName("[JPA][QueryDsl] Email 찾기를 통해 회원 아이디를 Optional로 리턴")
     void ReturnUserIdToOptionalByEmail() throws Exception
@@ -335,7 +339,7 @@ class MemberRepositoryTest {
         //then
         assertThat(expectedPassword).isEqualTo(member.getPassword());
     }
-    
+
     @Test
     @DisplayName("[JPA][QueryDsl] 일반 로그인 회원 일 경우 userId 를 통해 조회 후 Optional 객체를 반환")
     void returnOptionalMemberWhenUserIsAGeneralUser() throws Exception
@@ -405,7 +409,7 @@ class MemberRepositoryTest {
         //then
         assertThat(expectedTrue).isFalse();
     }
-    
+
     @Test
     @DisplayName("[JPA][QueryDsl] 일반 회원일 경우 아이디로 회원 조회")
     void checkMemberWithUserIDIfMemberIsAGeneralMember() throws Exception

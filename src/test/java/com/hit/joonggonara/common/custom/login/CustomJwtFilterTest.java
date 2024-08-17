@@ -54,7 +54,7 @@ class CustomJwtFilterTest {
         mockRequest.addHeader(JwtProperties.AUTHORIZATION, token);
 
         given(redisUtil.get(any())).willReturn(Optional.empty());
-        given(jwtUtil.validateToken(any())).willReturn(true);
+        given(jwtUtil.validateToken(any(), any())).willReturn(true);
         given(jwtUtil.getPrincipal(any())).willReturn(userId);
         given(jwtUtil.getRole(any())).willReturn(role);
         //when
@@ -62,7 +62,7 @@ class CustomJwtFilterTest {
 
         //then
         then(redisUtil).should().get(any());
-        then(jwtUtil).should().validateToken(any());
+        then(jwtUtil).should().validateToken(any(), any());
         then(jwtUtil).should().getPrincipal(any());
         then(jwtUtil).should().getRole(any());
     }
