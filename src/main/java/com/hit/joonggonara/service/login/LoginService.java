@@ -12,10 +12,7 @@ import com.hit.joonggonara.common.properties.RedisProperties;
 import com.hit.joonggonara.common.properties.secretConfig.GoogleSecurityConfig;
 import com.hit.joonggonara.common.properties.secretConfig.KakaoSecurityConfig;
 import com.hit.joonggonara.common.properties.secretConfig.NaverSecurityConfig;
-import com.hit.joonggonara.common.type.AuthenticationType;
-import com.hit.joonggonara.common.type.LoginType;
-import com.hit.joonggonara.common.type.Role;
-import com.hit.joonggonara.common.type.VerificationType;
+import com.hit.joonggonara.common.type.*;
 import com.hit.joonggonara.common.util.JwtUtil;
 import com.hit.joonggonara.common.util.RedisUtil;
 import com.hit.joonggonara.dto.login.OAuth2PropertiesDto;
@@ -244,6 +241,9 @@ public class LoginService {
         if(!Strings.hasText(token)){
             throw new CustomException(UserErrorCode.ALREADY_LOGGED_OUT_USER);
         }
+
+        jwtUtil.validateToken(token, TokenType.REFRESH_TOKEN);
+
 
         String principal = jwtUtil.getPrincipal(token);
         Role role = jwtUtil.getRole(token);

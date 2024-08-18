@@ -29,6 +29,7 @@ public enum UserErrorCode implements ErrorCode {
     NO_RANDOM_NUMBER(HttpStatus.INTERNAL_SERVER_ERROR, "보안 처리 중 오류가 발생했습니다. 잠시 후 다시 시도 바랍니다. (이 오류가 반복되면 관리자에게 문의 바랍니다.)"),
     NO_VERIFICATION_CODE(HttpStatus.INTERNAL_SERVER_ERROR, "인증 코드 처리 중 오류가 발생했습니다. 잠시 후 다시 시도 바랍니다. (이 오류가 반복되면 관리자에게 문의 바랍니다.)"),
     KID_REQUEST_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "OIDC 요청에 거부되었습니다. 잠시 후 다시 시도 바랍니다."),
+    REFRESH_TOKEN_EXPIRED_TOKEN(HttpStatus.BAD_REQUEST, "로그인 기간이 만료되었습니다. 다시 로그인해 주세요."),
     SEND_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "메세지 전송 오류입니다.");
 
 

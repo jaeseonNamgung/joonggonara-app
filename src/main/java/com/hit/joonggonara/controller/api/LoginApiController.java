@@ -55,7 +55,6 @@ public class LoginApiController {
     public ResponseEntity<OAUth2UserResponse> OAuth2Login(@RequestParam(name = "code") String code,
                                                           @PathVariable(name = "loginType") String loginType,
                                                           HttpServletResponse response) throws JsonProcessingException {
-        System.out.println("code: " + code);
         OAuth2UserDto oAuth2UserDto = loginService.oAuth2Login(code, LoginType.checkType(loginType));
         if(oAuth2UserDto.signUpStatus()){
             saveAccessTokenAndRefreshToken(response, oAuth2UserDto.accessToken(), oAuth2UserDto.refreshToken());
