@@ -50,7 +50,8 @@ public class SecurityConfig {
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(request->{
                     request.requestMatchers("/", "/ws/**", "/css/**","/js/**", "/favicon.ico",
-                                     "/user/login","/user/login/reissue", "/user/login/**", "/user/signUp", "/user/signUp/**").permitAll()
+                                     "/user/login","/user/login/reissue", "/user/login/**", "/user/signUp",
+                                    "/user/signUp/**", "/board/search").permitAll()
                             .anyRequest().authenticated();
                 })
                 .exceptionHandling(exception -> {
