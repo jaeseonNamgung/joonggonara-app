@@ -42,6 +42,7 @@ public class CustomFileUtil {
             String contentType = multipartFile.getContentType();
 
             // jpg, png 확장자만 업로드 가능
+            assert contentType != null;
             if(!contentType.equals("image/jpeg") && !contentType.equals("image/png")){
                 throw new CustomException(BoardErrorCode.MISMATCH_EXTENSION);
             }
@@ -57,12 +58,11 @@ public class CustomFileUtil {
             file = new File(filePath + fileName);
             try {
                 multipartFile.transferTo(file);
-                return true;
             } catch (IOException e) {
                 throw new CustomException(BoardErrorCode.IO_ERROR);
             }
         }
-        return false;
+        return true;
     }
 
 }
