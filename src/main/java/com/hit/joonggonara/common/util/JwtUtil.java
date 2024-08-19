@@ -40,7 +40,7 @@ public class JwtUtil {
 
 
     public TokenDto createToken(String principal, Role role, LoginType loginType){
-        long accessTokenPeriod = 10000L; // 30분
+        long accessTokenPeriod = 1000L * 60L * 60L * 24L * 14; // 30분
         long refreshTokenPeriod = 1000L * 60L * 60L * 24L * 14; // 2주
 
         String accessToken = createAccessToken(principal, role, loginType, accessTokenPeriod);
