@@ -2,9 +2,9 @@ package com.hit.joonggonara.dto.request.board;
 
 import com.hit.joonggonara.common.type.CategoryType;
 import com.hit.joonggonara.common.type.SchoolType;
+import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.entity.Product;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 import static com.hit.joonggonara.common.properties.ValidationMessageProperties.*;
 
@@ -12,7 +12,6 @@ public record ProductRequest(
         @NotBlank(message= TITLE_NOT_BLANK)
         String title,
         String category,
-        @NotNull(message= PRICE_NOT_BLANK)
         Long price,
         @NotBlank(message= CONTENT_NOT_BLANK)
         String content,
@@ -36,7 +35,7 @@ public record ProductRequest(
         return new ProductRequest(title, category, price, content, tradingPlace, productStatus, school);
     }
 
-    public Product toEntity(){
+    public Product toEntity(Member member){
         return Product.builder()
                 .title(title())
                 .categoryType(CategoryType.toEnum(category()))
@@ -45,6 +44,7 @@ public record ProductRequest(
                 .tradingPlace(tradingPlace())
                 .productStatus(productStatus())
                 .schoolType(SchoolType.toEnum(school()))
+                .member(member)
                 .build();
     }
 

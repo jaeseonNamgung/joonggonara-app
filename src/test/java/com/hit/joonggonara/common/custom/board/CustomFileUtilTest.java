@@ -6,7 +6,7 @@ import com.hit.joonggonara.common.type.CategoryType;
 import com.hit.joonggonara.common.type.SchoolType;
 import com.hit.joonggonara.entity.Photo;
 import com.hit.joonggonara.entity.Product;
-import com.hit.joonggonara.repository.PhotoRepository;
+import com.hit.joonggonara.repository.product.PhotoRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

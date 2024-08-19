@@ -5,6 +5,7 @@ import com.hit.joonggonara.common.type.SchoolType;
 import com.hit.joonggonara.dto.request.board.ProductRequest;
 import com.hit.joonggonara.dto.response.board.ProductResponse;
 import com.hit.joonggonara.service.board.BoardService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,18 +23,17 @@ public class BoardApiController {
 
     private final BoardService boardService;
 
-    @PostMapping( path = "/board/write", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(path = "/board/write", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Boolean> writeBoard(@RequestPart(name = "images", required = false) List<MultipartFile> images,
-                                              @RequestPart(name = "productRequest", required = false) @Valid ProductRequest productRequest) {
-
-        System.out.println(productRequest);
-        System.out.println(images.get(0).getName());
-        return ResponseEntity.ok(boardService.upload(productRequest, images));
+                                              @RequestPart(name = "productRequest", required = false) @Valid ProductRequest productRequest,
+                                              HttpServletRequest request) {
+        images.forEach(data-> System.out.println(data.getOriginalFilename()));
+        return ResponseEntity.ok(boardService.upload(productRequest, images, request));
     }
 
     @GetMapping("/board/search")
     public ResponseEntity<Page<ProductResponse>> searchBoard(@RequestParam(name = "category") String category,
-                                                             @RequestParam(name="school") String school, Pageable pageable){
+                                                             @RequestParam(name = "school") String school, Pageable pageable) {
         return ResponseEntity.ok(boardService.search(SchoolType.toEnum(school), CategoryType.toEnum(category), pageable));
 
     }

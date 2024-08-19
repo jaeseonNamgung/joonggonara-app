@@ -20,7 +20,6 @@ public class Product extends BaseEntity {
     @GeneratedValue
     private Long id;
 
-    @Column(nullable = false)
     private Long price;
 
     @Column(nullable = false)

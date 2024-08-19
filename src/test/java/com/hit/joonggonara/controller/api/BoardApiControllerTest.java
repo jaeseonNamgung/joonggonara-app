@@ -87,21 +87,21 @@ class BoardApiControllerTest {
 
         ProductRequest productRequest = ProductRequest.of("title", "책", (long)10000, "content",
                 "학교앞", "최상", "HIT");
-
         MockMultipartFile productRequestJson = new MockMultipartFile(
                 "productRequest", "", "application/json", objectMapper.writeValueAsBytes(productRequest));
-        given(boardService.upload(any(), any())).willReturn(true);
+        given(boardService.upload(any(), any(), any())).willReturn(true);
 
         //when & then
         mvc.perform(multipart(HttpMethod.POST, "/board/write")
                 .file(mockFile)
                 .file(productRequestJson)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .header("Authorization", "token")
                 .with(csrf())
         ).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$").value(true));
-        then(boardService).should().upload(any(), any());
+        then(boardService).should().upload(any(), any(), any());
 
     }
 

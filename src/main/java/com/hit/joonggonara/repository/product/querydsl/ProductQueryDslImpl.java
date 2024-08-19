@@ -13,6 +13,8 @@ import org.springframework.data.support.PageableExecutionUtils;
 
 import java.util.List;
 
+import static com.hit.joonggonara.entity.QMember.member;
+import static com.hit.joonggonara.entity.QPhoto.photo;
 import static com.hit.joonggonara.entity.QProduct.product;
 
 @RequiredArgsConstructor
@@ -23,12 +25,14 @@ public class ProductQueryDslImpl implements ProductQueryDsl {
     @Override
     public Page<Product> getSortProducts(SchoolType schoolType, CategoryType categoryType, Pageable pageable) {
         List<Product> products = queryFactory.selectFrom(product)
+                .distinct()
+                .join(product.member, member).fetchJoin()
+                .join(product.photos, photo).fetchJoin()
                 .where(eqSchool(schoolType), eqCategory(categoryType))
                 .orderBy(product.createdDate.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
-
         JPAQuery<Long> fetchQuery = queryFactory
                 .select(product.id.count())
                 .from(product)
@@ -37,11 +41,11 @@ public class ProductQueryDslImpl implements ProductQueryDsl {
     }
 
     private BooleanExpression eqSchool(SchoolType schoolType) {
-        return schoolType != null ? product.schoolType.eq(schoolType) : null;
+        return !schoolType.equals(SchoolType.ALL) ? product.schoolType.eq(schoolType) : null;
     }
 
     private BooleanExpression eqCategory(CategoryType categoryType) {
-        return categoryType != null ? product.categoryType.eq(categoryType) : null;
+        return !categoryType.equals(CategoryType.ALL)? product.categoryType.eq(categoryType) : null;
     }
 }
 

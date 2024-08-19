@@ -1,12 +1,18 @@
 package com.hit.joonggonara.service.board;
 
 import com.hit.joonggonara.common.custom.board.CustomFileUtil;
+import com.hit.joonggonara.common.error.CustomException;
+import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
+import com.hit.joonggonara.common.properties.JwtProperties;
 import com.hit.joonggonara.common.type.CategoryType;
+import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.type.SchoolType;
+import com.hit.joonggonara.common.util.JwtUtil;
 import com.hit.joonggonara.dto.request.board.ProductRequest;
 import com.hit.joonggonara.dto.response.board.ProductResponse;
 import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.entity.Product;
+import com.hit.joonggonara.repository.login.MemberRepository;
 import com.hit.joonggonara.repository.product.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,12 +23,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -32,6 +41,10 @@ class BoardServiceTest {
 
     @Mock
     private ProductRepository productRepository;
+    @Mock
+    private MemberRepository memberRepository;
+    @Mock
+    private JwtUtil jwtUtil;
     @Mock
     private CustomFileUtil customFileUtil;
 
@@ -45,15 +58,77 @@ class BoardServiceTest {
         ProductRequest productRequest = createProductRequest();
         MultipartFile multipartFile = new MockMultipartFile(
                 "file", "test.png", "image/png", "test data".getBytes());
-        given(productRepository.save(any())).willReturn(productRequest.toEntity());
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader(JwtProperties.AUTHORIZATION, JwtProperties.JWT_TYPE + "token");
+        Member member = createMember();
+        given(jwtUtil.getPrincipal(any())).willReturn("userId");
+        given(jwtUtil.getLoginType(any())).willReturn(LoginType.GENERAL);
+        given(memberRepository.findByPrincipal(any())).willReturn(Optional.of(member));
+        given(productRepository.save(any())).willReturn(productRequest.toEntity(member));
         given(customFileUtil.uploadImage(any(), any())).willReturn(true);
         //when
-        boolean expectedValue = sut.upload(productRequest, List.of(multipartFile));
+        boolean expectedValue = sut.upload(productRequest, List.of(multipartFile), request);
         //then
         assertThat(expectedValue).isTrue();
         then(productRepository).should().save(any());
         then(customFileUtil).should().uploadImage(any(),any());
+        then(jwtUtil).should().getPrincipal(any());
+        then(jwtUtil).should().getLoginType(any());
+        then(memberRepository).should().findByPrincipal(any());
 
+    }
+
+    @Test
+    @DisplayName("[Service] 토큰이 null일 겨우 ALREADY_LOGGED_OUT_USER 에러를 던진다.")
+    void throwALREADY_LOGGED_OUT_USERErrorIfTokenIsNull() throws Exception {
+        //given
+        ProductRequest productRequest = createProductRequest();
+        MultipartFile multipartFile = new MockMultipartFile(
+                "file", "test.png", "image/png", "test data".getBytes());
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader(JwtProperties.AUTHORIZATION, "");
+        Member member = createMember();
+        //when
+        CustomException expectedException = assertThrows(CustomException.class,
+                () -> sut.upload(productRequest, List.of(multipartFile), request));
+        //then
+        assertThat(expectedException.getErrorCode()).isEqualTo(UserErrorCode.ALREADY_LOGGED_OUT_USER);
+        assertThat(expectedException).hasMessage(UserErrorCode.ALREADY_LOGGED_OUT_USER.getMessage());
+
+    }
+
+    @Test
+    @DisplayName("[Service] 회원이 존재하지 않을 경우 NOT_EXIST_USER 에러를 던진다.")
+    void throwNOT_EXIST_USERErrorIfNotExistMember() throws Exception {
+        //given
+        ProductRequest productRequest = createProductRequest();
+        MultipartFile multipartFile = new MockMultipartFile(
+                "file", "test.png", "image/png", "test data".getBytes());
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader(JwtProperties.AUTHORIZATION, JwtProperties.JWT_TYPE + "token");
+        given(jwtUtil.getPrincipal(any())).willReturn("userId");
+        given(jwtUtil.getLoginType(any())).willReturn(LoginType.GENERAL);
+        given(memberRepository.findByPrincipal(any())).willReturn(Optional.empty());
+
+        //when
+        CustomException expectedException = assertThrows(CustomException.class,
+                () -> sut.upload(productRequest, List.of(multipartFile), request));
+        //then
+        assertThat(expectedException.getErrorCode()).isEqualTo(UserErrorCode.NOT_EXIST_USER);
+        assertThat(expectedException).hasMessage(UserErrorCode.NOT_EXIST_USER.getMessage());
+
+        then(jwtUtil).should().getPrincipal(any());
+        then(jwtUtil).should().getLoginType(any());
+        then(memberRepository).should().findByPrincipal(any());
+
+
+    }
+
+    private Member createMember() {
+        return Member.builder()
+                .name("name")
+                .email("email")
+                .build();
     }
 
     @Test
