@@ -27,15 +27,22 @@ public class BoardApiController {
     public ResponseEntity<Boolean> writeBoard(@RequestPart(name = "images", required = false) List<MultipartFile> images,
                                               @RequestPart(name = "productRequest", required = false) @Valid ProductRequest productRequest,
                                               HttpServletRequest request) {
-        images.forEach(data-> System.out.println(data.getOriginalFilename()));
         return ResponseEntity.ok(boardService.upload(productRequest, images, request));
     }
 
-    @GetMapping("/board/search")
-    public ResponseEntity<Page<ProductResponse>> searchBoard(@RequestParam(name = "category") String category,
-                                                             @RequestParam(name = "school") String school, Pageable pageable) {
-        return ResponseEntity.ok(boardService.search(SchoolType.toEnum(school), CategoryType.toEnum(category), pageable));
+    @GetMapping("/board/search/list")
+    public ResponseEntity<Page<ProductResponse>> getProducts(
+            @RequestParam(name="keyword", required = false) String keyword,
+            @RequestParam(name = "category") String category,
+            @RequestParam(name = "school") String school, Pageable pageable) {
+        return ResponseEntity.ok(boardService.search(keyword, SchoolType.toEnum(school), CategoryType.toEnum(category), pageable));
 
     }
+
+    @GetMapping("/board/search")
+    public ResponseEntity<Page<ProductResponse>> searchProducts(String keyword, Pageable pageable) {
+        return ResponseEntity.ok(boardService.getSearchProductsByKeyword(keyword, pageable));
+    }
+
 
 }

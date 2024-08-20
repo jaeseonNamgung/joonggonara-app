@@ -36,8 +36,8 @@ public class BoardService {
     private final CustomFileUtil fileUtil;
 
 
-    public Page<ProductResponse> search(SchoolType schoolType, CategoryType categoryType, Pageable pageable) {
-        return ProductResponse.fromResponse(productRepository.getSortProducts(schoolType, categoryType, pageable));
+    public Page<ProductResponse> search(String keyword, SchoolType schoolType, CategoryType categoryType, Pageable pageable) {
+        return ProductResponse.fromResponse(productRepository.getSortProducts(keyword, schoolType, categoryType, pageable));
     }
 
     @Transactional
@@ -54,6 +54,10 @@ public class BoardService {
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_EXIST_USER));
         Product savedProduct = productRepository.save(productRequest.toEntity(member));
         return fileUtil.uploadImage(savedProduct, files);
+    }
+
+    public Page<ProductResponse> getSearchProductsByKeyword(String keyword, Pageable pageable) {
+        return ProductResponse.fromResponse(productRepository.findProductsByKeyword(keyword, pageable));
     }
 
     private String getParseJwt(String token) {

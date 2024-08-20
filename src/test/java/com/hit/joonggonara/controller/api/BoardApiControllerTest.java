@@ -111,7 +111,7 @@ class BoardApiControllerTest {
     void TestProductSearchByCategoryAndSchool() throws Exception {
         //given
         ProductResponse productResponse = createProductResponse();
-        given(boardService.search(any(),any(),any())).willReturn(new PageImpl<>(List.of(productResponse)));
+        given(boardService.search(any(),any(),any(), any())).willReturn(new PageImpl<>(List.of(productResponse)));
         //when & then
         mvc.perform(get("/board/search")
                         .queryParam("category", CategoryType.BOOK.name())
@@ -128,7 +128,7 @@ class BoardApiControllerTest {
                 .andExpect(jsonPath("$.content[0].schoolType").value("HIT"))
                 .andExpect(jsonPath("$.size").value(1))
                 .andExpect(jsonPath("$.number").value(0));
-        then(boardService).should().search(any(),any(),any());
+        then(boardService).should().search(any(),any(),any(), any());
 
     }
 
@@ -143,7 +143,7 @@ class BoardApiControllerTest {
                 null,
                 false,
                 CategoryType.BOOK,
-                SchoolType.HIT,
+                SchoolType.HIT.getName(),
                 null
         );
     }

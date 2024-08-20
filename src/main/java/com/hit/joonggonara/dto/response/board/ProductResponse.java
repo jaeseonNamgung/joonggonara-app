@@ -1,7 +1,6 @@
 package com.hit.joonggonara.dto.response.board;
 
 import com.hit.joonggonara.common.type.CategoryType;
-import com.hit.joonggonara.common.type.SchoolType;
 import com.hit.joonggonara.entity.Product;
 import org.springframework.data.domain.Page;
 
@@ -17,7 +16,7 @@ public record ProductResponse(
         List<PhotoResponse> photos,
         boolean isSoldOut,
         CategoryType categoryType,
-        SchoolType schoolType,
+        String school,
         MemberResponse memberResponse
 ) {
 
@@ -32,10 +31,10 @@ public record ProductResponse(
             List<PhotoResponse> photos,
             boolean isSoldOut,
             CategoryType categoryType,
-            SchoolType schoolType,
+            String school,
             MemberResponse memberResponse
     ) {
-        return new ProductResponse(id, price, title, content,tradingPlace, productStatus, photos, isSoldOut, categoryType, schoolType, memberResponse);
+        return new ProductResponse(id, price, title, content,tradingPlace, productStatus, photos, isSoldOut, categoryType, school, memberResponse);
     }
 
     public static Page<ProductResponse> fromResponse(Page<Product> products) {
@@ -49,7 +48,7 @@ public record ProductResponse(
                 PhotoResponse.fromResponse(product.getPhotos()),
                 product.isSoldOut(),
                 product.getCategoryType(),
-                product.getSchoolType(),
+                product.getSchoolType().getName(),
                 MemberResponse.fromResponse(product.getMember())
         ));
     }

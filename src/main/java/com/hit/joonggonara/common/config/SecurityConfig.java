@@ -51,7 +51,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request->{
                     request.requestMatchers("/", "/ws/**", "/css/**","/js/**", "/favicon.ico",
                                      "/user/login","/user/login/reissue", "/user/login/**", "/user/signUp",
-                                    "/user/signUp/**", "/board/search").permitAll()
+                                    "/user/signUp/**", "/board/search/list", "/board/search").permitAll()
                             .anyRequest().authenticated();
                 })
                 .exceptionHandling(exception -> {

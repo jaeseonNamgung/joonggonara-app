@@ -4,8 +4,13 @@ package com.hit.joonggonara.repository.product;
 import com.hit.joonggonara.common.config.JPAConfig;
 import com.hit.joonggonara.common.config.P6SpyConfig;
 import com.hit.joonggonara.common.type.CategoryType;
+import com.hit.joonggonara.common.type.LoginType;
+import com.hit.joonggonara.common.type.Role;
 import com.hit.joonggonara.common.type.SchoolType;
+import com.hit.joonggonara.entity.Member;
+import com.hit.joonggonara.entity.Photo;
 import com.hit.joonggonara.entity.Product;
+import com.hit.joonggonara.repository.login.MemberRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,19 +34,29 @@ class ProductRepositoryTest {
 
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private PhotoRepository photoRepository;
 
     @Test
-    @DisplayName("[JPA][Query Dsl] 학교 이름과 카테고리로 가장 최근 날짜 순으로 조회 ")
+    @DisplayName("[JPA][Query Dsl] 키워드 없이 학교 이름과 카테고리로 가장 최근 날짜 순으로 조회 ")
     void givenSchoolTypeAndPageable_whenGetSortProductsBySchool_thenReturnsSortedProducts() throws Exception {
         //given
         Pageable pageable = PageRequest.of(0, 3);
+        Member savedMember = memberRepository.save(createMember());
+
         for (int i = 1; i <= 5 ; i++) {
-            productRepository.save(createProduct(i, SchoolType.HIT, CategoryType.BOOK));
-            productRepository.save(createProduct(i, SchoolType.HC, CategoryType.CLOTHING));
-            productRepository.save(createProduct(i, SchoolType.HJ, CategoryType.COSMETICS));
+            Photo photo1 = createPhoto(productRepository.save(createProduct(i, SchoolType.HIT, CategoryType.BOOK, savedMember)));
+            Photo photo2 = createPhoto(productRepository.save(createProduct(i, SchoolType.HC, CategoryType.CLOTHING, savedMember)));
+            Photo photo3 = createPhoto(productRepository.save(createProduct(i, SchoolType.HJ, CategoryType.COSMETICS, savedMember)));
+
+            photoRepository.save(photo1);
+            photoRepository.save(photo2);
+            photoRepository.save(photo3);
         }
         //when
-        Page<Product> expectedProducts = productRepository.getSortProducts(SchoolType.HIT, CategoryType.BOOK, pageable);
+        Page<Product> expectedProducts = productRepository.getSortProducts(null, SchoolType.HIT, CategoryType.BOOK, pageable);
         //then
         assertThat(expectedProducts).hasSize(3);
         assertThat(expectedProducts.getTotalPages()).isEqualTo(2);
@@ -60,7 +75,116 @@ class ProductRepositoryTest {
 
     }
 
-    private static Product createProduct(int i, SchoolType schoolType, CategoryType categoryType) {
+    @Test
+    @DisplayName("[QueryDsl] title 키워드로 상품 검색")
+    void searchProductByTitleKeywordTest() throws Exception {
+        //given
+        String keyword = "le1";
+        Pageable pageable = PageRequest.of(0, 3);
+        Member savedMember = memberRepository.save(createMember());
+
+        for (int i = 1; i <= 5 ; i++) {
+            Photo photo1 = createPhoto(productRepository.save(createProduct(i, SchoolType.HIT, CategoryType.BOOK, savedMember)));
+            Photo photo2 = createPhoto(productRepository.save(createProduct(i, SchoolType.HC, CategoryType.CLOTHING, savedMember)));
+            Photo photo3 = createPhoto(productRepository.save(createProduct(i, SchoolType.HJ, CategoryType.COSMETICS, savedMember)));
+
+            photoRepository.save(photo1);
+            photoRepository.save(photo2);
+            photoRepository.save(photo3);
+        }
+
+        //when
+        Page<Product> expectedProducts = productRepository.getSortProducts(keyword, SchoolType.ALL, CategoryType.ALL, pageable);
+        //then
+        assertThat(expectedProducts).hasSize(3);
+        assertThat(expectedProducts.getTotalPages()).isEqualTo(1);
+        assertThat(expectedProducts.isFirst()).isTrue();
+        assertThat(expectedProducts.getTotalElements()).isEqualTo(3);
+        assertThat(expectedProducts.getContent().get(0).getTitle()).isEqualTo("title1");
+
+
+    }
+
+    @Test
+    @DisplayName("[QueryDsl] 가격 키워드로 상품 검색")
+    void searchProductByContentKeywordTest() throws Exception {
+        //given
+        String keyword = "2";
+        Pageable pageable = PageRequest.of(0, 3);
+        Member savedMember = memberRepository.save(createMember());
+
+        for (int i = 1; i <= 5 ; i++) {
+            Photo photo1 = createPhoto(productRepository.save(createProduct(i, SchoolType.HIT, CategoryType.BOOK, savedMember)));
+            Photo photo2 = createPhoto(productRepository.save(createProduct(i+1, SchoolType.HC, CategoryType.CLOTHING, savedMember)));
+            Photo photo3 = createPhoto(productRepository.save(createProduct(i+1, SchoolType.HJ, CategoryType.COSMETICS, savedMember)));
+
+            photoRepository.save(photo1);
+            photoRepository.save(photo2);
+            photoRepository.save(photo3);
+        }
+
+        //when
+        Page<Product> expectedProducts = productRepository.getSortProducts(keyword, SchoolType.ALL, CategoryType.ALL, pageable);
+        //then
+        assertThat(expectedProducts).hasSize(3);
+        assertThat(expectedProducts.getTotalPages()).isEqualTo(1);
+        assertThat(expectedProducts.isFirst()).isTrue();
+        assertThat(expectedProducts.getTotalElements()).isEqualTo(3);
+        assertThat(expectedProducts.getContent().get(0).getPrice()).isEqualTo(2);
+
+
+    }
+
+    @Test
+    @DisplayName("[QueryDsl] 제목 키워드와 카데고리, 학교 별로 상품 검색")
+    void searchProductByTitleKeywordAndCategoryAndSchoolTest() throws Exception {
+        //given
+        String keyword = "le2";
+        Pageable pageable = PageRequest.of(0, 3);
+        Member savedMember = memberRepository.save(createMember());
+
+        for (int i = 1; i <= 5 ; i++) {
+            Photo photo1 = createPhoto(productRepository.save(createProduct(i, SchoolType.HIT, CategoryType.BOOK, savedMember)));
+            Photo photo2 = createPhoto(productRepository.save(createProduct(i+1, SchoolType.HC, CategoryType.CLOTHING, savedMember)));
+            Photo photo3 = createPhoto(productRepository.save(createProduct(i+1, SchoolType.HJ, CategoryType.COSMETICS, savedMember)));
+
+            photoRepository.save(photo1);
+            photoRepository.save(photo2);
+            photoRepository.save(photo3);
+        }
+
+        //when
+        Page<Product> expectedProducts = productRepository.getSortProducts(keyword, SchoolType.HIT, CategoryType.BOOK, pageable);
+        //then
+        assertThat(expectedProducts).hasSize(1);
+        assertThat(expectedProducts.getTotalPages()).isEqualTo(1);
+        assertThat(expectedProducts.isFirst()).isTrue();
+        assertThat(expectedProducts.getTotalElements()).isEqualTo(1);
+        assertThat(expectedProducts.getContent().get(0).getTitle()).isEqualTo("title2");
+        assertThat(expectedProducts.getContent().get(0).getSchoolType()).isEqualTo(SchoolType.HIT);
+        assertThat(expectedProducts.getContent().get(0).getCategoryType()).isEqualTo(CategoryType.BOOK);
+
+
+    }
+
+    private Photo createPhoto(Product product) {
+        return Photo.builder().fileName("fileName").filePath("filePath").product(product).build();
+    }
+
+    private Member createMember() {
+        return Member.builder()
+                .userId("testId")
+                .email("test@email.com")
+                .name("hong")
+                .nickName("nickName")
+                .password("Abc1234*")
+                .phoneNumber("+8612345678")
+                .role(Role.ROLE_USER)
+                .loginType(LoginType.GENERAL)
+                .build();
+    }
+
+    private static Product createProduct(int i, SchoolType schoolType, CategoryType categoryType, Member member) {
         return Product.builder()
                 .title("title"+i)
                 .price((long) i)
@@ -70,6 +194,7 @@ class ProductRepositoryTest {
                 .productStatus("최상")
                 .tradingPlace("하공대 정문 앞")
                 .schoolType(schoolType)
+                .member(member)
                 .build();
     }
 

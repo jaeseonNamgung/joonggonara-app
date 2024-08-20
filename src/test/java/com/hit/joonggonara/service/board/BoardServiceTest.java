@@ -135,22 +135,23 @@ class BoardServiceTest {
     @DisplayName("[Service] 학교 및 카데고리로 조회한 상품이 존재할 경우 페이징 처리된 상품을 리턴")
     void returnProductsPagingIfExistProducts() throws Exception {
         //given
+        String keyword = "keyword";
         PageRequest pageRequest = PageRequest.of( 1, 5);
         Product product = createProduct();
-        given(productRepository.getSortProducts(any(), any(), any()))
+        given(productRepository.getSortProducts(any(), any(), any(), any()))
                 .willReturn(new PageImpl<>(List.of(product)));
         //when
-        Page<ProductResponse> expectedPage = sut.search(SchoolType.HIT, CategoryType.BOOK, pageRequest);
+        Page<ProductResponse> expectedPage = sut.search(keyword, SchoolType.HIT, CategoryType.BOOK, pageRequest);
 
         System.out.println(expectedPage.getTotalPages());
         //then
         assertThat(expectedPage.getContent().get(0).categoryType()).isEqualTo(CategoryType.BOOK);
-        assertThat(expectedPage.getContent().get(0).schoolType()).isEqualTo(SchoolType.HIT);
+        assertThat(expectedPage.getContent().get(0).school()).isEqualTo(SchoolType.HIT.getName());
         assertThat(expectedPage.getSize()).isEqualTo(1);
         assertThat(expectedPage.getTotalPages()).isEqualTo(1);
         assertThat(expectedPage.isFirst()).isTrue();
 
-        then(productRepository).should().getSortProducts(any(), any(), any());
+        then(productRepository).should().getSortProducts(any(), any(), any(), any());
 
     }
 
@@ -158,19 +159,20 @@ class BoardServiceTest {
     @DisplayName("[Service] 학교 및 카데고리로 조회한 상품이 존재하지 않을 경우 null을 반환")
     void returnsNullIfNotExistProducts() throws Exception {
         //given
+        String keyword = "keyword";
         PageRequest pageRequest = PageRequest.of( 1, 5);
         Product product = createProduct();
-        given(productRepository.getSortProducts(any(), any(), any()))
+        given(productRepository.getSortProducts(any(), any(), any(), any()))
                 .willReturn(new PageImpl<>(List.of()));
         //when
-        Page<ProductResponse> expectedPage = sut.search(SchoolType.HIT, CategoryType.BOOK, pageRequest);
+        Page<ProductResponse> expectedPage = sut.search(keyword, SchoolType.HIT, CategoryType.BOOK, pageRequest);
 
         //then
         assertThat(expectedPage).isEmpty();
         assertThat(expectedPage.getSize()).isEqualTo(0);
         assertThat(expectedPage.getTotalPages()).isEqualTo(1);
 
-        then(productRepository).should().getSortProducts(any(), any(), any());
+        then(productRepository).should().getSortProducts(any(), any(), any(), any());
 
     }
 

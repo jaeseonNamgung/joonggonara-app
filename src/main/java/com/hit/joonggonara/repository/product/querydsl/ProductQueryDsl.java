@@ -8,5 +8,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface ProductQueryDsl {
 
-    Page<Product> getSortProducts(SchoolType schoolType, CategoryType categoryType, Pageable pageable);
+    Page<Product> getSortProducts(String keyword, SchoolType schoolType, CategoryType categoryType, Pageable pageable);
+    Page<Product> findProductsByKeyword(String keyword, Pageable pageable);
 }

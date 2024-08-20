@@ -23,12 +23,12 @@ public class ProductQueryDslImpl implements ProductQueryDsl {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Product> getSortProducts(SchoolType schoolType, CategoryType categoryType, Pageable pageable) {
+    public Page<Product> getSortProducts(String keyword, SchoolType schoolType, CategoryType categoryType, Pageable pageable) {
         List<Product> products = queryFactory.selectFrom(product)
                 .distinct()
                 .join(product.member, member).fetchJoin()
                 .join(product.photos, photo).fetchJoin()
-                .where(eqSchool(schoolType), eqCategory(categoryType))
+                .where(keywordContain(keyword), eqSchool(schoolType), eqCategory(categoryType))
                 .orderBy(product.createdDate.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -36,8 +36,42 @@ public class ProductQueryDslImpl implements ProductQueryDsl {
         JPAQuery<Long> fetchQuery = queryFactory
                 .select(product.id.count())
                 .from(product)
-                .where(eqSchool(schoolType), eqCategory(categoryType));
+                .where(keywordContain(keyword), eqSchool(schoolType), eqCategory(categoryType));
         return PageableExecutionUtils.getPage(products, pageable, fetchQuery::fetchOne);
+    }
+
+    @Override
+    public Page<Product> findProductsByKeyword(String keyword, Pageable pageable) {
+        List<Product> products = queryFactory.selectFrom(product)
+                .distinct()
+                .join(product.member, member).fetchJoin()
+                .join(product.photos, photo).fetchJoin()
+                .where(keywordContain(keyword))
+                .orderBy(product.createdDate.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPAQuery<Long> fetchQuery = queryFactory
+                .select(product.id.count())
+                .from(product)
+                .where(keywordContain(keyword));
+
+        return PageableExecutionUtils.getPage(products, pageable, fetchQuery::fetchOne);
+    }
+
+    private BooleanExpression keywordContain(String keyword) {
+        return keyword != null ? priceContain(keyword).or(titleContain(keyword)): null;
+
+    }
+
+
+    private BooleanExpression titleContain(String title) {
+        return product.title.containsIgnoreCase(title);
+    }
+
+    private BooleanExpression priceContain(String price) {
+        return product.price.stringValue().containsIgnoreCase(price);
     }
 
     private BooleanExpression eqSchool(SchoolType schoolType) {
