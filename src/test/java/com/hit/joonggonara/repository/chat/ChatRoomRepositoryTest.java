@@ -79,6 +79,26 @@ class ChatRoomRepositoryTest {
         assertThat(expectedChatRoom.getChats().size()).isEqualTo(5);
     }
 
+    @Test
+    @DisplayName("[QueryDsl] 구매자 와 판매자 닉네임으로 채팅방 조회")
+    void findChatRoomByBuyerNickNameAndSellerNickName() throws Exception
+    {
+        //given
+        String buyerNickName = "buyerNickName";
+        String sellerNickName = "sellerNickName";
+        ChatRoom chatRoom = ChatRoom.builder().buyerNickName(buyerNickName).sellerNickName(sellerNickName).build();
+        ChatRoom savedChatRoom = sut.save(chatRoom);
+        for (int i = 1; i <= 5; i++) {
+            chatRepository.save(createChat(i,savedChatRoom));
+        }
+        //when
+        ChatRoom expectedChatRoom = sut.findChatRoomByBuyerNickNameAndSellerNickName(buyerNickName, sellerNickName).get();
+        //then
+        assertThat(expectedChatRoom).isNotNull();
+        assertThat(expectedChatRoom.getId()).isEqualTo(savedChatRoom.getId());
+        assertThat(expectedChatRoom.getChats().size()).isEqualTo(5);
+    }
+
 
     private Chat createChat(int i, ChatRoom chatRoom) {
         return Chat.builder()

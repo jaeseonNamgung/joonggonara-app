@@ -43,7 +43,7 @@ class ChatServiceTest {
     private ChatRepository chatRepository;
     @InjectMocks
     private ChatService sut;
-    
+
     @Test
     @DisplayName("[Save][Chat] 채팅 기록이 정상적으로 저장 될 경우 response를 반환")
     void IfTheChatHistoryIsSavedNormallyReturnTrue() throws Exception
@@ -132,8 +132,8 @@ class ChatServiceTest {
         return chats;
     }
     @Test
-    @DisplayName("[Save][ChatRoom] 채팅방 저장 된 후 채팅방 정보를 true를 반환")
-    void returnTrueWhenSaveChatRoom() throws Exception
+    @DisplayName("[Save][ChatRoom] 기존에 채팅방이 존재할 경우 기존에 채팅방을 Response 로 반환")
+    void createChatRoomTest() throws Exception
     {
         //given
         ChatRoomRequest chatRoomRequest = createChatRoomRequest();
@@ -142,13 +142,39 @@ class ChatServiceTest {
                 .sellerNickName("seller")
                 .buyerNickName("buyer")
                 .build();
-        given(chatRoomRepository.save(any())).willReturn(chatRoom);
+        given(chatRoomRepository.findChatRoomByBuyerNickNameAndSellerNickName(any(), any()))
+                .willReturn(Optional.of(chatRoom));
         //when
         ChatRoomResponse expectedResponse = sut.createRoom(chatRoomRequest);
         //then
         assertThat(expectedResponse.roomName()).isEqualTo("seller");
         assertThat(expectedResponse.nickName()).isEqualTo("buyer");
         assertThat(expectedResponse.profile()).isEqualTo("profile");
+        then(chatRoomRepository).should().findChatRoomByBuyerNickNameAndSellerNickName(any(), any());
+    }
+
+    @Test
+    @DisplayName("[Save][ChatRoom] 기존에 채팅방이 존재하지 않을 경우 새 채팅방을 저장 후 저장된 채팅방을 response로 반환")
+    void createChatRoomTest2() throws Exception
+    {
+        //given
+        ChatRoomRequest chatRoomRequest = createChatRoomRequest();
+        ChatRoom chatRoom = ChatRoom.builder()
+                .profile("profile")
+                .sellerNickName("seller")
+                .buyerNickName("buyer")
+                .build();
+        given(chatRoomRepository.findChatRoomByBuyerNickNameAndSellerNickName(any(), any()))
+                .willReturn(Optional.empty());
+        given(chatRoomRepository.save(any()))
+                .willReturn(chatRoom);
+        //when
+        ChatRoomResponse expectedResponse = sut.createRoom(chatRoomRequest);
+        //then
+        assertThat(expectedResponse.roomName()).isEqualTo("seller");
+        assertThat(expectedResponse.nickName()).isEqualTo("buyer");
+        assertThat(expectedResponse.profile()).isEqualTo("profile");
+        then(chatRoomRepository).should().findChatRoomByBuyerNickNameAndSellerNickName(any(), any());
         then(chatRoomRepository).should().save(any());
     }
 
@@ -213,7 +239,7 @@ class ChatServiceTest {
         assertThat(expectedException).hasMessage(ChatErrorCode.NOT_FOUND_CHATROOM.getMessage());
         then(chatRoomRepository).should().findById(any());
     }
-    
+
     @Test
     @DisplayName("[Check Delete][ChatRoom] 빈 채팅방 삭제 테스트")
     void deleteEmptyChatRoomTest() throws Exception

@@ -2,7 +2,6 @@ package com.hit.joonggonara.service.chat;
 
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.errorCode.ChatErrorCode;
-import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
 import com.hit.joonggonara.common.type.ChatRoomStatus;
 import com.hit.joonggonara.dto.request.chat.ChatRequest;
 import com.hit.joonggonara.dto.request.chat.ChatRoomRequest;
@@ -11,10 +10,8 @@ import com.hit.joonggonara.dto.response.chat.ChatRoomAllResponse;
 import com.hit.joonggonara.dto.response.chat.ChatRoomResponse;
 import com.hit.joonggonara.entity.Chat;
 import com.hit.joonggonara.entity.ChatRoom;
-import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.repository.chat.ChatRepository;
 import com.hit.joonggonara.repository.chat.ChatRoomRepository;
-import com.hit.joonggonara.repository.login.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,13 +60,17 @@ public class ChatService {
     // 채팅방 생성
     @Transactional
     public ChatRoomResponse createRoom(ChatRoomRequest chatRoomRequest){
-        ChatRoom chatRoom = ChatRoom.builder()
-                .profile(chatRoomRequest.profile())
-                .buyerNickName(chatRoomRequest.buyerNickName())
-                .sellerNickName(chatRoomRequest.sellerNickName())
-                .build();
 
-        return ChatRoomResponse.fromResponse(chatRoomRepository.save(chatRoom));
+        ChatRoom chatRoom = chatRoomRepository.
+                findChatRoomByBuyerNickNameAndSellerNickName(chatRoomRequest.buyerNickName(), chatRoomRequest.sellerNickName())
+                .orElseGet(() -> chatRoomRepository.save(
+                        ChatRoom.builder()
+                                .profile(chatRoomRequest.profile())
+                                .buyerNickName(chatRoomRequest.buyerNickName())
+                                .sellerNickName(chatRoomRequest.sellerNickName())
+                                .build()));
+
+        return ChatRoomResponse.fromResponse(chatRoom);
     }
 
     // 채팅방 전체 조회

@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.Optional;
 
-import static com.hit.joonggonara.entity.QChat.chat;
 import static com.hit.joonggonara.entity.QChatRoom.chatRoom;
 
 @RequiredArgsConstructor
@@ -18,7 +17,7 @@ public class ChatRoomQueryDslImpl implements ChatRoomQueryDsl{
 
     private final JPAQueryFactory jpaQueryFactory;
 
-    
+
     // buyer과 seller 에 속한 모든 채팅방을 조회하는데 삭제되지 않은 채팅방만 조회
     @Override
     public List<ChatRoom> findAllByNickName(String nickName) {
@@ -36,6 +35,14 @@ public class ChatRoomQueryDslImpl implements ChatRoomQueryDsl{
                 .join(QChatRoom.chatRoom.chats).fetchJoin()
                 .where(QChatRoom.chatRoom.id.eq(roomId)).fetchOne();
 
+        return Optional.ofNullable(chatRoom);
+    }
+
+    @Override
+    public Optional<ChatRoom> findChatRoomByBuyerNickNameAndSellerNickName(String buyerNickName, String sellerNickName) {
+        ChatRoom chatRoom = jpaQueryFactory.selectFrom(QChatRoom.chatRoom)
+                .where(QChatRoom.chatRoom.buyerNickName.eq(buyerNickName), QChatRoom.chatRoom.sellerNickName.eq(sellerNickName))
+                .fetchOne();
         return Optional.ofNullable(chatRoom);
     }
 
