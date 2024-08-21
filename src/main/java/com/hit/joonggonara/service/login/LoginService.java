@@ -21,10 +21,12 @@ import com.hit.joonggonara.dto.login.TokenDto;
 import com.hit.joonggonara.dto.request.login.*;
 import com.hit.joonggonara.dto.response.login.FindUserIdResponse;
 import com.hit.joonggonara.dto.response.login.OAuth2UserDto;
+import com.hit.joonggonara.dto.response.login.MemberTokenResponse;
 import com.hit.joonggonara.dto.response.login.TokenResponse;
 import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.repository.login.MemberRepository;
 import com.hit.joonggonara.repository.login.condition.AuthenticationCondition;
+import com.hit.joonggonara.repository.login.condition.LoginCondition;
 import com.hit.joonggonara.repository.login.condition.VerificationCondition;
 import com.hit.joonggonara.service.login.oidc.OidcService;
 import io.jsonwebtoken.lang.Strings;
@@ -63,7 +65,7 @@ public class LoginService {
 
 
     @Transactional
-    public TokenResponse login(LoginRequest loginRequest){
+    public MemberTokenResponse login(LoginRequest loginRequest){
 
         // 초기 인증 정보를 넣는다.
         Authentication authentication =
@@ -76,10 +78,13 @@ public class LoginService {
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_EXIST_AUTHORIZATION));
         Role role = Role.checkRole(r);
 
+        Member member = memberRepository.findByPrincipal(LoginCondition.of(loginRequest.userId(), LoginType.GENERAL))
+                .orElseThrow(() -> new CustomException(UserErrorCode.NOT_EXIST_USER));
+
         // access token, refresh token 생성
         TokenDto token = createToken((String) authenticate.getPrincipal(), role, LoginType.GENERAL);
 
-        return TokenResponse.toResponse(token);
+        return MemberTokenResponse.toResponse(member, token);
     }
     @Transactional
     public OAuth2UserDto oAuth2Login(String code, LoginType loginType) throws JsonProcessingException {
@@ -187,6 +192,7 @@ public class LoginService {
         return true;
     }
 
+
     private void checkExistUser(VerificationCondition condition, VerificationType verificationType) {
 
         boolean exist = memberRepository.existByUserNameAndVerificationTypeValue(condition, verificationType);
@@ -268,11 +274,8 @@ public class LoginService {
 
     @Transactional
     public boolean withdrawal(HttpServletRequest request){
-        String jwtToken = request.getHeader(AUTHORIZATION);
-        String accessToken = getParseJwt(jwtToken);
-        if(accessToken == null){
-            throw new CustomException(UserErrorCode.ALREADY_LOGGED_OUT_USER);
-        }
+
+        String accessToken = getAccessToken(request);
 
         String principal = jwtUtil.getPrincipal(accessToken);
         LoginType loginType = jwtUtil.getLoginType(accessToken);
@@ -286,6 +289,15 @@ public class LoginService {
 
         redisUtil.delete(REFRESH_TOKEN_NAME + principal);
         return true;
+    }
+
+    private String getAccessToken(HttpServletRequest request) {
+        String jwtToken = request.getHeader(AUTHORIZATION);
+        String accessToken = getParseJwt(jwtToken);
+        if(accessToken == null){
+            throw new CustomException(UserErrorCode.ALREADY_LOGGED_OUT_USER);
+        }
+        return accessToken;
     }
 
     @Transactional

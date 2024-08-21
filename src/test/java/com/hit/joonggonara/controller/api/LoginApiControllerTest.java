@@ -5,9 +5,12 @@ import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.ErrorCode;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
 import com.hit.joonggonara.common.properties.JwtProperties;
+import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.util.CookieUtil;
 import com.hit.joonggonara.dto.request.login.*;
+import com.hit.joonggonara.dto.response.board.MemberResponse;
 import com.hit.joonggonara.dto.response.login.FindUserIdResponse;
+import com.hit.joonggonara.dto.response.login.MemberTokenResponse;
 import com.hit.joonggonara.dto.response.login.OAuth2UserDto;
 import com.hit.joonggonara.dto.response.login.TokenResponse;
 import com.hit.joonggonara.service.login.LoginService;
@@ -72,9 +75,9 @@ class LoginApiControllerTest {
     {
         //given
         LoginRequest loginRequest = createLoginRequest();
-        TokenResponse tokenResponse = createTokenResponse();
+        MemberTokenResponse memberTokenResponse = createMemberTokenResponse();
 
-        given(loginService.login(any())).willReturn(tokenResponse);
+        given(loginService.login(any())).willReturn(memberTokenResponse);
         //when & then
         mvc.perform(post("/user/login")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -82,14 +85,26 @@ class LoginApiControllerTest {
                 .with(csrf())
         )
                 .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(header().string(AUTHORIZATION, JWT_TYPE + "accessToken"))
                 .andExpect(cookie().value(REFRESH_TOKEN_NAME, "refreshToken"))
-                .andExpect(jsonPath("$").value(true));
+                .andExpect(jsonPath("$.email").value("test@email.com"))
+                .andExpect(jsonPath("$.nickName").value("nickName"))
+                .andExpect(jsonPath("$.loginType").value(LoginType.GENERAL.name()));
         then(loginService).should().login(any());
         then(cookieUtil).should().addCookie(any(HttpServletResponse.class), any(), any());
     }
 
+    private MemberTokenResponse createMemberTokenResponse() {
+        return MemberTokenResponse.of(MemberResponse.of(
+                1L,
+                "userId",
+                "test@email.com",
+                "name",
+                "nickName",
+                null,
+                LoginType.GENERAL
+        ), "accessToken" , "refreshToken");
+    }
 
 
     @WithMockUser(roles = "GUEST")

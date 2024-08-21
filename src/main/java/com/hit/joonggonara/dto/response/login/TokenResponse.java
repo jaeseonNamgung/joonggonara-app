@@ -12,6 +12,8 @@ public record TokenResponse(
     }
 
     public static TokenResponse toResponse(TokenDto tokenDto){
-        return TokenResponse.of(tokenDto.accessToken(), tokenDto.refreshToken());
+        return TokenResponse.of(
+                tokenDto.accessToken(),
+                tokenDto.refreshToken());
     }
 }

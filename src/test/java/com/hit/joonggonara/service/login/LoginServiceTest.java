@@ -16,6 +16,7 @@ import com.hit.joonggonara.dto.login.TokenDto;
 import com.hit.joonggonara.dto.request.login.*;
 import com.hit.joonggonara.dto.response.login.FindUserIdResponse;
 import com.hit.joonggonara.dto.response.login.OAuth2UserDto;
+import com.hit.joonggonara.dto.response.login.MemberTokenResponse;
 import com.hit.joonggonara.dto.response.login.TokenResponse;
 import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.repository.login.MemberRepository;
@@ -72,24 +73,29 @@ class LoginServiceTest {
     private LoginService sut;
 
     @Test
-    @DisplayName("[Service] login 성공 시 TokenResponse 리턴")
+    @DisplayName("[Service] login 성공 시 MemberTokenResponse 리턴")
     void loginSuccessTest() throws Exception {
         //given
         TokenDto tokenDto = createTokenDto();
         Authentication authentication = createUsernamePasswordAuthenticationToken();
         LoginRequest loginRequest = createLoginRequest();
+        Member member = createMember("userId", LoginType.GENERAL);
         given(userProvider.authenticate(any())).willReturn(authentication);
+        given(memberRepository.findByPrincipal(any())).willReturn(Optional.of(member));
         given(jwtUtil.createToken(any(), any(), any())).willReturn(tokenDto);
         given(redisUtil.get(any())).willReturn(Optional.empty());
         //when
-        TokenResponse expectedTokenResponse = sut.login(loginRequest);
+        MemberTokenResponse expectedMemberTokenResponse = sut.login(loginRequest);
         //then
-        assertThat(expectedTokenResponse.accessToken()).isEqualTo(tokenDto.accessToken());
-        assertThat(expectedTokenResponse.refreshToken()).isEqualTo(tokenDto.refreshToken());
+        assertThat(expectedMemberTokenResponse.memberResponse().userId()).isEqualTo("userId");
+        assertThat(expectedMemberTokenResponse.memberResponse().loginType()).isEqualTo(LoginType.GENERAL);
+        assertThat(expectedMemberTokenResponse.refreshToken()).isEqualTo(tokenDto.refreshToken());
+        assertThat(expectedMemberTokenResponse.refreshToken()).isEqualTo(tokenDto.refreshToken());
 
 
         then(userProvider).should().authenticate(any());
         then(jwtUtil).should().createToken(any(), any(), any());
+        then(memberRepository).should().findByPrincipal(any());
         then(redisUtil).should().get(any());
         then(redisUtil).should().save(any(), any(), any());
     }
@@ -113,6 +119,29 @@ class LoginServiceTest {
     }
 
     @Test
+    @DisplayName("[Service] 존재하지 않은 회원일 경우  NOT_EXIST_USER Exception 발생")
+    void throwsNOT_EXIST_USERIfNotExistUser() throws Exception {
+        //given
+        TokenDto tokenDto = createTokenDto();
+        Authentication authentication = createUsernamePasswordAuthenticationToken();
+        LoginRequest loginRequest = createLoginRequest();
+        String refreshToken = "refreshToken";
+        Member member = createMember("userId", LoginType.GENERAL);
+        given(userProvider.authenticate(any())).willReturn(authentication);
+        given(memberRepository.findByPrincipal(any())).willReturn(Optional.empty());
+
+        //when
+        CustomException expectedException =
+                (CustomException) catchRuntimeException(() -> sut.login(loginRequest));
+        //then
+        assertThat(expectedException.getErrorCode().getHttpStatus()).isEqualTo(UserErrorCode.NOT_EXIST_USER.getHttpStatus());
+        assertThat(expectedException.getMessage()).isEqualTo(UserErrorCode.NOT_EXIST_USER.getMessage());
+
+        then(userProvider).should().authenticate(any());
+        then(memberRepository).should().findByPrincipal(any());
+    }
+
+    @Test
     @DisplayName("[Service] 이미 존재 하는 refreshToken 일 경우 ALREADY_LOGGED_IN_USER Exception 발생")
     void alreadyLoggedInUserTest() throws Exception {
         //given
@@ -120,7 +149,9 @@ class LoginServiceTest {
         Authentication authentication = createUsernamePasswordAuthenticationToken();
         LoginRequest loginRequest = createLoginRequest();
         String refreshToken = "refreshToken";
+        Member member = createMember("userId", LoginType.GENERAL);
         given(userProvider.authenticate(any())).willReturn(authentication);
+        given(memberRepository.findByPrincipal(any())).willReturn(Optional.of(member));
         given(jwtUtil.createToken(any(), any(), any())).willReturn(tokenDto);
         given(redisUtil.get(any())).willReturn(Optional.of(refreshToken));
         //when
@@ -131,6 +162,7 @@ class LoginServiceTest {
         assertThat(expectedException.getMessage()).isEqualTo(UserErrorCode.ALREADY_LOGGED_IN_USER.getMessage());
 
         then(userProvider).should().authenticate(any());
+        then(memberRepository).should().findByPrincipal(any());
         then(jwtUtil).should().createToken(any(), any(), any());
         then(redisUtil).should().get(any());
     }
