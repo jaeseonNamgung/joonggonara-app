@@ -13,6 +13,7 @@ public record ProductResponse(
         String content,
         String tradingPlace,
         String productStatus,
+        String createdDate,
         List<PhotoResponse> photos,
         boolean isSoldOut,
         CategoryType categoryType,
@@ -28,13 +29,14 @@ public record ProductResponse(
             String content,
             String tradingPlace,
             String productStatus,
+            String createdDate,
             List<PhotoResponse> photos,
             boolean isSoldOut,
             CategoryType categoryType,
             String school,
             MemberResponse memberResponse
     ) {
-        return new ProductResponse(id, price, title, content,tradingPlace, productStatus, photos, isSoldOut, categoryType, school, memberResponse);
+        return new ProductResponse(id, price, title, content,tradingPlace, productStatus,createdDate, photos, isSoldOut, categoryType, school, memberResponse);
     }
 
     public static Page<ProductResponse> fromResponse(Page<Product> products) {
@@ -45,6 +47,7 @@ public record ProductResponse(
                 product.getContent(),
                 product.getTradingPlace(),
                 product.getProductStatus(),
+                product.getUpdatedDate().toString(),
                 PhotoResponse.fromResponse(product.getPhotos()),
                 product.isSoldOut(),
                 product.getCategoryType(),
