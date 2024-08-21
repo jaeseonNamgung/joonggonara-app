@@ -23,6 +23,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -140,6 +141,7 @@ class BoardApiControllerTest {
                 "content",
                 "하공대 정문 앞",
                 "최상",
+                LocalDateTime.now().toString(),
                 null,
                 false,
                 CategoryType.BOOK,
