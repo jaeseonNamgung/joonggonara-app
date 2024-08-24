@@ -52,9 +52,7 @@ public class CustomFileUtil {
                     .fileName(fileName)
                     .product(product)
                     .build();
-            photoRepository.save(photo);
-            photo.addProduct(product);
-
+            Photo savedPhotos = photoRepository.save(photo);
             file = new File(filePath + fileName);
             try {
                 multipartFile.transferTo(file);

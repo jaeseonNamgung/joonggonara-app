@@ -24,7 +24,7 @@ public class BoardApiController {
     private final BoardService boardService;
 
     @PostMapping(path = "/board/write", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Boolean> writeBoard(@RequestPart(name = "images", required = false) List<MultipartFile> images,
+    public ResponseEntity<ProductResponse> writeBoard(@RequestPart(name = "images", required = false) List<MultipartFile> images,
                                               @RequestPart(name = "productRequest", required = false) @Valid ProductRequest productRequest,
                                               HttpServletRequest request) {
         return ResponseEntity.ok(boardService.upload(productRequest, images, request));

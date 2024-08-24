@@ -80,9 +80,10 @@ class BoardApiControllerTest {
 
     @WithMockUser("USER")
     @Test
-    @DisplayName("[API] 상품 등록 컨트롤러 테스트 성공 시 true를 리턴")
+    @DisplayName("[API] 상품 등록 컨트롤러 테스트 성공 시 Response 를 리턴")
     void TestProductRegistrationController() throws Exception {
         //given
+        ProductResponse productResponse = createProductResponse();
         MockMultipartFile mockFile = new MockMultipartFile(
                 "images", "test.jpg", "image/jpeg", "test image content".getBytes());
 
@@ -90,7 +91,7 @@ class BoardApiControllerTest {
                 "학교앞", "최상", "HIT");
         MockMultipartFile productRequestJson = new MockMultipartFile(
                 "productRequest", "", "application/json", objectMapper.writeValueAsBytes(productRequest));
-        given(boardService.upload(any(), any(), any())).willReturn(true);
+        given(boardService.upload(any(), any(), any())).willReturn(productResponse);
 
         //when & then
         mvc.perform(multipart(HttpMethod.POST, "/board/write")
@@ -101,7 +102,10 @@ class BoardApiControllerTest {
                 .with(csrf())
         ).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$").value(true));
+                .andExpect(jsonPath("$.title").value("title"))
+                .andExpect(jsonPath("$.content").value("content"))
+                .andExpect(jsonPath("$.categoryType").value(CategoryType.BOOK.name()))
+                .andExpect(jsonPath("$.tradingPlace").value("하공대 정문 앞"));
         then(boardService).should().upload(any(), any(), any());
 
     }

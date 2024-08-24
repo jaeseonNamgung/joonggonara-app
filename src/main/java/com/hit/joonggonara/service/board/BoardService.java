@@ -2,6 +2,7 @@ package com.hit.joonggonara.service.board;
 
 import com.hit.joonggonara.common.custom.board.CustomFileUtil;
 import com.hit.joonggonara.common.error.CustomException;
+import com.hit.joonggonara.common.error.errorCode.BoardErrorCode;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
 import com.hit.joonggonara.common.properties.JwtProperties;
 import com.hit.joonggonara.common.type.*;
@@ -41,7 +42,7 @@ public class BoardService {
     }
 
     @Transactional
-    public boolean upload(ProductRequest productRequest, List<MultipartFile> files, HttpServletRequest request) {
+    public ProductResponse upload(ProductRequest productRequest, List<MultipartFile> files, HttpServletRequest request) {
         String accessToken = getParseJwt(request.getHeader(JwtProperties.AUTHORIZATION));
         if(!Strings.hasText(accessToken)){
             throw new CustomException(UserErrorCode.ALREADY_LOGGED_OUT_USER);
@@ -53,7 +54,13 @@ public class BoardService {
         Member member = memberRepository.findByPrincipal(loginCondition)
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_EXIST_USER));
         Product savedProduct = productRepository.save(productRequest.toEntity(member));
-        return fileUtil.uploadImage(savedProduct, files);
+
+        if(fileUtil.uploadImage(savedProduct, files)){
+            return ProductResponse.fromResponse(productRepository.findProductById(savedProduct.getId())
+                    .orElseThrow(() -> new CustomException(BoardErrorCode.NOT_UPLOADED_PRODUCT)));
+        }
+
+        return ProductResponse.empty();
     }
 
     public Page<ProductResponse> getSearchProductsByKeyword(String keyword, Pageable pageable) {

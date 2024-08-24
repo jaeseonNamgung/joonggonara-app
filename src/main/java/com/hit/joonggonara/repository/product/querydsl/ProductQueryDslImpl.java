@@ -3,6 +3,7 @@ package com.hit.joonggonara.repository.product.querydsl;
 import com.hit.joonggonara.common.type.CategoryType;
 import com.hit.joonggonara.common.type.SchoolType;
 import com.hit.joonggonara.entity.Product;
+import com.hit.joonggonara.entity.QProduct;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.hit.joonggonara.entity.QMember.member;
 import static com.hit.joonggonara.entity.QPhoto.photo;
@@ -58,6 +60,17 @@ public class ProductQueryDslImpl implements ProductQueryDsl {
                 .where(keywordContain(keyword));
 
         return PageableExecutionUtils.getPage(products, pageable, fetchQuery::fetchOne);
+    }
+
+    @Override
+    public Optional<Product> findProductById(Long id) {
+        Product product = queryFactory.selectFrom(QProduct.product)
+                .join(QProduct.product.member, member).fetchJoin()
+                .join(QProduct.product.photos,photo).fetchJoin()
+                .where(QProduct.product.id.eq(id))
+                .distinct()
+                .fetchOne();
+        return Optional.ofNullable(product);
     }
 
     private BooleanExpression keywordContain(String keyword) {

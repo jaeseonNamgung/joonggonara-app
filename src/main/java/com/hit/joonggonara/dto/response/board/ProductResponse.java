@@ -56,6 +56,37 @@ public record ProductResponse(
         ));
     }
 
+    public static ProductResponse fromResponse(Product product) {
+        return ProductResponse.of(
+                product.getId(),
+                product.getPrice(),
+                product.getTitle(),
+                product.getContent(),
+                product.getTradingPlace(),
+                product.getProductStatus(),
+                product.getUpdatedDate().toString(),
+                PhotoResponse.fromResponse(product.getPhotos()),
+                product.isSoldOut(),
+                product.getCategoryType(),
+                product.getSchoolType().getName(),
+                MemberResponse.fromResponse(product.getMember())
+        );
+    }
 
-
+    public static ProductResponse empty() {
+        return ProductResponse.of(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                false,
+                null,
+                null,
+                null
+        );
+    }
 }

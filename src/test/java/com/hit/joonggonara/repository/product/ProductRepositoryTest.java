@@ -166,6 +166,31 @@ class ProductRepositoryTest {
 
 
     }
+    @Test
+    @DisplayName("[QueryDsl] 상품 아이디로 상품 조회")
+    void findProductByIdTest() throws Exception {
+        //given
+        Member savedMember = memberRepository.save(createMember());
+        Product savedProduct = productRepository.save(createProduct(1, SchoolType.HC, CategoryType.CLOTHING, savedMember));
+
+        Photo photo1 = createPhoto(savedProduct);
+        Photo photo2 = createPhoto(savedProduct);
+        Photo photo3 = createPhoto(savedProduct);
+
+        photoRepository.save(photo1);
+        photoRepository.save(photo2);
+        photoRepository.save(photo3);
+
+        Photo photo = photoRepository.findById(savedProduct.getId()).get();
+        //when
+        Product expectedProduct = productRepository.findProductById(savedProduct.getId()).get();
+
+        //then
+        assertThat(expectedProduct.getTitle()).isEqualTo("title1");
+        assertThat(expectedProduct.getSchoolType()).isEqualTo(SchoolType.HC);
+        assertThat(expectedProduct.getCategoryType()).isEqualTo(CategoryType.CLOTHING);
+        assertThat(expectedProduct.getPhotos().size()).isEqualTo(3);
+    }
 
     private Photo createPhoto(Product product) {
         return Photo.builder().fileName("fileName").filePath("filePath").product(product).build();

@@ -29,7 +29,7 @@ public class Photo {
     public Photo(String fileName, String filePath, Product product) {
         this.fileName = fileName;
         this.filePath = filePath;
-        this.product = product;
+        addProduct(product);
     }
 
     public void addProduct(Product product){

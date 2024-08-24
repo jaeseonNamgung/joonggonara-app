@@ -2,6 +2,7 @@ package com.hit.joonggonara.service.board;
 
 import com.hit.joonggonara.common.custom.board.CustomFileUtil;
 import com.hit.joonggonara.common.error.CustomException;
+import com.hit.joonggonara.common.error.errorCode.BoardErrorCode;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
 import com.hit.joonggonara.common.properties.JwtProperties;
 import com.hit.joonggonara.common.type.CategoryType;
@@ -25,8 +26,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,29 +55,110 @@ class BoardServiceTest {
     private BoardService sut;
 
     @Test
-    @DisplayName("[Service] 성공적으로 글을 업로드 할 경우 true를 리턴")
-    void returnsTrueIfThePostIsSuccessfullyUploaded() throws Exception {
+    @DisplayName("[Service] 성공적으로 글을 업로드 할 경우 response 를 리턴")
+    void returnsResponseIfThePostIsSuccessfullyUploaded() throws Exception {
         //given
         ProductRequest productRequest = createProductRequest();
+        Product product = createProduct();
         MultipartFile multipartFile = new MockMultipartFile(
                 "file", "test.png", "image/png", "test data".getBytes());
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(JwtProperties.AUTHORIZATION, JwtProperties.JWT_TYPE + "token");
         Member member = createMember();
+
+        ReflectionTestUtils.setField(product, "updatedDate", LocalDateTime.now());
+
         given(jwtUtil.getPrincipal(any())).willReturn("userId");
         given(jwtUtil.getLoginType(any())).willReturn(LoginType.GENERAL);
         given(memberRepository.findByPrincipal(any())).willReturn(Optional.of(member));
-        given(productRepository.save(any())).willReturn(productRequest.toEntity(member));
+        given(productRepository.save(any())).willReturn(product);
         given(customFileUtil.uploadImage(any(), any())).willReturn(true);
+        given(productRepository.findProductById(any())).willReturn(Optional.of(product));
         //when
-        boolean expectedValue = sut.upload(productRequest, List.of(multipartFile), request);
+        ProductResponse expectedResponse = sut.upload(productRequest, List.of(multipartFile), request);
         //then
-        assertThat(expectedValue).isTrue();
+        assertThat(expectedResponse.title()).isEqualTo("title");
+        assertThat(expectedResponse.content()).isEqualTo("content");
+        assertThat(expectedResponse.categoryType()).isEqualTo(CategoryType.BOOK);
+        assertThat(expectedResponse.tradingPlace()).isEqualTo("하공대 정문 앞");
         then(productRepository).should().save(any());
         then(customFileUtil).should().uploadImage(any(),any());
         then(jwtUtil).should().getPrincipal(any());
         then(jwtUtil).should().getLoginType(any());
         then(memberRepository).should().findByPrincipal(any());
+        then(productRepository).should().findProductById(any());
+
+    }
+
+    @Test
+    @DisplayName("[Service] 상품이 존재하지 않을 경우 NOT_UPLOAD_PRODUCT 에러를 던진다.")
+    void throwsNOT_UPLOAD_PRODUCTIfNotExistProduct() throws Exception {
+        //given
+        ProductRequest productRequest = createProductRequest();
+        Product product = createProduct();
+        MultipartFile multipartFile = new MockMultipartFile(
+                "file", "test.png", "image/png", "test data".getBytes());
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader(JwtProperties.AUTHORIZATION, JwtProperties.JWT_TYPE + "token");
+        Member member = createMember();
+
+        ReflectionTestUtils.setField(product, "updatedDate", LocalDateTime.now());
+
+        given(jwtUtil.getPrincipal(any())).willReturn("userId");
+        given(jwtUtil.getLoginType(any())).willReturn(LoginType.GENERAL);
+        given(memberRepository.findByPrincipal(any())).willReturn(Optional.of(member));
+        given(productRepository.save(any())).willReturn(product);
+        given(customFileUtil.uploadImage(any(), any())).willReturn(true);
+        given(productRepository.findProductById(any())).willReturn(Optional.empty());
+        //when
+        CustomException expectedException = assertThrows(CustomException.class,
+                () -> sut.upload(productRequest, List.of(multipartFile), request));
+        //then
+        assertThat(expectedException.getErrorCode()).isEqualTo(BoardErrorCode.NOT_UPLOADED_PRODUCT);
+        assertThat(expectedException).hasMessage(BoardErrorCode.NOT_UPLOADED_PRODUCT.getMessage());
+        then(productRepository).should().save(any());
+        then(customFileUtil).should().uploadImage(any(),any());
+        then(jwtUtil).should().getPrincipal(any());
+        then(jwtUtil).should().getLoginType(any());
+        then(memberRepository).should().findByPrincipal(any());
+        then(productRepository).should().findProductById(any());
+
+    }
+
+    @Test
+    @DisplayName("[Service] 이미지 업로드 메서드가 false를 반환할 경우 빈 response를 반환")
+    void returnsEmptyResponseIfReturnsFalseAnImageUploadMethod() throws Exception {
+        //given
+        ProductRequest productRequest = createProductRequest();
+        Product product = createProduct();
+        MultipartFile multipartFile = new MockMultipartFile(
+                "file", "test.png", "image/png", "test data".getBytes());
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader(JwtProperties.AUTHORIZATION, JwtProperties.JWT_TYPE + "token");
+        Member member = createMember();
+
+        ReflectionTestUtils.setField(product, "updatedDate", LocalDateTime.now());
+
+        given(jwtUtil.getPrincipal(any())).willReturn("userId");
+        given(jwtUtil.getLoginType(any())).willReturn(LoginType.GENERAL);
+        given(memberRepository.findByPrincipal(any())).willReturn(Optional.of(member));
+        given(productRepository.save(any())).willReturn(product);
+        given(customFileUtil.uploadImage(any(), any())).willReturn(false);
+
+        //when
+        ProductResponse expectedResponse = sut.upload(productRequest, List.of(multipartFile), request);
+        //then
+        assertThat(expectedResponse.title()).isNull();
+        assertThat(expectedResponse.content()).isNull();
+        assertThat(expectedResponse.categoryType()).isNull();
+        assertThat(expectedResponse.id()).isNull();
+
+        then(productRepository).should().save(any());
+        then(customFileUtil).should().uploadImage(any(),any());
+        then(jwtUtil).should().getPrincipal(any());
+        then(jwtUtil).should().getLoginType(any());
+        then(memberRepository).should().findByPrincipal(any());
+
 
     }
 
@@ -138,8 +222,10 @@ class BoardServiceTest {
         String keyword = "keyword";
         PageRequest pageRequest = PageRequest.of( 1, 5);
         Product product = createProduct();
+        ReflectionTestUtils.setField(product, "updatedDate", LocalDateTime.now());
         given(productRepository.getSortProducts(any(), any(), any(), any()))
                 .willReturn(new PageImpl<>(List.of(product)));
+
         //when
         Page<ProductResponse> expectedPage = sut.search(keyword, SchoolType.HIT, CategoryType.BOOK, pageRequest);
 
@@ -201,7 +287,22 @@ class BoardServiceTest {
         );
     }
 
-
+    private ProductResponse createProductResponse() {
+        return ProductResponse.of(
+                1L,
+                (long)10000,
+                "title",
+                "content",
+                "하공대 정문 앞",
+                "최상",
+                LocalDateTime.now().toString(),
+                null,
+                false,
+                CategoryType.BOOK,
+                SchoolType.HIT.getName(),
+                null
+        );
+    }
 
 
 
