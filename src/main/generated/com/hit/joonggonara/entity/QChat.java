@@ -35,6 +35,8 @@ public class QChat extends EntityPathBase<Chat> {
 
     public final BooleanPath isDeleted = createBoolean("isDeleted");
 
+    public final BooleanPath isFirstMessage = createBoolean("isFirstMessage");
+
     public final StringPath message = createString("message");
 
     public final StringPath senderNickName = createString("senderNickName");

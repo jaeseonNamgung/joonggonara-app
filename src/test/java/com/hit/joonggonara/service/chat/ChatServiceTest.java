@@ -255,7 +255,7 @@ class ChatServiceTest {
 
 
     private ChatRequest createChatRequest() {
-        return ChatRequest.of("message","senderNickName", "buyer");
+        return ChatRequest.of("message","senderNickName", "buyer", true);
     }
     private Chat createChat(ChatRoom chatRoom, int i) {
         return Chat.builder()

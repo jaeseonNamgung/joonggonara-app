@@ -1,6 +1,5 @@
 package com.hit.joonggonara.dto.request.chat;
 
-import com.hit.joonggonara.common.type.ChatRoomStatus;
 import com.hit.joonggonara.entity.Chat;
 import com.hit.joonggonara.entity.ChatRoom;
 
@@ -10,17 +9,17 @@ public record ChatRequest(
         String message,
         String createMessageDate,
         String senderNickName,
-        String chatRoomStatus
-
-
+        String chatRoomStatus,
+        boolean isFirstMessage
 
 ) {
     public static ChatRequest of(
             String message,
             String senderNickName,
-            String chatRoomStatus
+            String chatRoomStatus,
+            boolean isFirstMessage
     ){
-        return new ChatRequest(message,LocalDateTime.now().toString(), senderNickName, chatRoomStatus);
+        return new ChatRequest(message,LocalDateTime.now().toString(), senderNickName, chatRoomStatus, isFirstMessage);
     }
 
     public Chat toEntity(ChatRoom chatRoom) {
@@ -28,6 +27,7 @@ public record ChatRequest(
                 .message(message)
                 .createdMassageDate(LocalDateTime.now().toString())
                 .senderNickName(senderNickName)
+                .isFirstMessage(isFirstMessage)
                 .chatRoom(chatRoom)
                 .build();
     }

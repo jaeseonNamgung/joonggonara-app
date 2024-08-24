@@ -9,17 +9,19 @@ public record ChatResponse(
         Long chatId,
         String message,
         String createdMessageDate,
-        String senderNickName
+        String senderNickName,
+        boolean isFirstMessage
 ) {
 
     public static ChatResponse of(
             Long chatId,
             String message,
             String createdMessageDate,
-            String senderNickName
+            String senderNickName,
+            boolean isFirstMessage
 
     ){
-        return new ChatResponse(chatId, message, createdMessageDate, senderNickName);
+        return new ChatResponse(chatId, message, createdMessageDate, senderNickName, isFirstMessage);
     }
 
     public static List<ChatResponse> fromResponse(List<Chat> chats){
@@ -28,7 +30,8 @@ public record ChatResponse(
                 chat.getId(),
                 chat.getMessage(),
                 chat.getCreatedMassageDate(),
-                chat.getSenderNickName()
+                chat.getSenderNickName(),
+                chat.isFirstMessage()
         )).collect(Collectors.toList());
     }
 
@@ -37,7 +40,8 @@ public record ChatResponse(
                 chat.getId(),
                 chat.getMessage(),
                 chat.getCreatedMassageDate(),
-                chat.getSenderNickName()
+                chat.getSenderNickName(),
+                chat.isFirstMessage()
         );
     }
 

@@ -21,6 +21,7 @@ public class Chat extends BaseEntity {
     private String createdMassageDate;
     private String senderNickName;
     private boolean isDeleted;
+    private boolean isFirstMessage;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")
@@ -31,12 +32,14 @@ public class Chat extends BaseEntity {
             String message,
             String createdMassageDate,
             ChatRoom chatRoom,
-            String senderNickName
+            String senderNickName,
+            boolean isFirstMessage
     ) {
         this.message = message;
         this.createdMassageDate = createdMassageDate;
         this.senderNickName = senderNickName;
         this.isDeleted = false;
+        this.isFirstMessage = isFirstMessage;
         addChatRoom(chatRoom);
     }
 

@@ -84,6 +84,7 @@ class ChatRepositoryTest {
                 .message("message" + i)
                 .createdMassageDate(LocalDateTime.of(2024, 6, 18, 17, i).toString())
                 .chatRoom(chatRoom)
+                .isFirstMessage(false)
                 .build();
     }
 

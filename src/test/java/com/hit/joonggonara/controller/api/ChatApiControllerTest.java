@@ -87,7 +87,7 @@ class ChatApiControllerTest {
         given(chatService.getAllChats(any())).willReturn(
                 List.of(ChatResponse.of(1L, "message",
                         LocalDateTime.of(2024, 6, 20 ,  14, 50, 0).toString(),
-                        "hong"))
+                        "hong", false))
         );
         //when
         mvc.perform(get("/chat/all/" + 1L)
