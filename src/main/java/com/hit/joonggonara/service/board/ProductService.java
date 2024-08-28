@@ -75,6 +75,11 @@ public class BoardService {
         return null;
     }
 
-
-
+    @Transactional
+    public Boolean updateProductStatus(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(BoardErrorCode.NOT_EXIST_PRODUCT));
+        product.updateIsSoldOut();
+        return true;
+    }
 }

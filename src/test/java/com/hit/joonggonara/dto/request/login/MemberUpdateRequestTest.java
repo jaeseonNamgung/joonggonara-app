@@ -2,14 +2,12 @@ package com.hit.joonggonara.dto.request.login;
 
 
 import com.hit.joonggonara.common.custom.validation.ValidationSequence;
-import com.hit.joonggonara.common.properties.ValidationMessageProperties;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -38,7 +36,7 @@ class MemberUpdateRequestTest {
     {
         //given
         MemberUpdateRequest memberUpdateRequest =
-                MemberUpdateRequest.of(nickName, email, phoneNumber, "profile", true);
+                MemberUpdateRequest.of(nickName, email, phoneNumber, "profile");
         //when
         Set<ConstraintViolation<MemberUpdateRequest>> expectedValidate = sut.validate(memberUpdateRequest, ValidationSequence.class);
         assertThat(expectedValidate).isNotEmpty();

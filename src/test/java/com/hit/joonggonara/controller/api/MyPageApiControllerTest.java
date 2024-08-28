@@ -14,7 +14,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(MyPageApiController.class)
 class MyPageApiControllerTest {
 
-    
+
     @MockBean
     private SignUpService signUpService;
     @MockBean
@@ -130,7 +129,7 @@ class MyPageApiControllerTest {
     void returnTrueIfTheCodeMatches() throws Exception
     {
         //given
-        VerificationRequest verificationRequest = 
+        VerificationRequest verificationRequest =
                 createVerificationRequest();
         given(signUpService.checkCode(any())).willReturn(true);
         //when
@@ -180,8 +179,7 @@ class MyPageApiControllerTest {
                 "nickName",
                 "test@email.com",
                 "+8617545562261",
-                "profile",
-                true
+                "profile"
         );
     }
 

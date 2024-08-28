@@ -72,12 +72,11 @@ public class Member extends BaseEntity{
         this.role = role;
     }
 
-    public void update(MemberUpdateRequest memberUpdateRequest) {
+    public void update(MemberUpdateRequest memberUpdateRequest, String profile) {
         this.nickName = memberUpdateRequest.nickName();
         this.email = memberUpdateRequest.email();
-        this.profile = memberUpdateRequest.profile();
+        this.profile = profile;
         this.phoneNumber = memberUpdateRequest.phoneNumber();
-        this.isNotification = memberUpdateRequest.isNotification();
     }
 
     public void updatePassword(String password){

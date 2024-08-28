@@ -102,6 +102,7 @@ class LoginApiControllerTest {
                 "name",
                 "nickName",
                 null,
+                "01012345678",
                 LoginType.GENERAL
         ), "accessToken" , "refreshToken");
     }

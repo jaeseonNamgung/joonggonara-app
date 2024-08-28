@@ -15,19 +15,17 @@ public record MemberUpdateRequest(
         @NotBlank(message = EMAIL_NOT_BLANK, groups = NotBlankGroup.class)
         String email,
         @NotBlank(message = PHONE_NUMBER_NOT_BLANK, groups = NotBlankGroup.class)
-        String phoneNumber,
-        String profile,
-        boolean isNotification
+        String phoneNumber
+
+
 ) {
 
         public static MemberUpdateRequest of(
                 String nickName,
                 String email,
-                String phoneNumber,
-                String profile,
-                boolean isNotification
+                String phoneNumber
         ){
-                return new MemberUpdateRequest(nickName, email, phoneNumber, profile, isNotification);
+                return new MemberUpdateRequest(nickName, email, phoneNumber);
         }
 
 }

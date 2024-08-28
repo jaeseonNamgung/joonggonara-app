@@ -10,9 +10,8 @@ import java.util.Optional;
 public interface MemberRepository extends JpaRepository<Member, Long>, MemberQueryDsl {
     Optional<Member> findByUserIdAndLoginType(String userId, LoginType loginType);
 
-    Optional<Member> findSellerByNickName(String nickName);
+    Optional<Member> findMemberByNickName(String nickName);
 
-    Optional<Member> findBuyerByNickName(String nickName);
 
     void deleteByUserId(String userId);
 

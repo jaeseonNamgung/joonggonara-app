@@ -10,6 +10,7 @@ public record MemberResponse(
         String name,
         String nickName,
         String profile,
+        String phoneNumber,
         LoginType loginType
 ) {
 
@@ -20,9 +21,10 @@ public record MemberResponse(
             String name,
             String nickName,
             String profile,
+            String phoneNumber,
             LoginType loginType
     ) {
-        return new MemberResponse(id, userId, email, name, nickName, profile, loginType);
+        return new MemberResponse(id, userId, email, name, nickName, profile,phoneNumber, loginType);
     }
 
     public static MemberResponse fromResponse(Member member) {
@@ -33,6 +35,7 @@ public record MemberResponse(
                 member.getName(),
                 member.getNickName(),
                 member.getProfile(),
+                member.getPhoneNumber(),
                 member.getLoginType()
         );
     }

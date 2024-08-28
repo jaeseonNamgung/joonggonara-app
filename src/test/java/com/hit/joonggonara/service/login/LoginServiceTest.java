@@ -729,8 +729,7 @@ class LoginServiceTest {
                 "nickName",
                 "test@email.com",
                 "+8617545562261",
-                "profile",
-                true
+                "profile"
         );
     }
 

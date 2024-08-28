@@ -1,6 +1,7 @@
 package com.hit.joonggonara.service.login;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.hit.joonggonara.common.custom.board.CustomFileUtil;
 import com.hit.joonggonara.common.custom.login.CustomUserProvider;
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.errorCode.BaseErrorCode;
@@ -19,9 +20,10 @@ import com.hit.joonggonara.dto.login.OAuth2PropertiesDto;
 import com.hit.joonggonara.dto.login.OAuth2TokenDto;
 import com.hit.joonggonara.dto.login.TokenDto;
 import com.hit.joonggonara.dto.request.login.*;
+import com.hit.joonggonara.dto.response.board.MemberResponse;
 import com.hit.joonggonara.dto.response.login.FindUserIdResponse;
-import com.hit.joonggonara.dto.response.login.OAuth2UserDto;
 import com.hit.joonggonara.dto.response.login.MemberTokenResponse;
+import com.hit.joonggonara.dto.response.login.OAuth2UserDto;
 import com.hit.joonggonara.dto.response.login.TokenResponse;
 import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.repository.login.MemberRepository;
@@ -39,6 +41,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 import java.util.Optional;
@@ -62,6 +65,7 @@ public class LoginService {
     private final KakaoSecurityConfig kakaoSecurityConfig;
     private final NaverSecurityConfig naverSecurityConfig;
     private final PasswordEncoder passwordEncoder;
+    private final CustomFileUtil customFileUtil;
 
 
     @Transactional
@@ -301,13 +305,17 @@ public class LoginService {
     }
 
     @Transactional
-    public void memberUpdateInfo(String token, MemberUpdateRequest memberUpdateRequest) {
+    public MemberResponse memberUpdateInfo(String token, MemberUpdateRequest memberUpdateRequest, MultipartFile profile) {
         String parseJwt = getParseJwt(token);
         String principal = jwtUtil.getPrincipal(parseJwt);
         LoginType loginType = jwtUtil.getLoginType(parseJwt);
+
         Member member = memberRepository.findByPrincipalAndLoginType(principal, loginType)
                 .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
-        member.update(memberUpdateRequest);
+
+        String uploadProfile = customFileUtil.uploadProfile(profile);
+        member.update(memberUpdateRequest, uploadProfile);
+        return MemberResponse.fromResponse(member);
     }
     private String getParseJwt(String token) {
         if(Strings.hasText(token) && token.startsWith(JWT_TYPE)){
