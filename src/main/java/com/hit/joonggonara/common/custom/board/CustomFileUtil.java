@@ -20,17 +20,18 @@ public class CustomFileUtil {
 
     private final PhotoRepository photoRepository;
 
+    private final String PATH = "/src/main/resources/static/upload/images/";
+
     public boolean uploadImage(Product product, List<MultipartFile> multipartFiles) {
 
-        String path = "/src/main/resources/static/upload/images/";
-        File file = new File(path);
+        File file = new File(PATH);
         // 디렉토리가 존재하지 않는다면 디렉토리 생성
         if(!file.exists()){
             /// mkdir() 함수와 다른 점은 상위 디렉토리가 존재하지 않을 때 그것까지 생성
             file.mkdirs();
         }
 
-        String filePath = System.getProperty("user.dir") + path;
+        String filePath = System.getProperty("user.dir") + PATH;
 
         if(multipartFiles.isEmpty()){
             throw new CustomException(BoardErrorCode.NOT_UPLOADED_IMAGE);
@@ -63,4 +64,33 @@ public class CustomFileUtil {
         return true;
     }
 
+    public String uploadProfile(MultipartFile profile) {
+        File file = new File(PATH);
+        // 디렉토리가 존재하지 않는다면 디렉토리 생성
+        if(!file.exists()){
+            /// mkdir() 함수와 다른 점은 상위 디렉토리가 존재하지 않을 때 그것까지 생성
+            file.mkdirs();
+        }
+        String filePath = System.getProperty("user.dir") + PATH;
+
+        if(profile.isEmpty()){
+            throw new CustomException(BoardErrorCode.NOT_UPLOADED_IMAGE);
+        }
+
+        String fileName = UUID.randomUUID() + "_" + profile.getOriginalFilename();
+        String contentType = profile.getContentType();
+
+        assert contentType != null;
+        if(!contentType.equals("image/jpeg") && !contentType.equals("image/png")){
+            throw new CustomException(BoardErrorCode.MISMATCH_EXTENSION);
+        }
+
+        file = new File(filePath + fileName);
+        try {
+            profile.transferTo(file);
+        } catch (IOException e) {
+            throw new CustomException(BoardErrorCode.IO_ERROR);
+        }
+        return filePath + fileName;
+    }
 }

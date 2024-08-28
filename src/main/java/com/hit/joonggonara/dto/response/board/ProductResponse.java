@@ -72,7 +72,22 @@ public record ProductResponse(
                 MemberResponse.fromResponse(product.getMember())
         );
     }
-
+    public static List<ProductResponse> fromResponse(List<Product> products) {
+        return products.stream().map(product -> ProductResponse.of(
+                product.getId(),
+                product.getPrice(),
+                product.getTitle(),
+                product.getContent(),
+                product.getTradingPlace(),
+                product.getProductStatus(),
+                product.getUpdatedDate().toString(),
+                PhotoResponse.fromResponse(product.getPhotos()),
+                product.isSoldOut(),
+                product.getCategoryType(),
+                product.getSchoolType().getName(),
+                MemberResponse.fromResponse(product.getMember())
+        )).toList();
+    }
     public static ProductResponse empty() {
         return ProductResponse.of(
                 null,

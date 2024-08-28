@@ -23,6 +23,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -190,6 +192,32 @@ class ProductRepositoryTest {
         assertThat(expectedProduct.getSchoolType()).isEqualTo(SchoolType.HC);
         assertThat(expectedProduct.getCategoryType()).isEqualTo(CategoryType.CLOTHING);
         assertThat(expectedProduct.getPhotos().size()).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("[QueryDsl][조회] 상품을 닉네임으로 조회")
+    void findByNickName() throws Exception {
+        //given
+        Member savedMember = memberRepository.save(createMember());
+        Product product1 = createProduct(1, SchoolType.HC, CategoryType.CLOTHING, savedMember);
+        Product product2 = createProduct(2, SchoolType.HC, CategoryType.CLOTHING, savedMember);
+        Product product3 = createProduct(3, SchoolType.HC, CategoryType.CLOTHING, savedMember);
+        Product savedProduct1 = productRepository.save(product1);
+        Product savedProduct2 = productRepository.save(product2);
+        Product savedProduct3 = productRepository.save(product3);
+        photoRepository.save(createPhoto(savedProduct1));
+        photoRepository.save(createPhoto(savedProduct2));
+        photoRepository.save(createPhoto(savedProduct3));
+        //when
+        List<Product> expectedProducts = productRepository.findByNickName("nickName");
+        //then
+
+        assertThat(expectedProducts.size()).isEqualTo(3);
+        assertThat(expectedProducts.get(0).getTitle()).isEqualTo("title3");
+        assertThat(expectedProducts.get(1).getTitle()).isEqualTo("title2");
+        assertThat(expectedProducts.get(2).getTitle()).isEqualTo("title1");
+
+
     }
 
     private Photo createPhoto(Product product) {

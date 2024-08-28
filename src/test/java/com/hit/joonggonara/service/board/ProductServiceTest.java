@@ -40,7 +40,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
-class BoardServiceTest {
+class ProductServiceTest {
 
     @Mock
     private ProductRepository productRepository;
@@ -52,7 +52,7 @@ class BoardServiceTest {
     private CustomFileUtil customFileUtil;
 
     @InjectMocks
-    private BoardService sut;
+    private ProductService sut;
 
     @Test
     @DisplayName("[Service] 성공적으로 글을 업로드 할 경우 response 를 리턴")

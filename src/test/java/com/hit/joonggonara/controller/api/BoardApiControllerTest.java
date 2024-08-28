@@ -6,7 +6,7 @@ import com.hit.joonggonara.common.type.CategoryType;
 import com.hit.joonggonara.common.type.SchoolType;
 import com.hit.joonggonara.dto.request.board.ProductRequest;
 import com.hit.joonggonara.dto.response.board.ProductResponse;
-import com.hit.joonggonara.service.board.BoardService;
+import com.hit.joonggonara.service.board.ProductService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class BoardApiControllerTest {
 
     @MockBean
-    private BoardService boardService;
+    private ProductService productService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -91,7 +91,7 @@ class BoardApiControllerTest {
                 "학교앞", "최상", "HIT");
         MockMultipartFile productRequestJson = new MockMultipartFile(
                 "productRequest", "", "application/json", objectMapper.writeValueAsBytes(productRequest));
-        given(boardService.upload(any(), any(), any())).willReturn(productResponse);
+        given(productService.upload(any(), any(), any())).willReturn(productResponse);
 
         //when & then
         mvc.perform(multipart(HttpMethod.POST, "/board/write")
@@ -106,7 +106,7 @@ class BoardApiControllerTest {
                 .andExpect(jsonPath("$.content").value("content"))
                 .andExpect(jsonPath("$.categoryType").value(CategoryType.BOOK.name()))
                 .andExpect(jsonPath("$.tradingPlace").value("하공대 정문 앞"));
-        then(boardService).should().upload(any(), any(), any());
+        then(productService).should().upload(any(), any(), any());
 
     }
 
@@ -116,7 +116,7 @@ class BoardApiControllerTest {
     void TestProductSearchByCategoryAndSchool() throws Exception {
         //given
         ProductResponse productResponse = createProductResponse();
-        given(boardService.search(any(),any(),any(), any())).willReturn(new PageImpl<>(List.of(productResponse)));
+        given(productService.search(any(),any(),any(), any())).willReturn(new PageImpl<>(List.of(productResponse)));
         //when & then
         mvc.perform(get("/board/search")
                         .queryParam("category", CategoryType.BOOK.name())
@@ -133,7 +133,7 @@ class BoardApiControllerTest {
                 .andExpect(jsonPath("$.content[0].schoolType").value("HIT"))
                 .andExpect(jsonPath("$.size").value(1))
                 .andExpect(jsonPath("$.number").value(0));
-        then(boardService).should().search(any(),any(),any(), any());
+        then(productService).should().search(any(),any(),any(), any());
 
     }
 

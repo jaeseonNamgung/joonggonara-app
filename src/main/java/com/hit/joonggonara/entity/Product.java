@@ -52,6 +52,9 @@ public class Product extends BaseEntity {
     @JoinColumn(name="member_id")
     private Member member;
 
+    @OneToMany(mappedBy = "product")
+    private List<ChatRoom> chatRooms = new ArrayList<>();
+
     @Builder
     public Product(Long price, String title, String content, String tradingPlace, String productStatus, boolean isSoldOut, CategoryType categoryType, SchoolType schoolType, Member member) {
         this.price = price;
@@ -66,4 +69,7 @@ public class Product extends BaseEntity {
     }
 
 
+    public void updateIsSoldOut() {
+        this.isSoldOut = true;
+    }
 }

@@ -29,7 +29,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
-public class BoardService {
+public class ProductService {
 
     private final ProductRepository productRepository;
     private final MemberRepository memberRepository;
@@ -80,6 +80,16 @@ public class BoardService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(BoardErrorCode.NOT_EXIST_PRODUCT));
         product.updateIsSoldOut();
+        return true;
+    }
+
+    public List<ProductResponse> getProduct(String nickName) {
+        return ProductResponse.fromResponse(productRepository.findByNickName(nickName));
+    }
+
+    @Transactional
+    public Boolean delete(Long productId) {
+        productRepository.deleteById(productId);
         return true;
     }
 }

@@ -26,6 +26,8 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final EnumPath<com.hit.joonggonara.common.type.CategoryType> categoryType = createEnum("categoryType", com.hit.joonggonara.common.type.CategoryType.class);
 
+    public final ListPath<ChatRoom, QChatRoom> chatRooms = this.<ChatRoom, QChatRoom>createList("chatRooms", ChatRoom.class, QChatRoom.class, PathInits.DIRECT2);
+
     public final StringPath content = createString("content");
 
     //inherited

@@ -73,6 +73,18 @@ public class ProductQueryDslImpl implements ProductQueryDsl {
         return Optional.ofNullable(product);
     }
 
+    @Override
+    public List<Product> findByNickName(String nickName) {
+        return queryFactory.selectFrom(product)
+                .join(product.member, member).fetchJoin()
+                .join(product.photos,photo).fetchJoin()
+                .where(product.member.nickName.eq(nickName))
+                .orderBy(product.createdDate.desc())
+                .distinct()
+                .fetch();
+    }
+
+
     private BooleanExpression keywordContain(String keyword) {
         return keyword != null ? priceContain(keyword).or(titleContain(keyword)): null;
 
