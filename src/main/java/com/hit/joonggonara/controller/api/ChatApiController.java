@@ -3,6 +3,7 @@ package com.hit.joonggonara.controller.api;
 import com.hit.joonggonara.common.type.ChatRoomStatus;
 import com.hit.joonggonara.dto.request.chat.ChatRequest;
 import com.hit.joonggonara.dto.request.chat.ChatRoomRequest;
+import com.hit.joonggonara.dto.response.board.ProductResponse;
 import com.hit.joonggonara.dto.response.chat.ChatResponse;
 import com.hit.joonggonara.dto.response.chat.ChatRoomAllResponse;
 import com.hit.joonggonara.dto.response.chat.ChatRoomResponse;
@@ -21,7 +22,7 @@ import java.util.List;
 @RestController
 public class ChatApiController {
     private final ChatService chatService;
-    @MessageMapping("/{roomId}") //여기로 전송되면 메서드 호출 -> WebSocketConfig prefixes 에서 적용한건 앞에 생략
+    @MessageMapping("/chat/{roomId}") //여기로 전송되면 메서드 호출 -> WebSocketConfig prefixes 에서 적용한건 앞에 생략
     @SendTo("/sub/{roomId}") //구독하고 있는 장소로 메시지 전송 (목적지)  -> WebSocketConfig Broker 에서 적용한건 앞에 붙어줘야됨
     public ResponseEntity<ChatResponse> saveChat(@DestinationVariable("roomId") Long roomId, ChatRequest chatRequest){
         return ResponseEntity.ok(chatService.saveChatHistory(roomId, chatRequest));
@@ -36,9 +37,10 @@ public class ChatApiController {
     public ResponseEntity<List<ChatResponse>> getAllChats(@PathVariable(name = "roomId") Long roomId){
         return ResponseEntity.ok(chatService.getAllChats(roomId));
     }
-    @PostMapping("/chat/room/create")
-    public ResponseEntity<ChatRoomResponse> createRoom(@RequestBody ChatRoomRequest chatRoomRequest){
-        return ResponseEntity.ok(chatService.createRoom(chatRoomRequest));
+    @PostMapping("/chat/room/create/{productId}")
+    public ResponseEntity<ChatRoomResponse> createRoom(@RequestBody ChatRoomRequest chatRoomRequest,
+                                                       @PathVariable(name = "productId")Long productId){
+        return ResponseEntity.ok(chatService.createRoom(chatRoomRequest, productId));
     }
 
     @GetMapping("/chat/room")
@@ -58,6 +60,11 @@ public class ChatApiController {
     public ResponseEntity<Boolean> deleteEmptyChatRoom(
             @PathVariable(name = "roomId")Long roomId){
         return ResponseEntity.ok(chatService.deleteEmptyChatRoom(roomId));
+    }
+
+    @GetMapping("/chat/product/{roomId}")
+    public ResponseEntity<ProductResponse> getProduct(@PathVariable(name = "roomId") Long roomId){
+        return ResponseEntity.ok(chatService.getProduct(roomId));
     }
 
 }

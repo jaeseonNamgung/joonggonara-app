@@ -44,9 +44,9 @@ class ChatApiControllerTest {
         //given
         ChatRoomRequest chatRoomRequest = ChatRoomRequest.of("profile", "buyerNickName", "sellerNickName");
         ChatRoomResponse chatRoomResponse = createChatRoomResponse();
-        given(chatService.createRoom(any())).willReturn(chatRoomResponse);
+        given(chatService.createRoom(any(), any())).willReturn(chatRoomResponse);
         //when & then
-        mvc.perform(post("/chat/room/create")
+        mvc.perform(post("/chat/room/create/" + 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(chatRoomRequest))
                         .with(csrf())
@@ -56,7 +56,8 @@ class ChatApiControllerTest {
                 .andExpect(jsonPath("$.nickName").value("buyer"))
                 .andExpect(jsonPath("$.profile").value("profile"));
 
-        then(chatService).should().createRoom(any());
+
+        then(chatService).should().createRoom(any(), any());
     }
 
 
@@ -164,7 +165,8 @@ class ChatApiControllerTest {
                 1L,
                 "seller",
                 "profile",
-                "buyer"
+                "buyer",
+                null
         );
     }
 

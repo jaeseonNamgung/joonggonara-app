@@ -2,8 +2,11 @@ package com.hit.joonggonara.repository.chat;
 
 import com.hit.joonggonara.common.config.JPAConfig;
 import com.hit.joonggonara.common.config.P6SpyConfig;
+import com.hit.joonggonara.common.type.LoginType;
+import com.hit.joonggonara.common.type.Role;
 import com.hit.joonggonara.entity.Chat;
 import com.hit.joonggonara.entity.ChatRoom;
+import com.hit.joonggonara.entity.Member;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,9 +58,7 @@ class ChatRepositoryTest {
         assertThat(expectedChat.getMessage()).isEqualTo("삭제된 메세지입니다.");
     }
 
-    private ChatRoom createChatRoom() {
-        return ChatRoom.builder().buyerNickName("buyerNickName").sellerNickName("sellerNickName").build();
-    }
+
 
     @Test
     @DisplayName("[QueryDsl] roomId로 채팅 전체 조회")
@@ -79,6 +80,11 @@ class ChatRepositoryTest {
         assertThat(expectedChats).extracting(Chat::getMessage).containsExactly( "message1", "message2", "message3", "message4", "message5");
     }
 
+    private ChatRoom createChatRoom() {
+
+        return ChatRoom.builder().buyer(createBuyer()).seller(createSeller()).build();
+    }
+
     private Chat createChat(int i, ChatRoom chatRoom) {
         return Chat.builder()
                 .message("message" + i)
@@ -88,5 +94,27 @@ class ChatRepositoryTest {
                 .build();
     }
 
+    private Member createSeller() {
+        return createMember("sellerId", "seller@email.com", "seller", "seller",
+                "Aaaa1234*", "01012345678", LoginType.GENERAL);
+    }
+
+    private Member createBuyer() {
+        return createMember("buyerId", "buyer@email.com", "buyer", "buyer",
+                "Aaaa1234*", "01012345678", LoginType.GENERAL);
+    }
+
+    private Member createMember(String userId, String email, String name,String nickName, String password, String phoneNumber, LoginType loginType) {
+        return Member.builder()
+                .userId(userId)
+                .email(email)
+                .name(name)
+                .nickName(nickName)
+                .password(password)
+                .phoneNumber(phoneNumber)
+                .role(Role.ROLE_USER)
+                .loginType(loginType)
+                .build();
+    }
 
 }

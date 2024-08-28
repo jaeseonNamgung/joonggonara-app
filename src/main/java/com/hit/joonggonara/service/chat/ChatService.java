@@ -1,17 +1,24 @@
 package com.hit.joonggonara.service.chat;
 
 import com.hit.joonggonara.common.error.CustomException;
+import com.hit.joonggonara.common.error.errorCode.BoardErrorCode;
 import com.hit.joonggonara.common.error.errorCode.ChatErrorCode;
+import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
 import com.hit.joonggonara.common.type.ChatRoomStatus;
 import com.hit.joonggonara.dto.request.chat.ChatRequest;
 import com.hit.joonggonara.dto.request.chat.ChatRoomRequest;
+import com.hit.joonggonara.dto.response.board.ProductResponse;
 import com.hit.joonggonara.dto.response.chat.ChatResponse;
 import com.hit.joonggonara.dto.response.chat.ChatRoomAllResponse;
 import com.hit.joonggonara.dto.response.chat.ChatRoomResponse;
 import com.hit.joonggonara.entity.Chat;
 import com.hit.joonggonara.entity.ChatRoom;
+import com.hit.joonggonara.entity.Member;
+import com.hit.joonggonara.entity.Product;
 import com.hit.joonggonara.repository.chat.ChatRepository;
 import com.hit.joonggonara.repository.chat.ChatRoomRepository;
+import com.hit.joonggonara.repository.login.MemberRepository;
+import com.hit.joonggonara.repository.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +33,8 @@ public class ChatService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRepository chatRepository;
+    private final ProductRepository productRepository;
+    private final MemberRepository memberRepository;
 
 
     // 채팅 기록 저장
@@ -59,15 +68,25 @@ public class ChatService {
 
     // 채팅방 생성
     @Transactional
-    public ChatRoomResponse createRoom(ChatRoomRequest chatRoomRequest){
+    public ChatRoomResponse createRoom(ChatRoomRequest chatRoomRequest, Long productId){
+
+        Member buyer = memberRepository.findMemberByNickName(chatRoomRequest.buyerNickName())
+                .orElseThrow(() -> new CustomException(ChatErrorCode.NOT_EXIST_BUYER));
+
+        Member seller = memberRepository.findMemberByNickName(chatRoomRequest.sellerNickName())
+                .orElseThrow(() -> new CustomException(UserErrorCode.NOT_EXIST_USER));
+
+
+        Product product = productRepository.findProductById(productId)
+                .orElseThrow(() -> new CustomException(BoardErrorCode.NOT_EXIST_PRODUCT));
 
         ChatRoom chatRoom = chatRoomRepository.
-                findChatRoomByBuyerNickNameAndSellerNickName(chatRoomRequest.buyerNickName(), chatRoomRequest.sellerNickName())
+                findChatRoomByBuyerNickNameAndSellerNickNameAndProductId(chatRoomRequest.buyerNickName(), chatRoomRequest.sellerNickName(), productId)
                 .orElseGet(() -> chatRoomRepository.save(
                         ChatRoom.builder()
-                                .profile(chatRoomRequest.profile())
-                                .buyerNickName(chatRoomRequest.buyerNickName())
-                                .sellerNickName(chatRoomRequest.sellerNickName())
+                                .buyer(buyer)
+                                .seller(seller)
+                                .product(product)
                                 .build()));
 
         return ChatRoomResponse.fromResponse(chatRoom);
@@ -75,8 +94,8 @@ public class ChatService {
 
     // 채팅방 전체 조회
     public List<ChatRoomAllResponse> getAllChatRoom(String nickName){
-        List<ChatRoom> chatRoomDtoAllByNickName = chatRoomRepository.findAllByNickName(nickName);
-        return chatRoomDtoAllByNickName.stream().map(chatRoom -> ChatRoomAllResponse.fromResponse(chatRoom, nickName))
+        List<ChatRoom> chatRooms = chatRoomRepository.findAllByNickName(nickName);
+        return chatRooms.stream().map(chatRoom -> ChatRoomAllResponse.fromResponse(chatRoom, nickName))
                 .collect(Collectors.toList());
     }
 
@@ -96,13 +115,20 @@ public class ChatService {
         }else{
             chatRoom.setSellerDeleted(true);
         }
+
+        if(chatRoom.isBuyerDeleted() && chatRoom.isSellerDeleted()){
+            chatRoomRepository.deleteById(chatRoom.getId());
+        }
+
         return true;
     }
 
-
-
-
-
-
-
+    public ProductResponse getProduct(Long roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
+                .orElseThrow(() -> new CustomException(ChatErrorCode.NOT_FOUND_CHATROOM));
+        if(chatRoom.getProduct() == null){
+            throw new CustomException(BoardErrorCode.NOT_EXIST_PRODUCT);
+        }
+        return ProductResponse.fromResponse(chatRoom.getProduct());
+    }
 }

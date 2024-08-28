@@ -1,16 +1,10 @@
 package com.hit.joonggonara.dto.response.chat;
 
-import com.hit.joonggonara.common.error.CustomException;
-import com.hit.joonggonara.common.error.errorCode.ChatErrorCode;
 import com.hit.joonggonara.common.type.ChatRoomStatus;
 import com.hit.joonggonara.entity.Chat;
 import com.hit.joonggonara.entity.ChatRoom;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public record ChatRoomAllResponse(
         Long roomId,
@@ -19,7 +13,6 @@ public record ChatRoomAllResponse(
         String lastChatTime,
         String roomName,
         ChatRoomStatus chatRoomStatus
-
 ) {
     public static ChatRoomAllResponse of(
             Long roomId,
@@ -37,24 +30,32 @@ public record ChatRoomAllResponse(
         // 채팅방 이름 조회 ( 채팅 상대방 닉네임 조회)
         String roomName = findRoomName(chatRoom, nickName);
         ChatRoomStatus chatRoomStatus = isChatRoomStatus(chatRoom, nickName);
+        // 수신 측 프로필 사진 가져오기
+        String profile = findProfile(chatRoom, nickName);
         return ChatRoomAllResponse.of(
                 chatRoom.getId(),
-                chatRoom.getProfile(),
+                profile,
                 chat.getMessage(),
                 chat.getCreatedMassageDate(),
                 roomName,
                 chatRoomStatus
         );
     }
+
+    private static String findProfile(ChatRoom chatRoom, String nickName) {
+        return chatRoom.getBuyer().getNickName().equals(nickName)?
+                chatRoom.getSeller().getProfile() : chatRoom.getBuyer().getProfile();
+    }
+
     private static ChatRoomStatus isChatRoomStatus(ChatRoom chatRoom, String nickName) {
-        return chatRoom.getBuyerNickName().equals(nickName) ? ChatRoomStatus.BUYER : ChatRoomStatus.SELLER;
+        return chatRoom.getBuyer().getNickName().equals(nickName) ? ChatRoomStatus.BUYER : ChatRoomStatus.SELLER;
     }
 
     private static String findRoomName(ChatRoom chatRoom, String nickName) {
-        if (chatRoom.getBuyerNickName().equals(nickName)){
-            return chatRoom.getSellerNickName();
+        if (chatRoom.getBuyer().getNickName().equals(nickName)){
+            return chatRoom.getSeller().getNickName();
         }
-        return chatRoom.getBuyerNickName();
+        return chatRoom.getBuyer().getNickName();
     }
 
     private static Chat getMostRecentDate(ChatRoom chatRoom) {

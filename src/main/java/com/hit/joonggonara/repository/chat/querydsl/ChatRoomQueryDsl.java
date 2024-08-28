@@ -8,5 +8,6 @@ import java.util.Optional;
 public interface ChatRoomQueryDsl {
     List<ChatRoom> findAllByNickName(String nickName);
     Optional<ChatRoom> findChatInChatRoomAllByRoomId(Long roomId);
-    Optional<ChatRoom> findChatRoomByBuyerNickNameAndSellerNickName(String buyerNickName, String sellerNickName);
+    Optional<ChatRoom> findChatRoomByBuyerNickNameAndSellerNickNameAndProductId(String buyerNickName, String sellerNickName, Long productId);
+    Optional <ChatRoom> findByRoomId(Long roomId);
 }

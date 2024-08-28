@@ -1,9 +1,13 @@
 package com.hit.joonggonara.service.chat;
 
 import com.hit.joonggonara.common.error.CustomException;
+import com.hit.joonggonara.common.error.errorCode.BoardErrorCode;
 import com.hit.joonggonara.common.error.errorCode.ChatErrorCode;
+import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
+import com.hit.joonggonara.common.type.CategoryType;
 import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.type.Role;
+import com.hit.joonggonara.common.type.SchoolType;
 import com.hit.joonggonara.dto.request.chat.ChatRequest;
 import com.hit.joonggonara.dto.request.chat.ChatRoomRequest;
 import com.hit.joonggonara.dto.response.chat.ChatResponse;
@@ -12,14 +16,18 @@ import com.hit.joonggonara.dto.response.chat.ChatRoomResponse;
 import com.hit.joonggonara.entity.Chat;
 import com.hit.joonggonara.entity.ChatRoom;
 import com.hit.joonggonara.entity.Member;
+import com.hit.joonggonara.entity.Product;
 import com.hit.joonggonara.repository.chat.ChatRepository;
 import com.hit.joonggonara.repository.chat.ChatRoomRepository;
+import com.hit.joonggonara.repository.login.MemberRepository;
+import com.hit.joonggonara.repository.product.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -32,17 +40,23 @@ import static org.assertj.core.api.Assertions.catchException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class ChatServiceTest {
 
     @Mock
     private ChatRoomRepository chatRoomRepository;
+    @Mock
+    private MemberRepository memberRepository;
 
     @Mock
     private ChatRepository chatRepository;
+    @Mock
+    private ProductRepository productRepository;
     @InjectMocks
     private ChatService sut;
+
 
     @Test
     @DisplayName("[Save][Chat] 채팅 기록이 정상적으로 저장 될 경우 response를 반환")
@@ -52,13 +66,15 @@ class ChatServiceTest {
         Long roomId = 1L;
         String buyerNickName = "buyerNickName";
         String sellerNickName = "sellerNickName";
-        ChatRoom chatRoom = createChatRoom(buyerNickName, sellerNickName);
+        ChatRoom chatRoom = createChatRoom();
         ChatRequest chatRequest = createChatRequest();
         Chat chat = Chat.builder()
                 .message("message")
                 .senderNickName(buyerNickName)
                 .createdMassageDate(LocalDateTime.now().toString())
                 .chatRoom(chatRoom).build();
+
+
         given(chatRoomRepository.findById(any())).willReturn(Optional.of(chatRoom));
         given(chatRepository.save(any())).willReturn(chat);
         //when
@@ -67,6 +83,7 @@ class ChatServiceTest {
         assertThat(chatResponse.message()).isEqualTo(chat.getMessage());
         assertThat(chatResponse.createdMessageDate()).isEqualTo(chat.getCreatedMassageDate());
         assertThat(chatResponse.senderNickName()).isEqualTo(buyerNickName);
+
 
         then(chatRoomRepository).should().findById(any());
         then(chatRepository).should().save(any());
@@ -110,7 +127,10 @@ class ChatServiceTest {
     private List<Chat> createChats() throws InterruptedException {
         String senderNickName = "senderNickName";
         String recipientNickName = "recipientNickName";
-        ChatRoom chatRoom = ChatRoom.builder().buyerNickName(senderNickName).sellerNickName(recipientNickName).build();
+        Member buyer = createBuyer();
+        Member seller = createSeller();
+        Product product = createProduct();
+        ChatRoom chatRoom = ChatRoom.builder().buyer(buyer).seller(seller).product(product).build();
         List<Chat> chats = new ArrayList<>();
         for (int i = 1; i <= 5; i++) {
             Chat chat1 = Chat.builder()
@@ -137,20 +157,101 @@ class ChatServiceTest {
     {
         //given
         ChatRoomRequest chatRoomRequest = createChatRoomRequest();
+        Member buyer = createBuyer();
+        Member seller = createSeller();
+        Product product = createProduct();
         ChatRoom chatRoom = ChatRoom.builder()
-                .profile("profile")
-                .sellerNickName("seller")
-                .buyerNickName("buyer")
+                .seller(seller)
+                .buyer(buyer)
+                .product(product)
                 .build();
-        given(chatRoomRepository.findChatRoomByBuyerNickNameAndSellerNickName(any(), any()))
+        Long productId = 1L;
+        ReflectionTestUtils.setField(product, "updatedDate", LocalDateTime.now());
+        given(memberRepository.findMemberByNickName(any())).willReturn(Optional.of(buyer));
+        given(memberRepository.findMemberByNickName(any())).willReturn(Optional.of(seller));
+        given(productRepository.findProductById(any())).willReturn(Optional.of(product));
+        given(chatRoomRepository.findChatRoomByBuyerNickNameAndSellerNickNameAndProductId(any(), any(), any()))
                 .willReturn(Optional.of(chatRoom));
         //when
-        ChatRoomResponse expectedResponse = sut.createRoom(chatRoomRequest);
+        ChatRoomResponse expectedResponse = sut.createRoom(chatRoomRequest, productId);
         //then
         assertThat(expectedResponse.roomName()).isEqualTo("seller");
         assertThat(expectedResponse.nickName()).isEqualTo("buyer");
-        assertThat(expectedResponse.profile()).isEqualTo("profile");
-        then(chatRoomRepository).should().findChatRoomByBuyerNickNameAndSellerNickName(any(), any());
+
+
+        then(memberRepository).should(times(2)).findMemberByNickName(any());
+        then(productRepository).should().findProductById(any());
+        then(chatRoomRepository).should().findChatRoomByBuyerNickNameAndSellerNickNameAndProductId(any(), any(), any());
+    }
+    @Test
+    @DisplayName("[Save][ChatRoom] 구매 회원이 존재하지 않을 경우 NOT_EXIST_BUYER 에러를 던진다.")
+    void createChatRoomNOT_EXIST_BUYERErrorTest() throws Exception
+    {
+        //given
+        ChatRoomRequest chatRoomRequest = createChatRoomRequest();
+        Long productId = 1L;
+
+        given(memberRepository.findMemberByNickName(any())).willReturn(Optional.empty());
+
+        //when
+        CustomException expectedException = (CustomException)catchException( () ->  sut.createRoom(chatRoomRequest, productId));
+        //then
+        assertThat(expectedException.getErrorCode().getHttpStatus())
+                .isEqualTo(ChatErrorCode.NOT_EXIST_BUYER.getHttpStatus());
+        assertThat(expectedException).hasMessage(ChatErrorCode.NOT_EXIST_BUYER.getMessage());
+
+
+        then(memberRepository).should().findMemberByNickName(any());
+
+    }
+    @Test
+    @DisplayName("[Save][ChatRoom] 판매 회원이 존재하지 않을 경우 NOT_EXIST_USER 에러를 던진다.")
+    void createChatRoomNOT_EXIST_USERErrorTest() throws Exception
+    {
+        //given
+        ChatRoomRequest chatRoomRequest = createChatRoomRequest();
+        Member buyer = createBuyer();
+        Member seller = createSeller();
+        Long productId = 1L;
+
+        given(memberRepository.findMemberByNickName(any())).willReturn(Optional.of(buyer));
+        given(memberRepository.findMemberByNickName("seller")).willReturn(Optional.empty());
+
+        //when
+        CustomException expectedException = (CustomException)catchException( () ->  sut.createRoom(chatRoomRequest, productId));
+        //then
+        assertThat(expectedException.getErrorCode().getHttpStatus())
+                .isEqualTo(UserErrorCode.NOT_EXIST_USER.getHttpStatus());
+        assertThat(expectedException).hasMessage(UserErrorCode.NOT_EXIST_USER.getMessage());
+
+
+        then(memberRepository).should(times(2)).findMemberByNickName(any());
+
+    }
+
+    @Test
+    @DisplayName("[Save][ChatRoom] 상품이 존재하지 않을 경우 NOT_EXIST_PRODUCT 에러를 던진다.")
+    void productNotExistTest() throws Exception
+    {
+        //given
+        ChatRoomRequest chatRoomRequest = createChatRoomRequest();
+        Product product = createProduct();
+        Long productId = 1L;
+        Member buyer = createBuyer();
+        Member seller = createSeller();
+        given(memberRepository.findMemberByNickName(any())).willReturn(Optional.of(buyer));
+        given(memberRepository.findMemberByNickName(any())).willReturn(Optional.of(seller));
+        given(productRepository.findProductById(any())).willReturn(Optional.empty());
+
+        //when
+        CustomException expectedException = (CustomException)catchException( () ->  sut.createRoom(chatRoomRequest, productId));
+        //then
+        assertThat(expectedException.getErrorCode().getHttpStatus())
+                .isEqualTo(BoardErrorCode.NOT_EXIST_PRODUCT.getHttpStatus());
+        assertThat(expectedException).hasMessage(BoardErrorCode.NOT_EXIST_PRODUCT.getMessage());
+
+        then(memberRepository).should(times(2)).findMemberByNickName(any());
+        then(productRepository).should().findProductById(any());
     }
 
     @Test
@@ -159,22 +260,33 @@ class ChatServiceTest {
     {
         //given
         ChatRoomRequest chatRoomRequest = createChatRoomRequest();
+        Member buyer = createBuyer();
+        Member seller = createSeller();
+        Product product = createProduct();
         ChatRoom chatRoom = ChatRoom.builder()
-                .profile("profile")
-                .sellerNickName("seller")
-                .buyerNickName("buyer")
+                .seller(seller)
+                .buyer(buyer)
+                .product(product)
                 .build();
-        given(chatRoomRepository.findChatRoomByBuyerNickNameAndSellerNickName(any(), any()))
+        Long productId = 1L;
+        ReflectionTestUtils.setField(product, "updatedDate", LocalDateTime.now());
+
+        given(memberRepository.findMemberByNickName(any())).willReturn(Optional.of(buyer));
+        given(memberRepository.findMemberByNickName(any())).willReturn(Optional.of(seller));
+        given(productRepository.findProductById(any())).willReturn(Optional.of(product));
+        given(chatRoomRepository.findChatRoomByBuyerNickNameAndSellerNickNameAndProductId(any(), any(), any()))
                 .willReturn(Optional.empty());
         given(chatRoomRepository.save(any()))
                 .willReturn(chatRoom);
         //when
-        ChatRoomResponse expectedResponse = sut.createRoom(chatRoomRequest);
+        ChatRoomResponse expectedResponse = sut.createRoom(chatRoomRequest, productId);
         //then
         assertThat(expectedResponse.roomName()).isEqualTo("seller");
         assertThat(expectedResponse.nickName()).isEqualTo("buyer");
-        assertThat(expectedResponse.profile()).isEqualTo("profile");
-        then(chatRoomRepository).should().findChatRoomByBuyerNickNameAndSellerNickName(any(), any());
+
+        then(memberRepository).should(times(2)).findMemberByNickName(any());
+        then(productRepository).should().findProductById(any());
+        then(chatRoomRepository).should().findChatRoomByBuyerNickNameAndSellerNickNameAndProductId(any(), any(), any());
         then(chatRoomRepository).should().save(any());
     }
 
@@ -184,9 +296,13 @@ class ChatServiceTest {
     void findAllChatRoomSuccessTest() throws Exception
     {
         //given
-        String buyerNickName = "buyerNickName";
-        String sellerNickName = "sellerNickName";
-        ChatRoom chatRoom = createChatRoom(buyerNickName, sellerNickName);
+        String buyerNickName = "buyer";
+        Member buyer = createBuyer();
+        Member seller = createSeller();
+        Product product = createProduct();
+        ReflectionTestUtils.setField(product, "id", 1L);
+        ChatRoom chatRoom = ChatRoom.builder().buyer(buyer).seller(seller)
+                .product(product).build();;
         List<Chat> chats = new ArrayList<>();
         for (int i = 1; i <= 5; i++) {
             chats.add(createChat(chatRoom, i));
@@ -196,10 +312,9 @@ class ChatServiceTest {
         List<ChatRoomAllResponse> expectedChatRoomAllResponse = sut.getAllChatRoom(buyerNickName);
         //then
         assertThat(expectedChatRoomAllResponse.size()).isEqualTo(1);
-        assertThat(expectedChatRoomAllResponse.get(0).roomName()).isEqualTo(sellerNickName);
+        assertThat(expectedChatRoomAllResponse.get(0).roomName()).isEqualTo("seller");
         assertThat(expectedChatRoomAllResponse.get(0).message()).isEqualTo("message5");
         assertThat(expectedChatRoomAllResponse.get(0).chatRoomStatus()).isEqualTo(BUYER);
-
         then(chatRoomRepository).should().findAllByNickName(any());
     }
 
@@ -214,7 +329,7 @@ class ChatServiceTest {
         Long roomId = 1L;
         String buyerNickName = "buyerNickName";
         String sellerNickName = "sellerNickName";
-        ChatRoom chatRoom = createChatRoom(buyerNickName, sellerNickName);
+        ChatRoom chatRoom = createChatRoom();
         given(chatRoomRepository.findById(any())).willReturn(Optional.of(chatRoom));
         //when
         boolean expectedTrue = sut.deleteChatRoom(roomId, BUYER);
@@ -253,6 +368,19 @@ class ChatServiceTest {
         then(chatRoomRepository).should().deleteById(any());
     }
 
+    private Product createProduct() {
+        return Product.builder()
+                .title("title")
+                .price((long)10000)
+                .content("content")
+                .categoryType(CategoryType.BOOK)
+                .schoolType(SchoolType.HIT)
+                .tradingPlace("하공대 정문 앞")
+                .productStatus("최상")
+                .member(Member.builder().email("email").name("name").build())
+                .build();
+    }
+
 
     private ChatRequest createChatRequest() {
         return ChatRequest.of("message","senderNickName", "buyer", true);
@@ -265,8 +393,22 @@ class ChatServiceTest {
                 .build();
     }
 
-    private ChatRoom createChatRoom(String buyerNickName, String sellerNickName) {
-        return ChatRoom.builder().buyerNickName(buyerNickName).sellerNickName(sellerNickName).build();
+
+    private ChatRoom createChatRoom() {
+        Member buyer = createBuyer();
+        Member seller = createSeller();
+        Product product = createProduct();
+        return ChatRoom.builder().buyer(buyer).seller(seller).product(product).build();
+    }
+
+    private Member createSeller() {
+        return createMember("sellerId", "seller@email.com", "seller", "seller",
+                "Aaaa1234*", "01012345678", LoginType.GENERAL);
+    }
+
+    private Member createBuyer() {
+        return createMember("buyerId", "buyer@email.com", "buyer", "buyer",
+                "Aaaa1234*", "01012345678", LoginType.GENERAL);
     }
 
     private ChatRoomRequest createChatRoomRequest() {
@@ -285,5 +427,6 @@ class ChatServiceTest {
                 .loginType(loginType)
                 .build();
     }
+
 
 }
