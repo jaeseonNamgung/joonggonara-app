@@ -32,7 +32,7 @@ public class ChatRoom extends BaseEntity{
 
     private boolean buyerDeleted;
     private boolean sellerDeleted;
-    private boolean isDeleted;
+
 
     @OneToMany(mappedBy = "chatRoom", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<Chat> chats = new ArrayList<>();
@@ -49,7 +49,6 @@ public class ChatRoom extends BaseEntity{
         this.seller = seller;
         this.buyerDeleted = false;
         this.sellerDeleted = false;
-        this.isDeleted = false;
         addProduct(product);
     }
 
