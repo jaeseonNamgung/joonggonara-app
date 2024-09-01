@@ -33,8 +33,6 @@ public class QChat extends EntityPathBase<Chat> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final BooleanPath isDeleted = createBoolean("isDeleted");
-
     public final BooleanPath isFirstMessage = createBoolean("isFirstMessage");
 
     public final StringPath message = createString("message");

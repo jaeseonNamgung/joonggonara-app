@@ -87,18 +87,6 @@ class ChatServiceTest {
         then(chatRoomRepository).should().findById(any());
         then(chatRepository).should().save(any());
     }
-    @Test
-    @DisplayName("[Delete][Chat] 채팅 삭제 요청이 오면 is_deleted를 true, message를 '삭제된 메세지입니다.' 로 변경 후 true를 반환")
-    void deleteChatHistoryTest() throws Exception
-    {
-        //given
-        Long chatId = 1L;
-        //when
-        boolean expectedTrue = sut.deleteChat(chatId);
-        //then
-        assertThat(expectedTrue).isTrue();
-        then(chatRepository).should().deleteById(any());
-    }
 
     @Test
     @DisplayName("[GetAll][Chat] 채팅 기록 전체 조회")

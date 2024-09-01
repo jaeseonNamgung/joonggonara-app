@@ -62,22 +62,7 @@ class ChatApiControllerTest {
 
 
 
-    @WithMockUser(username = "USER")
-    @Test
-    @DisplayName("[API][Delete] 채팅 기록 삭제")
-    void deleteChatHistoryTest() throws Exception
-    {
-        //given
-        given(chatService.deleteChat(any())).willReturn(true);
-        //when & then
-        mvc.perform(delete("/chat/delete/" + 1L)
-                .contentType(MediaType.APPLICATION_JSON)
-                .with(csrf())
-        ).andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$").value(true));
-        then(chatService).should().deleteChat(any());
-    }
+
 
     @WithMockUser(username = "USER")
     @Test
@@ -110,7 +95,8 @@ class ChatApiControllerTest {
     {
         //given
         ChatRoomAllResponse chatRoomAllResponse;
-        chatRoomAllResponse = ChatRoomAllResponse.of(1L, "profile", "message", LocalDateTime.now().toString(), "roomName", BUYER);
+        chatRoomAllResponse = ChatRoomAllResponse.of(1L, "profile", "message",
+                LocalDateTime.now().toString(), "roomName", false, BUYER);
         given(chatService.getAllChatRoom(any())).willReturn(List.of(chatRoomAllResponse));
         //when & then
         mvc.perform(get("/chat/room")

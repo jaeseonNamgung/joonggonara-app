@@ -51,13 +51,6 @@ public class ChatService {
     }
 
 
-    // 채팅 기록 삭제 (is_deleted를 true로 변경, messgage에 삭제된 메세지로 변경)
-    @Transactional
-    public boolean deleteChat(Long chatId){
-        chatRepository.deleteById(chatId);
-        return true;
-    }
-
     // 채팅방 채팅 전체 조회 (정렬-> createMessageTime 내림차순)
     // roomId
     // response: roomId, senderNickName, message, createMessageTime

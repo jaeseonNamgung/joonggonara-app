@@ -28,10 +28,6 @@ public class ChatApiController {
         return ResponseEntity.ok(chatService.saveChatHistory(roomId, chatRequest));
     }
 
-    @DeleteMapping("/chat/delete/{chatId}")
-    public ResponseEntity<Boolean> deleteChat(@PathVariable(name = "chatId")Long chatId){
-        return ResponseEntity.ok(chatService.deleteChat(chatId));
-    }
 
     @GetMapping("/chat/all/{roomId}")
     public ResponseEntity<List<ChatResponse>> getAllChats(@PathVariable(name = "roomId") Long roomId){
