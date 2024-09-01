@@ -70,7 +70,7 @@ class ProductServiceTest {
 
         given(jwtUtil.getPrincipal(any())).willReturn("userId");
         given(jwtUtil.getLoginType(any())).willReturn(LoginType.GENERAL);
-        given(memberRepository.findByPrincipal(any())).willReturn(Optional.of(member));
+        given(memberRepository.findByPrincipalAndLoginType(any())).willReturn(Optional.of(member));
         given(productRepository.save(any())).willReturn(product);
         given(customFileUtil.uploadImage(any(), any())).willReturn(true);
         given(productRepository.findProductById(any())).willReturn(Optional.of(product));
@@ -85,7 +85,7 @@ class ProductServiceTest {
         then(customFileUtil).should().uploadImage(any(),any());
         then(jwtUtil).should().getPrincipal(any());
         then(jwtUtil).should().getLoginType(any());
-        then(memberRepository).should().findByPrincipal(any());
+        then(memberRepository).should().findByPrincipalAndLoginType(any());
         then(productRepository).should().findProductById(any());
 
     }
@@ -106,7 +106,7 @@ class ProductServiceTest {
 
         given(jwtUtil.getPrincipal(any())).willReturn("userId");
         given(jwtUtil.getLoginType(any())).willReturn(LoginType.GENERAL);
-        given(memberRepository.findByPrincipal(any())).willReturn(Optional.of(member));
+        given(memberRepository.findByPrincipalAndLoginType(any())).willReturn(Optional.of(member));
         given(productRepository.save(any())).willReturn(product);
         given(customFileUtil.uploadImage(any(), any())).willReturn(true);
         given(productRepository.findProductById(any())).willReturn(Optional.empty());
@@ -120,7 +120,7 @@ class ProductServiceTest {
         then(customFileUtil).should().uploadImage(any(),any());
         then(jwtUtil).should().getPrincipal(any());
         then(jwtUtil).should().getLoginType(any());
-        then(memberRepository).should().findByPrincipal(any());
+        then(memberRepository).should().findByPrincipalAndLoginType(any());
         then(productRepository).should().findProductById(any());
 
     }
@@ -141,7 +141,7 @@ class ProductServiceTest {
 
         given(jwtUtil.getPrincipal(any())).willReturn("userId");
         given(jwtUtil.getLoginType(any())).willReturn(LoginType.GENERAL);
-        given(memberRepository.findByPrincipal(any())).willReturn(Optional.of(member));
+        given(memberRepository.findByPrincipalAndLoginType(any())).willReturn(Optional.of(member));
         given(productRepository.save(any())).willReturn(product);
         given(customFileUtil.uploadImage(any(), any())).willReturn(false);
 
@@ -157,7 +157,7 @@ class ProductServiceTest {
         then(customFileUtil).should().uploadImage(any(),any());
         then(jwtUtil).should().getPrincipal(any());
         then(jwtUtil).should().getLoginType(any());
-        then(memberRepository).should().findByPrincipal(any());
+        then(memberRepository).should().findByPrincipalAndLoginType(any());
 
 
     }
@@ -192,7 +192,7 @@ class ProductServiceTest {
         request.addHeader(JwtProperties.AUTHORIZATION, JwtProperties.JWT_TYPE + "token");
         given(jwtUtil.getPrincipal(any())).willReturn("userId");
         given(jwtUtil.getLoginType(any())).willReturn(LoginType.GENERAL);
-        given(memberRepository.findByPrincipal(any())).willReturn(Optional.empty());
+        given(memberRepository.findByPrincipalAndLoginType(any())).willReturn(Optional.empty());
 
         //when
         CustomException expectedException = assertThrows(CustomException.class,
@@ -203,7 +203,7 @@ class ProductServiceTest {
 
         then(jwtUtil).should().getPrincipal(any());
         then(jwtUtil).should().getLoginType(any());
-        then(memberRepository).should().findByPrincipal(any());
+        then(memberRepository).should().findByPrincipalAndLoginType(any());
 
 
     }

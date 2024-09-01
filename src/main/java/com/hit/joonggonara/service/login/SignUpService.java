@@ -1,12 +1,12 @@
 package com.hit.joonggonara.service.login;
 
 
-import com.hit.joonggonara.common.properties.RedisProperties;
-import com.hit.joonggonara.dto.request.login.MemberUpdateRequest;
-import com.hit.joonggonara.dto.request.login.SignUpPhoneNumberRequest;
-import com.hit.joonggonara.dto.request.login.SignUpRequest;
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
+import com.hit.joonggonara.common.properties.RedisProperties;
+import com.hit.joonggonara.dto.request.login.SignUpPhoneNumberRequest;
+import com.hit.joonggonara.dto.request.login.SignUpRequest;
+import com.hit.joonggonara.dto.request.login.SocialSignUpRequest;
 import com.hit.joonggonara.dto.request.login.VerificationRequest;
 import com.hit.joonggonara.repository.login.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +31,13 @@ public class SignUpService {
         // password 인코딩
         String passwordEncode = passwordEncoder.encode(signUpRequest.password());
         memberRepository.save(signUpRequest.toEntity(passwordEncode));
+        return true;
+    }
+
+    // 소셜 로그인 회원가입
+    @Transactional
+    public boolean socialSignUp(SocialSignUpRequest signUpRequest){
+        memberRepository.save(signUpRequest.toEntity());
         return true;
     }
 

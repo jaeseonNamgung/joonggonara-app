@@ -183,7 +183,7 @@ class ProductRepositoryTest {
         photoRepository.save(photo2);
         photoRepository.save(photo3);
 
-        Photo photo = photoRepository.findById(savedProduct.getId()).get();
+
         //when
         Product expectedProduct = productRepository.findProductById(savedProduct.getId()).get();
 

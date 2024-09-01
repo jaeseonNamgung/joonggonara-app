@@ -45,20 +45,21 @@ public class LoginApiController {
 
 
     @GetMapping("/user/login/oauth2")
-    public ResponseEntity<String> sendOAuth2LoginPage(@RequestParam(name = "loginType") String loginType) throws IOException {
+    public ResponseEntity<String> sendOAuth2LoginPage(@RequestParam(name = "loginType") String loginType, HttpServletResponse response) throws IOException {
         return ResponseEntity.ok(loginService.sendRedirect(LoginType.checkType(loginType)));
     }
 
     @GetMapping("/user/login/oauth2/code/{loginType}")
-    public ResponseEntity<OAUth2UserResponse> OAuth2Login(@RequestParam(name = "code") String code,
+    public ResponseEntity<MemberResponse> OAuth2Login(@RequestParam(name = "code") String code,
                                                           @PathVariable(name = "loginType") String loginType,
                                                           HttpServletResponse response) throws JsonProcessingException {
-        OAuth2UserDto oAuth2UserDto = loginService.oAuth2Login(code, LoginType.checkType(loginType));
-        if(oAuth2UserDto.signUpStatus()){
-            saveAccessTokenAndRefreshToken(response, oAuth2UserDto.accessToken(), oAuth2UserDto.refreshToken());
-            return ResponseEntity.ok(OAUth2UserResponse.fromResponse(oAuth2UserDto.principal(), oAuth2UserDto.profile(),true));
+
+        MemberTokenResponse memberTokenResponse = loginService.oAuth2Login(code, LoginType.checkType(loginType));
+        if(memberTokenResponse.accessToken() != null && memberTokenResponse.refreshToken() != null){
+            saveAccessTokenAndRefreshToken(response, memberTokenResponse.accessToken(), memberTokenResponse.refreshToken());
+            return ResponseEntity.ok(memberTokenResponse.memberResponse());
         }
-        return ResponseEntity.ok(OAUth2UserResponse.fromResponse(oAuth2UserDto.principal(),oAuth2UserDto.profile(), false));
+        return ResponseEntity.ok(memberTokenResponse.memberResponse());
     }
 
     @PutMapping("/user/login/reissue")

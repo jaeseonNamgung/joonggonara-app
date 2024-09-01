@@ -39,4 +39,17 @@ public record MemberResponse(
                 member.getLoginType()
         );
     }
+
+    public static MemberResponse fromResponse(String email, String profile, LoginType loginType) {
+        return MemberResponse.of(
+                null,
+                null,
+                email,
+                null,
+                null,
+                profile,
+                null,
+                loginType
+        );
+    }
 }

@@ -3,6 +3,7 @@ package com.hit.joonggonara.controller.api;
 import com.hit.joonggonara.common.custom.validation.ValidationSequence;
 import com.hit.joonggonara.dto.request.login.SignUpPhoneNumberRequest;
 import com.hit.joonggonara.dto.request.login.SignUpRequest;
+import com.hit.joonggonara.dto.request.login.SocialSignUpRequest;
 import com.hit.joonggonara.dto.request.login.VerificationRequest;
 import com.hit.joonggonara.service.login.SignUpService;
 import jakarta.validation.Valid;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-public class SignApiController {
+public class SignUpApiController {
 
     private final SignUpService signUpService;
 
@@ -22,6 +23,13 @@ public class SignApiController {
             @RequestBody @Validated(ValidationSequence.class) SignUpRequest signUpRequest
             ){
         return ResponseEntity.ok(signUpService.signUp(signUpRequest));
+    }
+
+    @PostMapping("/user/social/signUp")
+    public ResponseEntity<Boolean> socialSignUp(
+            @RequestBody @Validated(ValidationSequence.class) SocialSignUpRequest signUpRequest
+    ){
+        return ResponseEntity.ok(signUpService.socialSignUp(signUpRequest));
     }
 
 

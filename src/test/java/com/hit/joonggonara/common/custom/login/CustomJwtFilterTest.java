@@ -39,12 +39,13 @@ class CustomJwtFilterTest {
     private CustomJwtFilter sut;
 
 
+
     @Test
     @DisplayName("[Filter] jwt 토큰 필터 성공 테스트")
     void jwtFilterSuccessTest() throws Exception
     {
         //given
-        String token = JwtProperties.JWT_TYPE + " " + "token test";
+        String token = JwtProperties.JWT_TYPE + "token test";
         String userId = "testId";
         Role role = Role.ROLE_USER;
         MockHttpServletRequest mockRequest = new MockHttpServletRequest();
@@ -53,16 +54,17 @@ class CustomJwtFilterTest {
 
         mockRequest.addHeader(JwtProperties.AUTHORIZATION, token);
 
-        given(redisUtil.get(any())).willReturn(Optional.empty());
         given(jwtUtil.validateToken(any(), any())).willReturn(true);
+        given(redisUtil.get(any())).willReturn(Optional.empty());
+
         given(jwtUtil.getPrincipal(any())).willReturn(userId);
         given(jwtUtil.getRole(any())).willReturn(role);
         //when
-        sut.doFilter(mockRequest, mockResponse, mockFilterChain);
+        sut.doFilterInternal(mockRequest, mockResponse, mockFilterChain);
 
         //then
-        then(redisUtil).should().get(any());
         then(jwtUtil).should().validateToken(any(), any());
+        then(redisUtil).should().get(any());
         then(jwtUtil).should().getPrincipal(any());
         then(jwtUtil).should().getRole(any());
     }
@@ -72,18 +74,23 @@ class CustomJwtFilterTest {
     void existBlackListTest() throws Exception
     {
         //given
+        String token = JwtProperties.JWT_TYPE + "token test";
         MockHttpServletRequest mockRequest = new MockHttpServletRequest();
         MockHttpServletResponse mockResponse = new MockHttpServletResponse();
+        mockRequest.addHeader(JwtProperties.AUTHORIZATION, token);
         FilterChain mockFilterChain = mock(FilterChain.class);
+        given(jwtUtil.validateToken(any(), any())).willReturn(true);
         given(redisUtil.get(any())).willReturn(Optional.of(RedisProperties.BLACK_LIST_VALUE));
         //when
         CustomException expectedException =
-            (CustomException)catchRuntimeException(()->sut.doFilter(mockRequest, mockResponse, mockFilterChain));
+            (CustomException)catchRuntimeException(()->sut.doFilterInternal(mockRequest, mockResponse, mockFilterChain));
         //then
+
         assertThat(expectedException.getErrorCode().getHttpStatus())
                 .isEqualTo(UserErrorCode.ALREADY_LOGGED_OUT_USER.getHttpStatus());
         assertThat(expectedException).hasMessage(UserErrorCode.ALREADY_LOGGED_OUT_USER.getMessage());
 
+        then(jwtUtil).should().validateToken(any(), any());
         then(redisUtil).should().get(any());
     }
 

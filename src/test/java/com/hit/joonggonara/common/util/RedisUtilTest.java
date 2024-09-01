@@ -80,7 +80,7 @@ class RedisUtilTest {
                 Arguments.of(RedisProperties.REFRESH_TOKEN_KEY + email, "refreshToken", 5)
         );
     }
-    
+
     @Test
     @DisplayName("[Redis][BlackList] 블랙리스트에 토큰을 추가하고 기존 토큰에 남은 시간으로 블랙리스트 TTL 을 설정")
     void addBlackListTest() throws Exception

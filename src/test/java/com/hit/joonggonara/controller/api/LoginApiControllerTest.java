@@ -107,6 +107,19 @@ class LoginApiControllerTest {
         ), "accessToken" , "refreshToken");
     }
 
+    private MemberTokenResponse createSocialMemberTokenResponse() {
+        return MemberTokenResponse.of(MemberResponse.of(
+                1L,
+                null,
+                "test@email.com",
+                "name",
+                "nickName",
+                "profile",
+                "01012345678",
+                LoginType.KAKAO
+        ), "accessToken" , "refreshToken");
+    }
+
 
     @WithMockUser(roles = "GUEST")
     @MethodSource
@@ -185,8 +198,8 @@ class LoginApiControllerTest {
     void ShouldReturnOAUth2UserResponseWhenAlreadySignedUpAndLoginIsSuccessFull() throws Exception
     {
         //given
-        OAuth2UserDto oAuth2UserDto = createOAuth2UserDto(true);
-        given(loginService.oAuth2Login(any(), any())).willReturn(oAuth2UserDto);
+        MemberTokenResponse memberTokenResponse = createSocialMemberTokenResponse();
+        given(loginService.oAuth2Login(any(), any())).willReturn(memberTokenResponse);
         //when & then
         mvc.perform(get("/user/login/oauth2/code/kakao")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -197,7 +210,7 @@ class LoginApiControllerTest {
                 .andExpect(header().string(AUTHORIZATION, JWT_TYPE + "accessToken"))
                 .andExpect(cookie().value(REFRESH_TOKEN_NAME, "refreshToken"))
                 .andExpect(jsonPath("$.email").value("test@email.com"))
-                .andExpect(jsonPath("$.signUpStatus").value(true));
+                .andExpect(jsonPath("$.loginType").value(LoginType.KAKAO.name()));
 
         then(loginService).should().oAuth2Login(any(), any());
         then(cookieUtil).should().addCookie(any(HttpServletResponse.class), any(), any());
@@ -209,8 +222,8 @@ class LoginApiControllerTest {
     void IfNotSignUpUserTest() throws Exception
     {
         //given
-        OAuth2UserDto oAuth2UserDto = createOAuth2UserDto(false);
-        given(loginService.oAuth2Login(any(), any())).willReturn(oAuth2UserDto);
+        MemberTokenResponse memberTokenResponse = createSocialMemberTokenResponse();
+        given(loginService.oAuth2Login(any(), any())).willReturn(memberTokenResponse);
         //when & then
         mvc.perform(get("/user/login/oauth2/code/kakao")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -219,7 +232,8 @@ class LoginApiControllerTest {
                 ).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.email").value("test@email.com"))
-                .andExpect(jsonPath("$.signUpStatus").value(false));
+                .andExpect(jsonPath("$.profile").value("profile"))
+                .andExpect(jsonPath("$.loginType").value(LoginType.KAKAO.name()));
 
         then(loginService).should().oAuth2Login(any(), any());
     }

@@ -1,7 +1,6 @@
 package com.hit.joonggonara.service.chat;
 
 import com.hit.joonggonara.common.error.CustomException;
-import com.hit.joonggonara.common.error.errorCode.BoardErrorCode;
 import com.hit.joonggonara.common.error.errorCode.ChatErrorCode;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
 import com.hit.joonggonara.common.type.CategoryType;
@@ -167,8 +166,8 @@ class ChatServiceTest {
                 .build();
         Long productId = 1L;
         ReflectionTestUtils.setField(product, "updatedDate", LocalDateTime.now());
-        given(memberRepository.findMemberByNickName(any())).willReturn(Optional.of(buyer));
-        given(memberRepository.findMemberByNickName(any())).willReturn(Optional.of(seller));
+        given(memberRepository.findMemberByNickNameAndDeletedIsFalse(any())).willReturn(Optional.of(buyer));
+        given(memberRepository.findMemberByNickNameAndDeletedIsFalse(any())).willReturn(Optional.of(seller));
         given(productRepository.findProductById(any())).willReturn(Optional.of(product));
         given(chatRoomRepository.findChatRoomByBuyerNickNameAndSellerNickNameAndProductId(any(), any(), any()))
                 .willReturn(Optional.of(chatRoom));
@@ -179,78 +178,57 @@ class ChatServiceTest {
         assertThat(expectedResponse.nickName()).isEqualTo("buyer");
 
 
-        then(memberRepository).should(times(2)).findMemberByNickName(any());
+        then(memberRepository).should(times(2)).findMemberByNickNameAndDeletedIsFalse(any());
         then(productRepository).should().findProductById(any());
         then(chatRoomRepository).should().findChatRoomByBuyerNickNameAndSellerNickNameAndProductId(any(), any(), any());
     }
+
     @Test
-    @DisplayName("[Save][ChatRoom] 구매 회원이 존재하지 않을 경우 NOT_EXIST_BUYER 에러를 던진다.")
-    void createChatRoomNOT_EXIST_BUYERErrorTest() throws Exception
-    {
-        //given
-        ChatRoomRequest chatRoomRequest = createChatRoomRequest();
-        Long productId = 1L;
-
-        given(memberRepository.findMemberByNickName(any())).willReturn(Optional.empty());
-
-        //when
-        CustomException expectedException = (CustomException)catchException( () ->  sut.createRoom(chatRoomRequest, productId));
-        //then
-        assertThat(expectedException.getErrorCode().getHttpStatus())
-                .isEqualTo(ChatErrorCode.NOT_EXIST_BUYER.getHttpStatus());
-        assertThat(expectedException).hasMessage(ChatErrorCode.NOT_EXIST_BUYER.getMessage());
-
-
-        then(memberRepository).should().findMemberByNickName(any());
-
-    }
-    @Test
-    @DisplayName("[Save][ChatRoom] 판매 회원이 존재하지 않을 경우 NOT_EXIST_USER 에러를 던진다.")
-    void createChatRoomNOT_EXIST_USERErrorTest() throws Exception
+    @DisplayName("[Save][ChatRoom] 판매 회원과 상품이 null 이면 ALREADY_WITHDRAWAL_USER 에러 발생")
+    void createRoomTest3() throws Exception
     {
         //given
         ChatRoomRequest chatRoomRequest = createChatRoomRequest();
         Member buyer = createBuyer();
-        Member seller = createSeller();
+
         Long productId = 1L;
 
-        given(memberRepository.findMemberByNickName(any())).willReturn(Optional.of(buyer));
-        given(memberRepository.findMemberByNickName("seller")).willReturn(Optional.empty());
-
-        //when
-        CustomException expectedException = (CustomException)catchException( () ->  sut.createRoom(chatRoomRequest, productId));
-        //then
-        assertThat(expectedException.getErrorCode().getHttpStatus())
-                .isEqualTo(UserErrorCode.NOT_EXIST_USER.getHttpStatus());
-        assertThat(expectedException).hasMessage(UserErrorCode.NOT_EXIST_USER.getMessage());
-
-
-        then(memberRepository).should(times(2)).findMemberByNickName(any());
-
-    }
-
-    @Test
-    @DisplayName("[Save][ChatRoom] 상품이 존재하지 않을 경우 NOT_EXIST_PRODUCT 에러를 던진다.")
-    void productNotExistTest() throws Exception
-    {
-        //given
-        ChatRoomRequest chatRoomRequest = createChatRoomRequest();
-        Product product = createProduct();
-        Long productId = 1L;
-        Member buyer = createBuyer();
-        Member seller = createSeller();
-        given(memberRepository.findMemberByNickName(any())).willReturn(Optional.of(buyer));
-        given(memberRepository.findMemberByNickName(any())).willReturn(Optional.of(seller));
+        given(memberRepository.findMemberByNickNameAndDeletedIsFalse("buyer")).willReturn(Optional.empty());
+        given(memberRepository.findMemberByNickNameAndDeletedIsFalse("seller")).willReturn(Optional.of(buyer));
         given(productRepository.findProductById(any())).willReturn(Optional.empty());
 
         //when
-        CustomException expectedException = (CustomException)catchException( () ->  sut.createRoom(chatRoomRequest, productId));
+        CustomException expectedException = (CustomException) catchException(() -> sut.createRoom(chatRoomRequest, productId));
         //then
         assertThat(expectedException.getErrorCode().getHttpStatus())
-                .isEqualTo(BoardErrorCode.NOT_EXIST_PRODUCT.getHttpStatus());
-        assertThat(expectedException).hasMessage(BoardErrorCode.NOT_EXIST_PRODUCT.getMessage());
+                .isEqualTo(UserErrorCode.ALREADY_WITHDRAWAL_USER.getHttpStatus());
+        assertThat(expectedException).hasMessage(UserErrorCode.ALREADY_WITHDRAWAL_USER.getMessage());
 
-        then(memberRepository).should(times(2)).findMemberByNickName(any());
+
+        then(memberRepository).should(times(2)).findMemberByNickNameAndDeletedIsFalse(any());
+        then(productRepository).should().findProductById(any());
+    }
+
+    @Test
+    @DisplayName("[Save][ChatRoom] 구매 회원과 상품이 존재하지 않을 경우 ALREADY_WITHDRAWAL_USER 에러 발생")
+    void createRoomTest2() throws Exception
+    {
+        //given
+        ChatRoomRequest chatRoomRequest = createChatRoomRequest();
+        Long productId = 1L;
+        Member seller = createSeller();
+        given(memberRepository.findMemberByNickNameAndDeletedIsFalse("buyer")).willReturn(Optional.empty());
+        given(memberRepository.findMemberByNickNameAndDeletedIsFalse("seller")).willReturn(Optional.of(seller));
+        given(productRepository.findProductById(any())).willReturn(Optional.empty());
+
+        //when
+        CustomException expectedException = (CustomException) catchException(() -> sut.createRoom(chatRoomRequest, productId));
+        //then
+        assertThat(expectedException.getErrorCode().getHttpStatus())
+                .isEqualTo(UserErrorCode.ALREADY_WITHDRAWAL_USER.getHttpStatus());
+        assertThat(expectedException).hasMessage(UserErrorCode.ALREADY_WITHDRAWAL_USER.getMessage());
+
+        then(memberRepository).should(times(2)).findMemberByNickNameAndDeletedIsFalse(any());
         then(productRepository).should().findProductById(any());
     }
 
@@ -271,8 +249,8 @@ class ChatServiceTest {
         Long productId = 1L;
         ReflectionTestUtils.setField(product, "updatedDate", LocalDateTime.now());
 
-        given(memberRepository.findMemberByNickName(any())).willReturn(Optional.of(buyer));
-        given(memberRepository.findMemberByNickName(any())).willReturn(Optional.of(seller));
+        given(memberRepository.findMemberByNickNameAndDeletedIsFalse(any())).willReturn(Optional.of(buyer));
+        given(memberRepository.findMemberByNickNameAndDeletedIsFalse(any())).willReturn(Optional.of(seller));
         given(productRepository.findProductById(any())).willReturn(Optional.of(product));
         given(chatRoomRepository.findChatRoomByBuyerNickNameAndSellerNickNameAndProductId(any(), any(), any()))
                 .willReturn(Optional.empty());
@@ -284,7 +262,7 @@ class ChatServiceTest {
         assertThat(expectedResponse.roomName()).isEqualTo("seller");
         assertThat(expectedResponse.nickName()).isEqualTo("buyer");
 
-        then(memberRepository).should(times(2)).findMemberByNickName(any());
+        then(memberRepository).should(times(2)).findMemberByNickNameAndDeletedIsFalse(any());
         then(productRepository).should().findProductById(any());
         then(chatRoomRepository).should().findChatRoomByBuyerNickNameAndSellerNickNameAndProductId(any(), any(), any());
         then(chatRoomRepository).should().save(any());

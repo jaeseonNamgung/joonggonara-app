@@ -3,7 +3,10 @@ package com.hit.joonggonara.common.custom.board;
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.errorCode.BoardErrorCode;
 import com.hit.joonggonara.common.type.CategoryType;
+import com.hit.joonggonara.common.type.LoginType;
+import com.hit.joonggonara.common.type.Role;
 import com.hit.joonggonara.common.type.SchoolType;
+import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.entity.Photo;
 import com.hit.joonggonara.entity.Product;
 import com.hit.joonggonara.repository.product.PhotoRepository;
@@ -113,6 +116,20 @@ class CustomFileUtilTest {
                 .isSoldOut(false)
                 .productStatus("최상")
                 .tradingPlace("학교 앞")
+                .member(createMember())
+                .build();
+    }
+
+    private static Member createMember() {
+        return Member.builder()
+                .userId("userId")
+                .email("test@email.com")
+                .name("hong")
+                .nickName("nickName")
+                .password("Abc1234*")
+                .phoneNumber("+8612345678")
+                .role(Role.ROLE_USER)
+                .loginType(LoginType.GENERAL)
                 .build();
     }
 

@@ -61,11 +61,12 @@ class BoardApiControllerTest {
         ProductRequest productRequest = ProductRequest.of(title, "Book", price, content,
                 tradingPlace, productStatus, "HIT");
 
-        MockMultipartFile productRequestJson = new MockMultipartFile(
-                "productRequest", "", "application/json", objectMapper.writeValueAsBytes(productRequest));
+        MockMultipartFile productRequestJson = new MockMultipartFile("productRequest", "",
+                MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(productRequest));
 
         //when
-        ResultActions resultActions = mvc.perform(multipart(HttpMethod.POST, "/board/write")
+        ResultActions resultActions = mvc.perform(
+                multipart(HttpMethod.POST, "/board/write")
                         .file(mockFile)
                         .file(productRequestJson)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -76,6 +77,14 @@ class BoardApiControllerTest {
                     .andExpect(jsonPath("$.fieldErrors[*].message").value(message));
         //then
 
+    }
+    static Stream<Arguments> validationAPiExceptionTest(){
+        return Stream.of(
+                Arguments.of("", 1000L, "content", "HIT", "죄상", ValidationMessageProperties.TITLE_NOT_BLANK),
+                Arguments.of("title", 1000L, "", "HIT", "죄상", ValidationMessageProperties.CONTENT_NOT_BLANK),
+                Arguments.of("title", 1000L, "content", "", "죄상", ValidationMessageProperties.TRADING_PLACE_NOT_BLANK),
+                Arguments.of("title", 1000L, "content", "HIT", "", ValidationMessageProperties.PRODUCT_STATUS_NOT_BLANK)
+        );
     }
 
     @WithMockUser("USER")
@@ -116,13 +125,12 @@ class BoardApiControllerTest {
     void TestProductSearchByCategoryAndSchool() throws Exception {
         //given
         ProductResponse productResponse = createProductResponse();
-        given(productService.search(any(),any(),any(), any())).willReturn(new PageImpl<>(List.of(productResponse)));
+        given(productService.getSearchProductsByKeyword(any(),any())).willReturn(new PageImpl<>(List.of(productResponse)));
         //when & then
         mvc.perform(get("/board/search")
-                        .queryParam("category", CategoryType.BOOK.name())
-                        .queryParam("school", SchoolType.HIT.name())
+                        .queryParam("keyword", "ti")
                         .queryParam("size", "5")
-                        .queryParam("page", "1")
+                        .queryParam("page", "0")
                         .with(csrf())
         ).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
@@ -130,10 +138,10 @@ class BoardApiControllerTest {
                 .andExpect(jsonPath("$.content[0].title").value("title"))
                 .andExpect(jsonPath("$.content[0].content").value("content"))
                 .andExpect(jsonPath("$.content[0].categoryType").value("BOOK"))
-                .andExpect(jsonPath("$.content[0].schoolType").value("HIT"))
+                .andExpect(jsonPath("$.content[0].school").value("하얼빈 공업 대학교"))
                 .andExpect(jsonPath("$.size").value(1))
                 .andExpect(jsonPath("$.number").value(0));
-        then(productService).should().search(any(),any(),any(), any());
+        then(productService).should().getSearchProductsByKeyword(any(),any());
 
     }
 
@@ -155,14 +163,6 @@ class BoardApiControllerTest {
     }
 
 
-    static Stream<Arguments> validationAPiExceptionTest(){
-        return Stream.of(
-                Arguments.of("", 1000L, "content", "HIT", "죄상", ValidationMessageProperties.TITLE_NOT_BLANK),
-                Arguments.of("title", null, "content", "HIT", "죄상", ValidationMessageProperties.PRICE_NOT_BLANK),
-                Arguments.of("title", 1000L, "", "HIT", "죄상", ValidationMessageProperties.CONTENT_NOT_BLANK),
-                Arguments.of("title", 1000L, "content", "", "죄상", ValidationMessageProperties.TRADING_PLACE_NOT_BLANK),
-                Arguments.of("title", 1000L, "content", "HIT", "", ValidationMessageProperties.PRODUCT_STATUS_NOT_BLANK)
-        );
-    }
+
 
 }

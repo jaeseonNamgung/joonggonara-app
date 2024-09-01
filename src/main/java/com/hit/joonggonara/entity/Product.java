@@ -7,11 +7,13 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLRestriction("is_deleted = false")
 @Getter
 @Entity
 public class Product extends BaseEntity {
@@ -45,6 +47,10 @@ public class Product extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private SchoolType schoolType;
 
+    @Column(nullable = false)
+    private boolean isDeleted = false;
+
+
     @OneToMany(mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<Photo> photos = new ArrayList<>();
 
@@ -54,6 +60,8 @@ public class Product extends BaseEntity {
 
     @OneToMany(mappedBy = "product")
     private List<ChatRoom> chatRooms = new ArrayList<>();
+
+
 
     @Builder
     public Product(Long price, String title, String content, String tradingPlace, String productStatus, boolean isSoldOut, CategoryType categoryType, SchoolType schoolType, Member member) {
@@ -65,9 +73,20 @@ public class Product extends BaseEntity {
         this.isSoldOut = isSoldOut;
         this.categoryType = categoryType;
         this.schoolType = schoolType;
-        this.member = member;
+        addMember(member);
     }
 
+    public void addMember(Member member){
+        if(this.member != null){
+            this.member.getProducts().remove(this);
+        }
+        this.member = member;
+        member.getProducts().add(this);
+    }
+
+    public void delete(){
+        this.isDeleted = true;
+    }
 
     public void updateIsSoldOut() {
         this.isSoldOut = true;

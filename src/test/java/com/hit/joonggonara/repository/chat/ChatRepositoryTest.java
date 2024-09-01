@@ -2,11 +2,16 @@ package com.hit.joonggonara.repository.chat;
 
 import com.hit.joonggonara.common.config.JPAConfig;
 import com.hit.joonggonara.common.config.P6SpyConfig;
+import com.hit.joonggonara.common.type.CategoryType;
 import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.type.Role;
+import com.hit.joonggonara.common.type.SchoolType;
 import com.hit.joonggonara.entity.Chat;
 import com.hit.joonggonara.entity.ChatRoom;
 import com.hit.joonggonara.entity.Member;
+import com.hit.joonggonara.entity.Product;
+import com.hit.joonggonara.repository.login.MemberRepository;
+import com.hit.joonggonara.repository.product.ProductRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,6 +36,10 @@ class ChatRepositoryTest {
 
     @Autowired
     private ChatRepository sut;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private MemberRepository memberRepository;
     @Autowired
     private EntityManager em;
 
@@ -82,7 +91,35 @@ class ChatRepositoryTest {
 
     private ChatRoom createChatRoom() {
 
-        return ChatRoom.builder().buyer(createBuyer()).seller(createSeller()).build();
+        return ChatRoom.builder().buyer(memberRepository.save(createBuyer())).seller(memberRepository.save(createSeller()))
+                .product(productRepository.save(createProduct())).build();
+    }
+
+    private Product createProduct() {
+        return Product.builder()
+                .title("title")
+                .price((long) 1)
+                .categoryType(CategoryType.BOOK)
+                .content("content")
+                .isSoldOut(false)
+                .productStatus("최상")
+                .tradingPlace("하공대 정문 앞")
+                .schoolType(SchoolType.HIT)
+                .member(memberRepository.save(createMember()))
+                .build();
+    }
+
+    private  Member createMember() {
+        return Member.builder()
+                .userId("testId")
+                .email("test@email.com")
+                .name("hong")
+                .nickName("nickName")
+                .password("Abc1234*")
+                .phoneNumber("+8612345678")
+                .role(Role.ROLE_USER)
+                .loginType(LoginType.GENERAL)
+                .build();
     }
 
     private Chat createChat(int i, ChatRoom chatRoom) {

@@ -26,11 +26,12 @@ public class ChatRoomQueryDslImpl implements ChatRoomQueryDsl{
     public List<ChatRoom> findAllByNickName(String nickName) {
         QMember seller = new QMember("seller");
         QMember buyer = new QMember("buyer");
+
         return jpaQueryFactory
                 .selectFrom(chatRoom)
-                .join(chatRoom.chats, chat).fetchJoin()
-                .join(chatRoom.buyer, buyer).fetchJoin()
-                .join(chatRoom.seller, seller).fetchJoin()
+                .leftJoin(chatRoom.chats, chat).fetchJoin()
+                .leftJoin(chatRoom.buyer, buyer).fetchJoin()
+                .leftJoin(chatRoom.seller, seller).fetchJoin()
                 .distinct()
                 .where(findBuyerCondition(nickName).or(findSellerCondition(nickName)))
                 .orderBy(chatRoom.createdDate.desc()).fetch();
@@ -39,8 +40,8 @@ public class ChatRoomQueryDslImpl implements ChatRoomQueryDsl{
     @Override
     public Optional<ChatRoom> findChatInChatRoomAllByRoomId(Long roomId) {
         ChatRoom chatRoom = jpaQueryFactory.selectFrom(QChatRoom.chatRoom)
-                .join(QChatRoom.chatRoom.chats).fetchJoin()
-                .join(QChatRoom.chatRoom.product, product).fetchJoin()
+                .leftJoin(QChatRoom.chatRoom.chats).fetchJoin()
+                .leftJoin(QChatRoom.chatRoom.product, product).fetchJoin()
                 .where(QChatRoom.chatRoom.id.eq(roomId)).fetchOne();
 
         return Optional.ofNullable(chatRoom);
@@ -60,7 +61,7 @@ public class ChatRoomQueryDslImpl implements ChatRoomQueryDsl{
     @Override
     public Optional<ChatRoom> findByRoomId(Long roomId) {
         ChatRoom chatRoom = jpaQueryFactory.selectFrom(QChatRoom.chatRoom)
-                .join(QChatRoom.chatRoom.product, product).fetchJoin()
+                .leftJoin(QChatRoom.chatRoom.product, product).fetchJoin()
                 .where(QChatRoom.chatRoom.id.eq(roomId)).fetchOne();
         return Optional.ofNullable(chatRoom);
     }

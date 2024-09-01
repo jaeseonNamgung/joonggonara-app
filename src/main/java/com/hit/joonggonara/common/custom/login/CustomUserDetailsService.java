@@ -5,6 +5,7 @@ import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
 import com.hit.joonggonara.repository.login.MemberRepository;
+import com.hit.joonggonara.repository.login.condition.LoginCondition;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,7 +20,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Member member = memberRepository.findByUserIdAndLoginType(username, LoginType.GENERAL)
+        Member member = memberRepository.findByPrincipalAndLoginType
+                        (LoginCondition.of(username, LoginType.GENERAL))
                 .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
 
         return new CustomUserDetails(member);

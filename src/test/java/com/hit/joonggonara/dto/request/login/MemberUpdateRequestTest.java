@@ -36,7 +36,7 @@ class MemberUpdateRequestTest {
     {
         //given
         MemberUpdateRequest memberUpdateRequest =
-                MemberUpdateRequest.of(nickName, email, phoneNumber, "profile");
+                MemberUpdateRequest.of(nickName, email, phoneNumber);
         //when
         Set<ConstraintViolation<MemberUpdateRequest>> expectedValidate = sut.validate(memberUpdateRequest, ValidationSequence.class);
         assertThat(expectedValidate).isNotEmpty();

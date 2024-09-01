@@ -70,15 +70,16 @@ public class ChatService {
     @Transactional
     public ChatRoomResponse createRoom(ChatRoomRequest chatRoomRequest, Long productId){
 
-        Member buyer = memberRepository.findMemberByNickName(chatRoomRequest.buyerNickName())
-                .orElseThrow(() -> new CustomException(ChatErrorCode.NOT_EXIST_BUYER));
+        // 회원이 null 이고 상품이 null 일경우 회원 탈퇴한 회원
+        Member buyer = memberRepository.findMemberByNickNameAndDeletedIsFalse(chatRoomRequest.buyerNickName()).orElse(null);
 
-        Member seller = memberRepository.findMemberByNickName(chatRoomRequest.sellerNickName())
-                .orElseThrow(() -> new CustomException(UserErrorCode.NOT_EXIST_USER));
+        Member seller = memberRepository.findMemberByNickNameAndDeletedIsFalse(chatRoomRequest.sellerNickName()).orElse(null);
 
+        Product product = productRepository.findProductById(productId).orElse(null);
 
-        Product product = productRepository.findProductById(productId)
-                .orElseThrow(() -> new CustomException(BoardErrorCode.NOT_EXIST_PRODUCT));
+        if(buyer == null && product == null || seller == null && product == null){
+            throw new CustomException(UserErrorCode.ALREADY_WITHDRAWAL_USER);
+        }
 
         ChatRoom chatRoom = chatRoomRepository.
                 findChatRoomByBuyerNickNameAndSellerNickNameAndProductId(chatRoomRequest.buyerNickName(), chatRoomRequest.sellerNickName(), productId)
@@ -94,8 +95,9 @@ public class ChatService {
 
     // 채팅방 전체 조회
     public List<ChatRoomAllResponse> getAllChatRoom(String nickName){
-        List<ChatRoom> chatRooms = chatRoomRepository.findAllByNickName(nickName);
-        return chatRooms.stream().map(chatRoom -> ChatRoomAllResponse.fromResponse(chatRoom, nickName))
+        return chatRoomRepository.findAllByNickName(nickName)
+                .stream()
+                .map(chatRoom -> ChatRoomAllResponse.fromResponse(chatRoom, nickName))
                 .collect(Collectors.toList());
     }
 

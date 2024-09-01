@@ -24,8 +24,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
-@WebMvcTest(controllers = SignApiController.class)
-class SignApiControllerTest {
+@WebMvcTest(controllers = SignUpApiController.class)
+class SignUpApiControllerTest {
 
     @MockBean
     private SignUpService signUpService;

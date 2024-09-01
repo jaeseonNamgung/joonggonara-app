@@ -1,7 +1,7 @@
 package com.hit.joonggonara.common.util;
 
 import com.hit.joonggonara.common.config.AwsSesConfig;
-import com.hit.joonggonara.common.util.EmailUtil;
+import com.hit.joonggonara.common.config.JPAConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,15 +11,16 @@ import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ActiveProfiles("test")
-@Import(AwsSesConfig.class)
+
+@ActiveProfiles("dev")
+@Import({AwsSesConfig.class, JPAConfig.class})
 @SpringBootTest
 class EmailUtilTest {
 
 
     @Autowired
     private EmailUtil sut;
-    
+
     @Test
     @DisplayName("[EMAIL] 이메일 전송 테스트")
     void sendEmailTest() throws Exception

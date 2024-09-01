@@ -51,7 +51,7 @@ public class ProductService {
         String userId = jwtUtil.getPrincipal(accessToken);
         LoginType loginType = jwtUtil.getLoginType(accessToken);
         LoginCondition loginCondition = LoginCondition.of(userId, loginType);
-        Member member = memberRepository.findByPrincipal(loginCondition)
+        Member member = memberRepository.findByPrincipalAndLoginType(loginCondition)
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_EXIST_USER));
         Product savedProduct = productRepository.save(productRequest.toEntity(member));
 

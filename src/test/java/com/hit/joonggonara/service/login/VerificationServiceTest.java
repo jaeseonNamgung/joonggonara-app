@@ -4,7 +4,7 @@ import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
 import com.hit.joonggonara.common.util.EmailUtil;
 import com.hit.joonggonara.common.util.RedisUtil;
-import com.hit.joonggonara.common.util.CoolSmsUtil;
+import com.hit.joonggonara.common.util.TwilioSmsUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +24,7 @@ import static org.mockito.BDDMockito.then;
 class VerificationServiceTest {
 
     @Mock
-    private CoolSmsUtil coolSmsUtil;
+    private TwilioSmsUtil twilioSmsUtil;
     @Mock
     private EmailUtil emailUtil;
     @Mock
@@ -94,12 +94,12 @@ class VerificationServiceTest {
     {
         //given
         String phoneNumber = "+8612345678";
-        given(coolSmsUtil.sendMessage(any())).willReturn(Optional.of("123456"));
+        given(twilioSmsUtil.sendMessage(any())).willReturn(Optional.of("123456"));
 
         //when
         sut.sendSms(phoneNumber);
         //then
-        then(coolSmsUtil).should().sendMessage(any());
+        then(twilioSmsUtil).should().sendMessage(any());
         then(redisUtil).should().removeAndSave(any(), any(), any());
     }
 
@@ -109,7 +109,7 @@ class VerificationServiceTest {
     {
         //given
         String sms = "+8612345678";
-        given(coolSmsUtil.sendMessage(any())).willReturn(Optional.empty());
+        given(twilioSmsUtil.sendMessage(any())).willReturn(Optional.empty());
 
         //when
         CustomException expectedException =
@@ -118,7 +118,7 @@ class VerificationServiceTest {
         assertThat(expectedException.getErrorCode().getHttpStatus()).isEqualTo(UserErrorCode.NO_VERIFICATION_CODE.getHttpStatus());
         assertThat(expectedException).hasMessage(UserErrorCode.NO_VERIFICATION_CODE.getMessage());
 
-        then(coolSmsUtil).should().sendMessage(any());
+        then(twilioSmsUtil).should().sendMessage(any());
     }
 
     @Test

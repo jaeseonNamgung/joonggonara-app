@@ -23,13 +23,13 @@ import com.hit.joonggonara.dto.request.login.*;
 import com.hit.joonggonara.dto.response.board.MemberResponse;
 import com.hit.joonggonara.dto.response.login.FindUserIdResponse;
 import com.hit.joonggonara.dto.response.login.MemberTokenResponse;
-import com.hit.joonggonara.dto.response.login.OAuth2UserDto;
 import com.hit.joonggonara.dto.response.login.TokenResponse;
 import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.repository.login.MemberRepository;
 import com.hit.joonggonara.repository.login.condition.AuthenticationCondition;
 import com.hit.joonggonara.repository.login.condition.LoginCondition;
 import com.hit.joonggonara.repository.login.condition.VerificationCondition;
+import com.hit.joonggonara.repository.product.ProductRepository;
 import com.hit.joonggonara.service.login.oidc.OidcService;
 import io.jsonwebtoken.lang.Strings;
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,6 +43,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
@@ -66,6 +67,7 @@ public class LoginService {
     private final NaverSecurityConfig naverSecurityConfig;
     private final PasswordEncoder passwordEncoder;
     private final CustomFileUtil customFileUtil;
+    private final ProductRepository productRepository;
 
 
     @Transactional
@@ -82,7 +84,8 @@ public class LoginService {
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_EXIST_AUTHORIZATION));
         Role role = Role.checkRole(r);
 
-        Member member = memberRepository.findByPrincipal(LoginCondition.of(loginRequest.userId(), LoginType.GENERAL))
+        Member member = memberRepository.findByPrincipalAndLoginType(
+                LoginCondition.of(loginRequest.userId(), LoginType.GENERAL))
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_EXIST_USER));
 
         // access token, refresh token 생성
@@ -91,7 +94,7 @@ public class LoginService {
         return MemberTokenResponse.toResponse(member, token);
     }
     @Transactional
-    public OAuth2UserDto oAuth2Login(String code, LoginType loginType) throws JsonProcessingException {
+    public MemberTokenResponse oAuth2Login(String code, LoginType loginType) throws JsonProcessingException {
         OAuth2PropertiesDto oAuth2PropertiesDto = checkLoginType(loginType);
         OAuth2TokenDto oAuth2TokenDto = oAuth2Service.requestAccessToken(code, oAuth2PropertiesDto);
         Map<String, String> map;
@@ -102,13 +105,16 @@ public class LoginService {
             map = oidcService.getUserInfoFromIdToken(oAuth2TokenDto.id_token(), oAuth2PropertiesDto, loginType);
 
         }
-        boolean existMember = memberRepository.existByEmail(map.get("email"));
+        Optional<Member> optionalMember =
+                memberRepository.findByPrincipalAndLoginType(LoginCondition.of(map.get("email"), loginType));
+
         // 이미 가입된 회원인 경우 토큰 생성
-        if(existMember){
+        if(optionalMember.isPresent()){
+            Member member = optionalMember.get();
             TokenDto tokenDto = createToken(map.get("email"), Role.ROLE_USER, loginType);
-            return OAuth2UserDto.fromOAuth2UserDto(tokenDto, map.get("profile"));
+            return MemberTokenResponse.toResponse(member, tokenDto);
         }
-        return OAuth2UserDto.fromOAuth2UserDto(map.get("email"), map.get("profile"));
+        return MemberTokenResponse.toResponse(map.get("email"), map.get("profile"), loginType);
     }
 
     private OAuth2PropertiesDto checkLoginType(LoginType loginType) {
@@ -122,7 +128,7 @@ public class LoginService {
     }
 
 
-    public String sendRedirect(LoginType loginType) {
+    public String sendRedirect(LoginType loginType) throws IOException {
         OAuth2PropertiesDto oAuth2PropertiesDto = checkLoginType(loginType);
         return oAuth2Service.sendRedirect(loginType, oAuth2PropertiesDto);
     }
@@ -192,7 +198,6 @@ public class LoginService {
         VerificationCondition condition = VerificationCondition.of(name, userId, email);
         checkExistUser(condition, VerificationType.PASSWORD_EMAIL);
         verificationService.sendEmail(email);
-
         return true;
     }
 
@@ -284,12 +289,10 @@ public class LoginService {
         String principal = jwtUtil.getPrincipal(accessToken);
         LoginType loginType = jwtUtil.getLoginType(accessToken);
 
-        // 로그인 타입 별로 member 삭제
-        if(loginType.equals(LoginType.GENERAL)){
-            memberRepository.deleteByUserId(principal);
-        }else{
-            memberRepository.deleteByEmail(principal);
-        }
+        Member member = memberRepository.withDrawlFindByPrincipal(LoginCondition.of(principal, loginType))
+                .orElseThrow(() -> new CustomException(UserErrorCode.NOT_EXIST_USER));
+        memberRepository.delete(member);
+        member.deleteProduct();
 
         redisUtil.delete(REFRESH_TOKEN_NAME + principal);
         return true;
@@ -310,7 +313,7 @@ public class LoginService {
         String principal = jwtUtil.getPrincipal(parseJwt);
         LoginType loginType = jwtUtil.getLoginType(parseJwt);
 
-        Member member = memberRepository.findByPrincipalAndLoginType(principal, loginType)
+        Member member = memberRepository.findByPrincipalAndLoginType(LoginCondition.of(principal, loginType))
                 .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
 
         String uploadProfile = customFileUtil.uploadProfile(profile);
@@ -326,7 +329,7 @@ public class LoginService {
 
     @Transactional
     public boolean updatePassword(UpdatePasswordRequest updatePasswordRequest){
-        Member member = memberRepository.findByUserId(updatePasswordRequest.userId())
+        Member member = memberRepository.findByUserIdAndDeletedIsFalse(updatePasswordRequest.userId())
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_EXIST_USER));
 
         member.updatePassword(passwordEncoder.encode(updatePasswordRequest.password()));

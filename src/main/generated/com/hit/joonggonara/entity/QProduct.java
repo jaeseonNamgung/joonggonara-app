@@ -35,6 +35,8 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final BooleanPath isDeleted = createBoolean("isDeleted");
+
     public final BooleanPath isSoldOut = createBoolean("isSoldOut");
 
     public final QMember member;

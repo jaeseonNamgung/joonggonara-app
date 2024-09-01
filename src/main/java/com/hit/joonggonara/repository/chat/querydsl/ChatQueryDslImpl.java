@@ -17,7 +17,7 @@ public class ChatQueryDslImpl implements ChatQueryDsl{
     @Override
     public List<Chat> findChatAllByRoomId(Long roomId) {
         return jpaQueryFactory.selectFrom(chat)
-                .join(chat.chatRoom).fetchJoin()
+                .leftJoin(chat.chatRoom).fetchJoin()
                 .where(chat.chatRoom.id.eq(roomId))
                 .orderBy(chat.createdDate.asc())
                 .fetch();

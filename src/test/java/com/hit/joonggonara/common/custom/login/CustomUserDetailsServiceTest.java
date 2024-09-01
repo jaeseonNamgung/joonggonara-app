@@ -29,35 +29,35 @@ class CustomUserDetailsServiceTest {
     private MemberRepository memberRepository;
     @InjectMocks
     private CustomUserDetailsService sut;
-    
-    
+
+
     @Test
     @DisplayName("[Service] 회원 정보 존재")
     void userExistTest() throws Exception
     {
         //given
         Member member = createMember();
-        given(memberRepository.findByUserIdAndLoginType(any(), any())).willReturn(Optional.of(member));
+        given(memberRepository.findByPrincipalAndLoginType(any())).willReturn(Optional.of(member));
         //when
         UserDetails expectedUserDetails = sut.loadUserByUsername(member.getUserId());
         //then
         assertThat(expectedUserDetails.getUsername()).isEqualTo(member.getUserId());
         assertThat(expectedUserDetails.getPassword()).isEqualTo(member.getPassword());
-        then(memberRepository).should().findByUserIdAndLoginType(any(), any());
+        then(memberRepository).should().findByPrincipalAndLoginType(any());
     }
-    
+
     @Test
     @DisplayName("[Service] 존재하지 않은 회원")
     void NotFoundUserTest() throws Exception
     {
         //given
-        given(memberRepository.findByUserIdAndLoginType(any(), any())).willReturn(Optional.empty());
+        given(memberRepository.findByPrincipalAndLoginType(any())).willReturn(Optional.empty());
         //when
         CustomException expectedException = (CustomException) catchRuntimeException(()-> sut.loadUserByUsername("test"));
         //then
         assertThat(expectedException.getErrorCode().getHttpStatus()).isEqualTo(UserErrorCode.USER_NOT_FOUND.getHttpStatus());
         assertThat(expectedException).hasMessage(UserErrorCode.USER_NOT_FOUND.getMessage());
-        then(memberRepository).should().findByUserIdAndLoginType(any(), any());
+        then(memberRepository).should().findByPrincipalAndLoginType(any());
     }
 
     private Member createMember() {
