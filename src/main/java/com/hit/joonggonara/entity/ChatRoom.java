@@ -49,6 +49,7 @@ public class ChatRoom extends BaseEntity{
         this.seller = seller;
         this.buyerDeleted = false;
         this.sellerDeleted = false;
+        this.isDeleted = false;
         addProduct(product);
     }
 
