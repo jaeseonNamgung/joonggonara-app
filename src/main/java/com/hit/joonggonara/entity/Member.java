@@ -4,14 +4,17 @@ import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.type.Role;
 import com.hit.joonggonara.dto.request.login.MemberUpdateRequest;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-@SQLDelete(sql = "UPDATE member SET is_deleted = true, deleted_at = now() WHERE id = ?")
-@SQLRestriction("is_deleted = false")
+@SQLDelete(sql = "UPDATE member SET deleted = true, deleted_at = now() WHERE id = ?")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
@@ -34,7 +37,7 @@ public class Member extends BaseEntity{
     private boolean isNotification;
 
     // 회원 탈퇴 유무 true 일 경우 회원 탈퇴
-    private boolean isDeleted;
+    private boolean deleted;
     // 회원 탈퇴한 시작 시간
     private LocalDateTime deletedAt;
 
@@ -46,6 +49,9 @@ public class Member extends BaseEntity{
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToMany(mappedBy = "member")
+    private List<Product> products = new ArrayList<>();
 
 
     @Builder
@@ -70,6 +76,7 @@ public class Member extends BaseEntity{
         this.isNotification = isNotification;
         this.loginType = loginType;
         this.role = role;
+        this.deleted = false;
     }
 
     public void update(MemberUpdateRequest memberUpdateRequest, String profile) {
@@ -79,7 +86,14 @@ public class Member extends BaseEntity{
         this.phoneNumber = memberUpdateRequest.phoneNumber();
     }
 
+    public void deleteProduct() {
+        for (Product product : this.products) {
+            product.delete();
+        }
+    }
+
     public void updatePassword(String password){
         this.password = password;
     }
+
 }

@@ -28,9 +28,11 @@ public class ProductQueryDslImpl implements ProductQueryDsl {
     public Page<Product> getSortProducts(String keyword, SchoolType schoolType, CategoryType categoryType, Pageable pageable) {
         List<Product> products = queryFactory.selectFrom(product)
                 .distinct()
-                .join(product.member, member).fetchJoin()
-                .join(product.photos, photo).fetchJoin()
-                .where(keywordContain(keyword), eqSchool(schoolType), eqCategory(categoryType))
+                .leftJoin(product.member, member).fetchJoin()
+                .leftJoin(product.photos, photo).fetchJoin()
+                .where(keywordContain(keyword), eqSchool(schoolType),
+                        eqCategory(categoryType),
+                        product.member.deleted.isFalse())
                 .orderBy(product.createdDate.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -46,9 +48,9 @@ public class ProductQueryDslImpl implements ProductQueryDsl {
     public Page<Product> findProductsByKeyword(String keyword, Pageable pageable) {
         List<Product> products = queryFactory.selectFrom(product)
                 .distinct()
-                .join(product.member, member).fetchJoin()
-                .join(product.photos, photo).fetchJoin()
-                .where(keywordContain(keyword))
+                .leftJoin(product.member, member).fetchJoin()
+                .leftJoin(product.photos, photo).fetchJoin()
+                .where(keywordContain(keyword), product.member.deleted.isFalse())
                 .orderBy(product.createdDate.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -65,9 +67,9 @@ public class ProductQueryDslImpl implements ProductQueryDsl {
     @Override
     public Optional<Product> findProductById(Long id) {
         Product product = queryFactory.selectFrom(QProduct.product)
-                .join(QProduct.product.member, member).fetchJoin()
-                .join(QProduct.product.photos,photo).fetchJoin()
-                .where(QProduct.product.id.eq(id))
+                .leftJoin(QProduct.product.member, member).fetchJoin()
+                .leftJoin(QProduct.product.photos,photo).fetchJoin()
+                .where(QProduct.product.id.eq(id), QProduct.product.member.deleted.isFalse())
                 .distinct()
                 .fetchOne();
         return Optional.ofNullable(product);
@@ -76,9 +78,9 @@ public class ProductQueryDslImpl implements ProductQueryDsl {
     @Override
     public List<Product> findByNickName(String nickName) {
         return queryFactory.selectFrom(product)
-                .join(product.member, member).fetchJoin()
-                .join(product.photos,photo).fetchJoin()
-                .where(product.member.nickName.eq(nickName))
+                .leftJoin(product.member, member).fetchJoin()
+                .leftJoin(product.photos,photo).fetchJoin()
+                .where(product.member.nickName.eq(nickName), product.member.deleted.isFalse())
                 .orderBy(product.createdDate.desc())
                 .distinct()
                 .fetch();

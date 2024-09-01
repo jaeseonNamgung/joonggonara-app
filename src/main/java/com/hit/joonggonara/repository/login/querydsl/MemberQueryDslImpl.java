@@ -26,7 +26,7 @@ public class MemberQueryDslImpl implements MemberQueryDsl{
     public boolean existByUserId(String userId) {
         Integer isExist = jpaQueryFactory.selectOne()
                 .from(member)
-                .where(member.userId.eq(userId))
+                .where(member.userId.eq(userId), member.deleted.isFalse())
                 .fetchFirst();
         return isExist != null;
     }
@@ -35,7 +35,7 @@ public class MemberQueryDslImpl implements MemberQueryDsl{
     public boolean existByNickName(String nickName) {
         Integer isExist = jpaQueryFactory.selectOne()
                 .from(member)
-                .where(member.nickName.eq(nickName))
+                .where(member.nickName.eq(nickName), member.deleted.isFalse())
                 .fetchFirst();
         return isExist != null;
     }
@@ -43,7 +43,7 @@ public class MemberQueryDslImpl implements MemberQueryDsl{
     public boolean existByEmail(String email) {
         Integer isExist = jpaQueryFactory.selectOne()
                 .from(member)
-                .where(member.email.eq(email))
+                .where(member.email.eq(email), member.deleted.isFalse())
                 .fetchFirst();
         return isExist != null;
     }
@@ -52,7 +52,8 @@ public class MemberQueryDslImpl implements MemberQueryDsl{
     public boolean existByEmailAndLoginType(String email, LoginType loginType) {
         Integer isExist = jpaQueryFactory.selectOne()
                 .from(member)
-                .where(member.email.eq(email).and(member.loginType.eq(loginType)))
+                .where(member.email.eq(email).and(member.loginType.eq(loginType))
+                        , member.deleted.isFalse())
                 .fetchOne();
         return isExist != null;
     }
@@ -61,7 +62,11 @@ public class MemberQueryDslImpl implements MemberQueryDsl{
     public boolean existByUserNameAndVerificationTypeValue(VerificationCondition condition, VerificationType verificationType) {
         Integer exist = jpaQueryFactory.selectOne()
                 .from(member)
-                .where(member.name.eq(condition.username()), verificationType(condition, verificationType))
+                .where(member.name.eq(condition.username())
+                        ,verificationType(condition, verificationType)
+                        ,member.deleted.isFalse()
+                        ,member.loginType.eq(LoginType.GENERAL)
+                )
                 .fetchOne();
         return exist != null;
     }
@@ -71,32 +76,30 @@ public class MemberQueryDslImpl implements MemberQueryDsl{
     public Optional<String> findUserIdOrPasswordByPhoneNumberOrEmail(AuthenticationCondition condition) {
         String authentication = jpaQueryFactory.select(checkIdOfPassword(condition.authenticationType()))
                 .from(member)
-                .where(authenticationCondition(condition))
+                .where(authenticationCondition(condition), member.deleted.isFalse(), member.loginType.eq(LoginType.GENERAL))
                 .fetchFirst();
 
         return Optional.ofNullable(authentication);
     }
     @Override
-    public Optional<Member> findByPrincipalAndLoginType(String principal, LoginType loginType) {
+    public Optional<Member> findByPrincipalAndLoginType(LoginCondition condition) {
+
         Member fetchMember = jpaQueryFactory.selectFrom(member)
-                .where(principalAndLoginTypeCondition(principal, loginType))
-                .fetchFirst();
-        return Optional.of(fetchMember);
+                .where(
+                        loginCondition(condition),member.loginType.eq(condition.loginType()),
+                        member.deleted.isFalse())
+                .fetchOne();
+        return Optional.ofNullable(fetchMember);
     }
-
-    private BooleanExpression principalAndLoginTypeCondition(String principal, LoginType loginType) {
-        if(LoginType.GENERAL.equals(loginType)){
-            return member.userId.eq(principal);
-        }
-        return member.email.eq(principal);
-    }
-
-
 
     @Override
-    public Optional<Member> findByPrincipal(LoginCondition condition) {
+    public Optional<Member> withDrawlFindByPrincipal(LoginCondition condition) {
         Member fetchOne = jpaQueryFactory.selectFrom(member)
-                .where(loginCondition(condition).and(member.loginType.eq(condition.loginType())))
+                .distinct()
+                .leftJoin(member.products).fetchJoin()
+                .where(loginCondition(condition),
+                        member.loginType.eq(condition.loginType()),
+                        member.deleted.isFalse())
                 .fetchOne();
         return Optional.ofNullable(fetchOne);
     }

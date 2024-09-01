@@ -21,9 +21,9 @@ public interface MemberQueryDsl{
     boolean existByNickName(String nickName);
 
     Optional<String> findUserIdOrPasswordByPhoneNumberOrEmail(AuthenticationCondition condition);
-    Optional<Member> findByPrincipalAndLoginType(String principal, LoginType loginType);
 
+    // update 일 경우 false , login 일 경우 true
+    Optional<Member> findByPrincipalAndLoginType(LoginCondition condition);
 
-    Optional<Member> findByPrincipal(LoginCondition condition);
-
+    Optional<Member> withDrawlFindByPrincipal(LoginCondition condition);
 }
