@@ -9,6 +9,7 @@ import com.hit.joonggonara.dto.response.board.ProductResponse;
 import com.hit.joonggonara.service.board.ProductService;
 import com.hit.joonggonara.service.login.LoginService;
 import com.hit.joonggonara.service.login.SignUpService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -63,5 +64,10 @@ public class MyPageApiController {
     @DeleteMapping("/product/delete/{productId}")
     public ResponseEntity<Boolean> deleteProduct(@PathVariable(name = "productId") Long productId){
         return ResponseEntity.ok(productService.delete(productId));
+    }
+
+    @DeleteMapping("/user/withdrawal")
+    public ResponseEntity<Boolean> withdrawal(HttpServletRequest request){
+        return ResponseEntity.ok(loginService.withdrawal(request));
     }
 }
