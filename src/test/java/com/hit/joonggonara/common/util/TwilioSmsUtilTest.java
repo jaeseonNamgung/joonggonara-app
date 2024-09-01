@@ -21,15 +21,15 @@ import static org.assertj.core.api.Assertions.catchException;
 
 @TestPropertySource(properties = {"spring.config.location = classpath:application.yml"})
 @ActiveProfiles("test")
-@Import(CoolSmsUtil.class)
+@Import(TwilioSmsUtil.class)
 @ExtendWith(MockitoExtension.class)
-class CoolSmsUtilTest {
+class TwilioSmsUtilTest {
 
 
     @InjectMocks
-    private CoolSmsUtil coolSmsUtil;
+    private TwilioSmsUtil twilioSmsUtil;
 
-    
+
     @Test
     @DisplayName("[CoolSms] 메세지 전송 오류")
     void sendMessageTest() throws Exception
@@ -41,9 +41,9 @@ class CoolSmsUtilTest {
         String phoneNumber = "01097175449";
         String toPhoneNumber = "01097175449";
         //when
-        coolSmsUtil = new CoolSmsUtil(accountSid, authToken, phoneNumber);
+        twilioSmsUtil = new TwilioSmsUtil(accountSid, authToken, phoneNumber);
         CustomException customException =
-                (CustomException) catchException(() -> coolSmsUtil.sendMessage(toPhoneNumber));
+                (CustomException) catchException(() -> twilioSmsUtil.sendMessage(toPhoneNumber));
 
         //then
         assertThat(customException.getMessage()).isEqualTo(UserErrorCode.SEND_ERROR.getMessage());
@@ -61,7 +61,7 @@ class CoolSmsUtilTest {
             mock.when(SecureRandom::getInstanceStrong).thenThrow(NoSuchAlgorithmException.class);
             //when
             CustomException expectedException =
-                    (CustomException)catchException(()-> coolSmsUtil.sendMessage(phoneNumber));
+                    (CustomException)catchException(()-> twilioSmsUtil.sendMessage(phoneNumber));
             //then
             assertThat(expectedException.getErrorCode().getHttpStatus())
                     .isEqualTo(UserErrorCode.NO_SUCH_ALGORITHM.getHttpStatus());

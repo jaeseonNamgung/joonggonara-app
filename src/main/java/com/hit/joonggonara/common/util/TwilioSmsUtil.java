@@ -2,53 +2,49 @@ package com.hit.joonggonara.common.util;
 
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
-import net.nurigo.java_sdk.api.Message;
-import net.nurigo.java_sdk.exceptions.CoolsmsException;
+import com.twilio.Twilio;
+import com.twilio.rest.api.v2010.account.Message;
+import com.twilio.type.PhoneNumber;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.HashMap;
 import java.util.Optional;
 
 @Service
-public class CoolSmsUtil {
+public class TwilioSmsUtil {
 
 
-    private final String API_KEY;
-    private final String SECRET;
+    private final String SID;
+    private final String TOKEN;
     private final String FROM_PHONE_NUMBER;
 
-    public CoolSmsUtil(
-            @Value("${coolsms.api_key}")
-            String API_KEY,
-            @Value("${coolsms.secret}")
-            String SECRET,
-            @Value("${coolsms.phone_number}")
+    public TwilioSmsUtil(
+            @Value("${twilio.account-sid}")
+            String SID,
+            @Value("${twilio.auth-token}")
+            String TOKEN,
+            @Value("${twilio.phone-number}")
             String FROM_PHONE_NUMBER) {
-        this.API_KEY = API_KEY;
-        this.SECRET = SECRET;
+        this.SID = SID;
+        this.TOKEN = TOKEN;
         this.FROM_PHONE_NUMBER = FROM_PHONE_NUMBER;
     }
 
     public Optional<String> sendMessage(String toPhoneNumber){
         // 인증 코드 생성
+        Twilio.init(SID, TOKEN);
         String verificationCode = createVerificationCode();
-
         String sendMessage = "[굿바이 굿] 인증번호는 (" + verificationCode + ")입니다.";
 
-        HashMap<String, String> params = new HashMap<>();
-        Message coolsms = new Message(API_KEY, SECRET);
-
-        params.put("to", toPhoneNumber);
-        params.put("from", FROM_PHONE_NUMBER);
-        params.put("type", "SMS");
-        params.put("text", sendMessage);
-
-        try{
-            coolsms.send(params);
-        }catch (CoolsmsException e){
+        try {
+            Message.creator(
+                    new PhoneNumber("+82" + toPhoneNumber),
+                    new PhoneNumber(FROM_PHONE_NUMBER),
+                    sendMessage
+            ).create();
+        } catch (Exception e){
             throw new CustomException(UserErrorCode.SEND_ERROR);
         }
 
