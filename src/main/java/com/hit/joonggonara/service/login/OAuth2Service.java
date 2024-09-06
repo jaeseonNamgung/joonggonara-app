@@ -4,14 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
 import com.hit.joonggonara.common.properties.JwtProperties;
 import com.hit.joonggonara.common.type.LoginType;
-import com.hit.joonggonara.dto.login.OAuth2TokenDto;
 import com.hit.joonggonara.dto.login.OAuth2PropertiesDto;
+import com.hit.joonggonara.dto.login.OAuth2TokenDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -79,7 +78,6 @@ public class OAuth2Service {
 
         ResponseEntity<HashMap> responseEntity = restTemplate.postForEntity(oAuth2PropertiesDto.userInfoUrl(), httpEntity, HashMap.class);
         Map<String, String> map = (Map<String, String>) responseEntity.getBody().get("response");
-        log.info(map.toString());
         return Map.of("email", map.get("email"), "profile", map.get("profile_image"));
     }
 }

@@ -9,7 +9,6 @@ import com.hit.joonggonara.common.type.TokenType;
 import com.hit.joonggonara.dto.login.TokenDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-@Slf4j
 @Component
 public class JwtUtil {
 
@@ -196,7 +194,6 @@ public class JwtUtil {
 
     public Map<String, String> getOidcTokenBody(String token, String modulus, String exponent) {
         Claims claims = validationIdToken(token, modulus, exponent).getBody();
-        log.info(claims.toString());
         return Map.of("email", String.valueOf(claims.get("email")), "profile", String.valueOf(claims.get("picture")));
     }
 
