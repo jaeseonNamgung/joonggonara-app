@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
 @Getter
-public enum BoardErrorCode implements ErrorCode {
+public enum ProductErrorCode implements ErrorCode {
 
     NOT_UPLOADED_IMAGE(HttpStatus.BAD_REQUEST, "이미지가 업로드 되지 않았습니다."),
     MISMATCH_EXTENSION(HttpStatus.BAD_REQUEST, "png 또는 jpg 확장자만 업로드 가능합니다." ),
