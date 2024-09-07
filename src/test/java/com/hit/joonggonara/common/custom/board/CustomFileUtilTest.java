@@ -1,21 +1,21 @@
 package com.hit.joonggonara.common.custom.board;
 
 import com.hit.joonggonara.common.error.CustomException;
-import com.hit.joonggonara.common.error.errorCode.BoardErrorCode;
+import com.hit.joonggonara.common.error.errorCode.ProductErrorCode;
 import com.hit.joonggonara.common.type.CategoryType;
 import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.type.Role;
 import com.hit.joonggonara.common.type.SchoolType;
+import com.hit.joonggonara.common.util.CustomFileUtil;
+import com.hit.joonggonara.dto.file.FileDto;
 import com.hit.joonggonara.entity.Member;
 import com.hit.joonggonara.entity.Photo;
 import com.hit.joonggonara.entity.Product;
-import com.hit.joonggonara.repository.product.PhotoRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,15 +26,9 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchException;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
 class CustomFileUtilTest {
-
-    @Mock
-    private PhotoRepository photoRepository;
 
     @InjectMocks
     private CustomFileUtil sut;
@@ -42,7 +36,7 @@ class CustomFileUtilTest {
 
 
     @Test
-    @DisplayName("[이미지 업로드] 이미지가 성공적으로 저장되면 true를 리턴")
+    @DisplayName("[이미지 업로드] 이미지가 성공적으로 저장되면 Dto를 리턴")
     void ReturnsTrueIfTheImageIsSavedSuccessfully() throws Exception {
         //given
         MockMultipartFile validFile = new MockMultipartFile(
@@ -51,14 +45,13 @@ class CustomFileUtilTest {
                 "image/jpeg",
                 "test data".getBytes()
         );
-        Product product = createProduct();
-        Photo photo = createPhoto(product);
-        given(photoRepository.save(any())).willReturn(photo);
+
         //when
-        boolean expectedValue = sut.uploadImage(product, List.of(validFile));
+        List<FileDto> expectedDto = sut.uploadImage(List.of(validFile));
         //then
-        assertThat(expectedValue).isTrue();
-        then(photoRepository).should().save(any());
+        assertThat(expectedDto).isNotEmpty();
+        assertThat(expectedDto.get(0).filePath()).isNotBlank();
+        assertThat(expectedDto.get(0).fileName()).isNotBlank();
 
     }
 
@@ -72,14 +65,13 @@ class CustomFileUtilTest {
                 "image/gif",
                 "test data".getBytes()
         );
-        Product product = createProduct();
         //when
         CustomException expectedException =
-                (CustomException) catchException(() -> sut.uploadImage(product, List.of(validFile)));
+                (CustomException) catchException(() -> sut.uploadImage(List.of(validFile)));
         //then
-        assertThat(expectedException.getMessage()).isEqualTo(BoardErrorCode.MISMATCH_EXTENSION.getMessage());
+        assertThat(expectedException.getMessage()).isEqualTo(ProductErrorCode.MISMATCH_EXTENSION.getMessage());
         assertThat(expectedException.getErrorCode().getHttpStatus())
-                .isEqualTo(BoardErrorCode.MISMATCH_EXTENSION.getHttpStatus());
+                .isEqualTo(ProductErrorCode.MISMATCH_EXTENSION.getHttpStatus());
 
     }
 
@@ -88,14 +80,13 @@ class CustomFileUtilTest {
     void ThrowNOT_UPLOADED_IMAGEExceptionIfNotExistImage() throws Exception {
         // Given
         List<MultipartFile> emptyFileList = Collections.emptyList();
-        Product product = createProduct();
         // When
         CustomException exception = assertThrows(CustomException.class, () ->
-                sut.uploadImage(product, emptyFileList)
+                sut.uploadImage(emptyFileList)
         );
 
         // Then
-        Assertions.assertEquals(BoardErrorCode.NOT_UPLOADED_IMAGE, exception.getErrorCode());
+        Assertions.assertEquals(ProductErrorCode.NOT_UPLOADED_IMAGE, exception.getErrorCode());
     }
 
     private Photo createPhoto(Product product) {

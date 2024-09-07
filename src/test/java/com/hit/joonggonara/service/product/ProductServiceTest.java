@@ -1,19 +1,22 @@
-package com.hit.joonggonara.service.board;
+package com.hit.joonggonara.service.product;
 
-import com.hit.joonggonara.common.custom.board.CustomFileUtil;
 import com.hit.joonggonara.common.error.CustomException;
-import com.hit.joonggonara.common.error.errorCode.BoardErrorCode;
+import com.hit.joonggonara.common.error.errorCode.ProductErrorCode;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
 import com.hit.joonggonara.common.properties.JwtProperties;
 import com.hit.joonggonara.common.type.CategoryType;
 import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.type.SchoolType;
+import com.hit.joonggonara.common.util.CustomFileUtil;
 import com.hit.joonggonara.common.util.JwtUtil;
-import com.hit.joonggonara.dto.request.board.ProductRequest;
-import com.hit.joonggonara.dto.response.board.ProductResponse;
+import com.hit.joonggonara.dto.file.FileDto;
+import com.hit.joonggonara.dto.request.product.ProductRequest;
+import com.hit.joonggonara.dto.response.product.ProductResponse;
 import com.hit.joonggonara.entity.Member;
+import com.hit.joonggonara.entity.Photo;
 import com.hit.joonggonara.entity.Product;
 import com.hit.joonggonara.repository.login.MemberRepository;
+import com.hit.joonggonara.repository.product.PhotoRepository;
 import com.hit.joonggonara.repository.product.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,6 +50,8 @@ class ProductServiceTest {
     @Mock
     private MemberRepository memberRepository;
     @Mock
+    private PhotoRepository photoRepository;
+    @Mock
     private JwtUtil jwtUtil;
     @Mock
     private CustomFileUtil customFileUtil;
@@ -65,15 +70,16 @@ class ProductServiceTest {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(JwtProperties.AUTHORIZATION, JwtProperties.JWT_TYPE + "token");
         Member member = createMember();
-
+        FileDto fileDto = FileDto.of("/filePath/", "test.png");
         ReflectionTestUtils.setField(product, "updatedDate", LocalDateTime.now());
-
+        ReflectionTestUtils.setField(product, "id", 1L);
+        Photo photo = Photo.builder().filePath("/filePath/").fileName("test.png").product(product).build();
         given(jwtUtil.getPrincipal(any())).willReturn("userId");
         given(jwtUtil.getLoginType(any())).willReturn(LoginType.GENERAL);
         given(memberRepository.findByPrincipalAndLoginType(any())).willReturn(Optional.of(member));
         given(productRepository.save(any())).willReturn(product);
-        given(customFileUtil.uploadImage(any(), any())).willReturn(true);
-        given(productRepository.findProductById(any())).willReturn(Optional.of(product));
+        given(customFileUtil.uploadImage(any())).willReturn(List.of(fileDto));
+        given(photoRepository.save(any())).willReturn(photo);
         //when
         ProductResponse expectedResponse = sut.upload(productRequest, List.of(multipartFile), request);
         //then
@@ -81,18 +87,20 @@ class ProductServiceTest {
         assertThat(expectedResponse.content()).isEqualTo("content");
         assertThat(expectedResponse.categoryType()).isEqualTo(CategoryType.BOOK);
         assertThat(expectedResponse.tradingPlace()).isEqualTo("하공대 정문 앞");
+        assertThat(expectedResponse.photos()).isNotEmpty();
+        assertThat(expectedResponse.memberResponse()).isNotNull();
         then(productRepository).should().save(any());
-        then(customFileUtil).should().uploadImage(any(),any());
+        then(customFileUtil).should().uploadImage(any());
         then(jwtUtil).should().getPrincipal(any());
         then(jwtUtil).should().getLoginType(any());
         then(memberRepository).should().findByPrincipalAndLoginType(any());
-        then(productRepository).should().findProductById(any());
+        then(photoRepository).should().save(any());
 
     }
 
     @Test
-    @DisplayName("[Service] 상품이 존재하지 않을 경우 NOT_UPLOAD_PRODUCT 에러를 던진다.")
-    void throwsNOT_UPLOAD_PRODUCTIfNotExistProduct() throws Exception {
+    @DisplayName("[Service] 상품 이미지가 존재하지 않을 경우 NOT_UPLOADED_IMAGE 에러를 던진다.")
+    void throwsNOT_UPLOADED_IMAGEIfNotExistImage() throws Exception {
         //given
         ProductRequest productRequest = createProductRequest();
         Product product = createProduct();
@@ -108,57 +116,20 @@ class ProductServiceTest {
         given(jwtUtil.getLoginType(any())).willReturn(LoginType.GENERAL);
         given(memberRepository.findByPrincipalAndLoginType(any())).willReturn(Optional.of(member));
         given(productRepository.save(any())).willReturn(product);
-        given(customFileUtil.uploadImage(any(), any())).willReturn(true);
-        given(productRepository.findProductById(any())).willReturn(Optional.empty());
+        given(customFileUtil.uploadImage(any())).willReturn(List.of());
+
         //when
         CustomException expectedException = assertThrows(CustomException.class,
                 () -> sut.upload(productRequest, List.of(multipartFile), request));
         //then
-        assertThat(expectedException.getErrorCode()).isEqualTo(BoardErrorCode.NOT_UPLOADED_PRODUCT);
-        assertThat(expectedException).hasMessage(BoardErrorCode.NOT_UPLOADED_PRODUCT.getMessage());
-        then(productRepository).should().save(any());
-        then(customFileUtil).should().uploadImage(any(),any());
+        assertThat(expectedException.getErrorCode()).isEqualTo(ProductErrorCode.NOT_UPLOADED_IMAGE);
+        assertThat(expectedException).hasMessage(ProductErrorCode.NOT_UPLOADED_IMAGE.getMessage());
+
         then(jwtUtil).should().getPrincipal(any());
         then(jwtUtil).should().getLoginType(any());
         then(memberRepository).should().findByPrincipalAndLoginType(any());
-        then(productRepository).should().findProductById(any());
-
-    }
-
-    @Test
-    @DisplayName("[Service] 이미지 업로드 메서드가 false를 반환할 경우 빈 response를 반환")
-    void returnsEmptyResponseIfReturnsFalseAnImageUploadMethod() throws Exception {
-        //given
-        ProductRequest productRequest = createProductRequest();
-        Product product = createProduct();
-        MultipartFile multipartFile = new MockMultipartFile(
-                "file", "test.png", "image/png", "test data".getBytes());
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader(JwtProperties.AUTHORIZATION, JwtProperties.JWT_TYPE + "token");
-        Member member = createMember();
-
-        ReflectionTestUtils.setField(product, "updatedDate", LocalDateTime.now());
-
-        given(jwtUtil.getPrincipal(any())).willReturn("userId");
-        given(jwtUtil.getLoginType(any())).willReturn(LoginType.GENERAL);
-        given(memberRepository.findByPrincipalAndLoginType(any())).willReturn(Optional.of(member));
-        given(productRepository.save(any())).willReturn(product);
-        given(customFileUtil.uploadImage(any(), any())).willReturn(false);
-
-        //when
-        ProductResponse expectedResponse = sut.upload(productRequest, List.of(multipartFile), request);
-        //then
-        assertThat(expectedResponse.title()).isNull();
-        assertThat(expectedResponse.content()).isNull();
-        assertThat(expectedResponse.categoryType()).isNull();
-        assertThat(expectedResponse.id()).isNull();
-
         then(productRepository).should().save(any());
-        then(customFileUtil).should().uploadImage(any(),any());
-        then(jwtUtil).should().getPrincipal(any());
-        then(jwtUtil).should().getLoginType(any());
-        then(memberRepository).should().findByPrincipalAndLoginType(any());
-
+        then(customFileUtil).should().uploadImage(any());
 
     }
 
