@@ -2,9 +2,9 @@ package com.hit.joonggonara.controller.api;
 
 import com.hit.joonggonara.common.type.CategoryType;
 import com.hit.joonggonara.common.type.SchoolType;
-import com.hit.joonggonara.dto.request.board.ProductRequest;
-import com.hit.joonggonara.dto.response.board.ProductResponse;
-import com.hit.joonggonara.service.board.ProductService;
+import com.hit.joonggonara.dto.request.product.ProductRequest;
+import com.hit.joonggonara.dto.response.product.ProductResponse;
+import com.hit.joonggonara.service.product.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

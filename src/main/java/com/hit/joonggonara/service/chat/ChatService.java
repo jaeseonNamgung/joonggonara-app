@@ -1,13 +1,13 @@
 package com.hit.joonggonara.service.chat;
 
 import com.hit.joonggonara.common.error.CustomException;
-import com.hit.joonggonara.common.error.errorCode.BoardErrorCode;
+import com.hit.joonggonara.common.error.errorCode.ProductErrorCode;
 import com.hit.joonggonara.common.error.errorCode.ChatErrorCode;
 import com.hit.joonggonara.common.error.errorCode.UserErrorCode;
 import com.hit.joonggonara.common.type.ChatRoomStatus;
 import com.hit.joonggonara.dto.request.chat.ChatRequest;
 import com.hit.joonggonara.dto.request.chat.ChatRoomRequest;
-import com.hit.joonggonara.dto.response.board.ProductResponse;
+import com.hit.joonggonara.dto.response.product.ProductResponse;
 import com.hit.joonggonara.dto.response.chat.ChatResponse;
 import com.hit.joonggonara.dto.response.chat.ChatRoomAllResponse;
 import com.hit.joonggonara.dto.response.chat.ChatRoomResponse;
@@ -122,7 +122,7 @@ public class ChatService {
         ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
                 .orElseThrow(() -> new CustomException(ChatErrorCode.NOT_FOUND_CHATROOM));
         if(chatRoom.getProduct() == null){
-            throw new CustomException(BoardErrorCode.NOT_EXIST_PRODUCT);
+            throw new CustomException(ProductErrorCode.NOT_EXIST_PRODUCT);
         }
         return ProductResponse.fromResponse(chatRoom.getProduct());
     }

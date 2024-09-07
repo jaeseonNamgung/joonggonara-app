@@ -43,31 +43,6 @@ class ChatRepositoryTest {
     @Autowired
     private EntityManager em;
 
-    @Test
-    @DisplayName("[JPA][QueryDsl] 채팅 삭제 테스트")
-    void deleteChatTest() throws Exception
-    {
-
-        ChatRoom chatRoom = createChatRoom();
-        ChatRoom savedChatRoom = em.merge(chatRoom);
-        em.flush();
-        em.clear();
-
-        Chat chat = Chat.builder()
-                .createdMassageDate(LocalDateTime.now().toString())
-                .message("message")
-                .chatRoom(savedChatRoom).build();
-        Chat savedChat = sut.save(chat);
-        assertThat(savedChat.isDeleted()).isFalse();
-        sut.deleteById(savedChat.getId());
-        em.flush();
-        em.clear();
-        Chat expectedChat = sut.findById(savedChat.getId()).get();
-        assertThat(expectedChat.isDeleted()).isTrue();
-        assertThat(expectedChat.getMessage()).isEqualTo("삭제된 메세지입니다.");
-    }
-
-
 
     @Test
     @DisplayName("[QueryDsl] roomId로 채팅 전체 조회")

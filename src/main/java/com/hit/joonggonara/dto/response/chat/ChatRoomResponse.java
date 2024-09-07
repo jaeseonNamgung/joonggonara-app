@@ -1,6 +1,6 @@
 package com.hit.joonggonara.dto.response.chat;
 
-import com.hit.joonggonara.dto.response.board.ProductResponse;
+import com.hit.joonggonara.dto.response.product.ProductResponse;
 import com.hit.joonggonara.entity.ChatRoom;
 
 public record ChatRoomResponse(

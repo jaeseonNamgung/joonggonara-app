@@ -3,7 +3,7 @@ package com.hit.joonggonara.controller.api;
 import com.hit.joonggonara.common.type.ChatRoomStatus;
 import com.hit.joonggonara.dto.request.chat.ChatRequest;
 import com.hit.joonggonara.dto.request.chat.ChatRoomRequest;
-import com.hit.joonggonara.dto.response.board.ProductResponse;
+import com.hit.joonggonara.dto.response.product.ProductResponse;
 import com.hit.joonggonara.dto.response.chat.ChatResponse;
 import com.hit.joonggonara.dto.response.chat.ChatRoomAllResponse;
 import com.hit.joonggonara.dto.response.chat.ChatRoomResponse;

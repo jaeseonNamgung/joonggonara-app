@@ -8,7 +8,7 @@ import com.hit.joonggonara.common.properties.JwtProperties;
 import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.common.util.CookieUtil;
 import com.hit.joonggonara.dto.request.login.*;
-import com.hit.joonggonara.dto.response.board.MemberResponse;
+import com.hit.joonggonara.dto.response.product.MemberResponse;
 import com.hit.joonggonara.dto.response.login.FindUserIdResponse;
 import com.hit.joonggonara.dto.response.login.MemberTokenResponse;
 import com.hit.joonggonara.dto.response.login.OAuth2UserDto;

@@ -15,7 +15,6 @@ public class ValidationMessageProperties {
 
     public static final String TITLE_NOT_BLANK = "제목을 입력해주세요.";
     public static final String CONTENT_NOT_BLANK = "내용을 입력해주세요.";
-    public static final String PRICE_NOT_BLANK = "가격을 입력해주세요.";
     public static final String TRADING_PLACE_NOT_BLANK = "거래 장소를 입력해주세요.";
     public static final String PRODUCT_STATUS_NOT_BLANK = "상품 상태를 입력해주세요.";
     public static final String SCHOOL_NOT_BLANK = "학교를 선택해주세요.";

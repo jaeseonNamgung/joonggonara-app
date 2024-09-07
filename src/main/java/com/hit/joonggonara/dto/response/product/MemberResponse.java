@@ -1,4 +1,4 @@
-package com.hit.joonggonara.dto.response.board;
+package com.hit.joonggonara.dto.response.product;
 
 import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.entity.Member;

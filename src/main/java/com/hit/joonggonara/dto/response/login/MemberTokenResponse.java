@@ -3,7 +3,7 @@ package com.hit.joonggonara.dto.response.login;
 
 import com.hit.joonggonara.common.type.LoginType;
 import com.hit.joonggonara.dto.login.TokenDto;
-import com.hit.joonggonara.dto.response.board.MemberResponse;
+import com.hit.joonggonara.dto.response.product.MemberResponse;
 import com.hit.joonggonara.entity.Member;
 
 public record MemberTokenResponse(
