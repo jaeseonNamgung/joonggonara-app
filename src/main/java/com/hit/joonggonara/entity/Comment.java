@@ -18,13 +18,21 @@ public class Comment extends BaseEntity{
     @Column(nullable = false)
     private  String content;
 
+    @Column
+    private Boolean isDeleted;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="community_id")
     private Community community;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="member_id")
+    private Member member;
+
     @Builder
-    public Comment(String content, Community community) {
+    public Comment(String content, Community community, Member member) {
         this.content = content;
+        this.member = member;
         addCommunity(community);
     }
     private void addCommunity(Community community){
@@ -33,5 +41,9 @@ public class Comment extends BaseEntity{
         }
         this.community = community;
         this.community.getComments().add(this);
+    }
+    public void deleteComment(){
+        this.content = "삭제된 댓글입니다.";
+        this.isDeleted = true;
     }
 }
