@@ -24,6 +24,8 @@ public class QComment extends EntityPathBase<Comment> {
 
     public final QBaseEntity _super = new QBaseEntity(this);
 
+    public final ListPath<Comment, QComment> children = this.<Comment, QComment>createList("children", Comment.class, QComment.class, PathInits.DIRECT2);
+
     public final QCommunity community;
 
     public final StringPath content = createString("content");
@@ -36,6 +38,8 @@ public class QComment extends EntityPathBase<Comment> {
     public final BooleanPath isDeleted = createBoolean("isDeleted");
 
     public final QMember member;
+
+    public final QComment parent;
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedDate = _super.updatedDate;
@@ -60,6 +64,7 @@ public class QComment extends EntityPathBase<Comment> {
         super(type, metadata, inits);
         this.community = inits.isInitialized("community") ? new QCommunity(forProperty("community"), inits.get("community")) : null;
         this.member = inits.isInitialized("member") ? new QMember(forProperty("member")) : null;
+        this.parent = inits.isInitialized("parent") ? new QComment(forProperty("parent"), inits.get("parent")) : null;
     }
 
 }
