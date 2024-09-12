@@ -22,9 +22,6 @@ public class Community extends BaseEntity {
     @Column(nullable = false)
     private String content;
 
-    @Column
-    private Integer likeCount;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_Id")
     private Member member;
@@ -34,6 +31,9 @@ public class Community extends BaseEntity {
 
     @OneToMany(mappedBy = "community", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "community", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Likes> likes = new ArrayList<>();
 
     @Builder
     public Community(String content, Member member) {
@@ -45,7 +45,4 @@ public class Community extends BaseEntity {
         this.content = communityRequest.content();
     }
 
-    public void updateLikeCount(int likeCount) {
-        this.likeCount = likeCount;
-    }
 }

@@ -26,7 +26,7 @@ public record CommunityResponse(
         return CommunityResponse.of(
                 community.getId(),
                 community.getContent(),
-                community.getLikeCount(),
+                community.getLikes().size(),
                 community.getComments().size(),
                 community.getCreatedDate().toString(),
                 community.getMember().getNickName(),
@@ -38,7 +38,7 @@ public record CommunityResponse(
         return CommunityResponse.of(
                 community.getId(),
                 community.getContent(),
-                community.getLikeCount(),
+                community.getLikes().size(),
                 community.getComments().size(),
                 community.getCreatedDate().toString(),
                 community.getMember().getNickName(),
@@ -52,7 +52,7 @@ public record CommunityResponse(
         return communityPage.map(community -> CommunityResponse.of(
                 community.getId(),
                 community.getContent(),
-                community.getLikeCount(),
+                community.getLikes().size(),
                 community.getComments().size(),
                 community.getCreatedDate().toString(),
                 community.getMember().getNickName(),

@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
-@TestPropertySource(locations = "classpath:/application.yaml")
+@TestPropertySource(locations = "classpath:/application.yaml",properties = "spring.jpa.properties.hibernate.default_batch_fetch_size=100")
 @Import({JPAConfig.class, P6SpyConfig.class})
 @DataJpaTest
 class CommunityRepositoryTest {
@@ -38,8 +38,8 @@ class CommunityRepositoryTest {
 
 
     @Test
-    @DisplayName("[JPA] findById @EntityGraph 테스트")
-    void findByIdTest() throws Exception {
+    @DisplayName("[JPA] findCommunityById 테스트")
+    void findCommunityByIdTest() throws Exception {
         //given
         Community community = Community.builder().content("content").build();
         Community savedCommunity = communityRepository.save(community);
@@ -51,12 +51,11 @@ class CommunityRepositoryTest {
         entityManager.flush();
         entityManager.clear();
         //when
-        Community expectedCommunity = communityRepository.findById(savedCommunity.getId()).get();
+        Community expectedCommunity = communityRepository.findCommunityById(savedCommunity.getId()).get();
 
         //then
         assertThat(expectedCommunity.getContent()).isEqualTo("content");
         assertThat(expectedCommunity.getCommunityImages().size()).isEqualTo(1);
-
 
     }
     @Test

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -36,13 +37,14 @@ public class Comment extends BaseEntity{
     private Comment parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Comment> children;
+    private List<Comment> children = new ArrayList<>();
 
 
     @Builder
     public Comment(String content, Community community, Member member) {
         this.content = content;
         this.member = member;
+        this.isDeleted = false;
         addCommunity(community);
     }
     private void addCommunity(Community community){
@@ -52,7 +54,7 @@ public class Comment extends BaseEntity{
         this.community = community;
         this.community.getComments().add(this);
     }
-    public void addComment(Comment parent){
+    public void addParentComment(Comment parent){
         if(this.parent != null){
             this.parent.getChildren().remove(this);
         }

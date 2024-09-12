@@ -9,7 +9,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum CommunityErrorCode implements ErrorCode {
 
-    COMMUNITY_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "게시글이 존재하지 않습니다.");
+    COMMUNITY_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "게시글이 존재하지 않습니다."),
+    COMMENT_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "댓글이 존재하지 않습니다.");
 
 
 
