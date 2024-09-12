@@ -14,4 +14,7 @@ public class RedisProperties {
     // 3분
     public static final Integer PHONE_NUMBER_EXPIRATION_TIME = 1800;
 
+    public static final String LIKE_KEY = "like";
+    public static final Integer LIKE_EXPIRATION_TIME = 1000 * 60 * 60 * 2; // 2시간
+
 }

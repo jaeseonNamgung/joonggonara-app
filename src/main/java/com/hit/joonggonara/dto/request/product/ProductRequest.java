@@ -1,4 +1,4 @@
-package com.hit.joonggonara.dto.request.board;
+package com.hit.joonggonara.dto.request.product;
 
 import com.hit.joonggonara.common.type.CategoryType;
 import com.hit.joonggonara.common.type.SchoolType;

@@ -1,6 +1,6 @@
 package com.hit.joonggonara.service.login;
 
-import com.hit.joonggonara.common.custom.board.CustomFileUtil;
+import com.hit.joonggonara.common.util.CustomFileUtil;
 import com.hit.joonggonara.common.custom.login.CustomUserProvider;
 import com.hit.joonggonara.common.error.CustomException;
 import com.hit.joonggonara.common.error.errorCode.BaseErrorCode;
@@ -16,7 +16,7 @@ import com.hit.joonggonara.common.util.RedisUtil;
 import com.hit.joonggonara.dto.login.OAuth2TokenDto;
 import com.hit.joonggonara.dto.login.TokenDto;
 import com.hit.joonggonara.dto.request.login.*;
-import com.hit.joonggonara.dto.response.board.MemberResponse;
+import com.hit.joonggonara.dto.response.product.MemberResponse;
 import com.hit.joonggonara.dto.response.login.FindUserIdResponse;
 import com.hit.joonggonara.dto.response.login.MemberTokenResponse;
 import com.hit.joonggonara.dto.response.login.TokenResponse;

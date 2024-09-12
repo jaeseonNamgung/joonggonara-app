@@ -36,7 +36,6 @@ public class Photo {
         if(this.product != null){
             this.product.getPhotos().remove(this);
         }
-
         this.product = product;
         this.product.getPhotos().add(this);
     }

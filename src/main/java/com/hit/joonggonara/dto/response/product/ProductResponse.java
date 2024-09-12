@@ -1,6 +1,8 @@
-package com.hit.joonggonara.dto.response.board;
+package com.hit.joonggonara.dto.response.product;
 
 import com.hit.joonggonara.common.type.CategoryType;
+import com.hit.joonggonara.entity.Member;
+import com.hit.joonggonara.entity.Photo;
 import com.hit.joonggonara.entity.Product;
 import org.springframework.data.domain.Page;
 
@@ -48,7 +50,7 @@ public record ProductResponse(
                 product.getTradingPlace(),
                 product.getProductStatus(),
                 product.getUpdatedDate().toString(),
-                PhotoResponse.fromResponse(product.getPhotos()),
+                PhotoResponse.fromPhotoResponse(product.getPhotos()),
                 product.isSoldOut(),
                 product.getCategoryType(),
                 product.getSchoolType().getName(),
@@ -56,6 +58,22 @@ public record ProductResponse(
         ));
     }
 
+    public static ProductResponse fromResponse(Product product, List<Photo> photos, Member member) {
+        return ProductResponse.of(
+                product.getId(),
+                product.getPrice(),
+                product.getTitle(),
+                product.getContent(),
+                product.getTradingPlace(),
+                product.getProductStatus(),
+                product.getUpdatedDate().toString(),
+                PhotoResponse.fromPhotoResponse(photos),
+                product.isSoldOut(),
+                product.getCategoryType(),
+                product.getSchoolType().getName(),
+                MemberResponse.fromResponse(member)
+        );
+    }
     public static ProductResponse fromResponse(Product product) {
         return ProductResponse.of(
                 product.getId(),
@@ -65,7 +83,7 @@ public record ProductResponse(
                 product.getTradingPlace(),
                 product.getProductStatus(),
                 product.getUpdatedDate().toString(),
-                PhotoResponse.fromResponse(product.getPhotos()),
+                PhotoResponse.fromPhotoResponse(product.getPhotos()),
                 product.isSoldOut(),
                 product.getCategoryType(),
                 product.getSchoolType().getName(),
@@ -81,7 +99,7 @@ public record ProductResponse(
                 product.getTradingPlace(),
                 product.getProductStatus(),
                 product.getUpdatedDate().toString(),
-                PhotoResponse.fromResponse(product.getPhotos()),
+                PhotoResponse.fromPhotoResponse(product.getPhotos()),
                 product.isSoldOut(),
                 product.getCategoryType(),
                 product.getSchoolType().getName(),
