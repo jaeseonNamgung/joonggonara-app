@@ -3,16 +3,16 @@ package com.hit.joonggonara.controller.api;
 import com.hit.joonggonara.common.type.ChatRoomStatus;
 import com.hit.joonggonara.dto.request.chat.ChatRequest;
 import com.hit.joonggonara.dto.request.chat.ChatRoomRequest;
-import com.hit.joonggonara.dto.response.product.ProductResponse;
 import com.hit.joonggonara.dto.response.chat.ChatResponse;
 import com.hit.joonggonara.dto.response.chat.ChatRoomAllResponse;
 import com.hit.joonggonara.dto.response.chat.ChatRoomResponse;
+import com.hit.joonggonara.dto.response.product.ProductResponse;
 import com.hit.joonggonara.service.chat.ChatService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,12 +22,13 @@ import java.util.List;
 @RestController
 public class ChatApiController {
     private final ChatService chatService;
-    @MessageMapping("/chat/{roomId}") //여기로 전송되면 메서드 호출 -> WebSocketConfig prefixes 에서 적용한건 앞에 생략
-    @SendTo("/sub/{roomId}") //구독하고 있는 장소로 메시지 전송 (목적지)  -> WebSocketConfig Broker 에서 적용한건 앞에 붙어줘야됨
+    private final RabbitTemplate rabbitTemplate;
+
+    @MessageMapping("chat.message.{roomId}") //여기로 전송되면 메서드 호출 -> WebSocketConfig prefixes 에서 적용한건 앞에 생략
     public ResponseEntity<ChatResponse> saveChat(@DestinationVariable("roomId") Long roomId, ChatRequest chatRequest){
+        rabbitTemplate.convertAndSend("chat.exchange", "room."+roomId, chatRequest);
         return ResponseEntity.ok(chatService.saveChatHistory(roomId, chatRequest));
     }
-
 
     @GetMapping("/chat/all/{roomId}")
     public ResponseEntity<List<ChatResponse>> getAllChats(@PathVariable(name = "roomId") Long roomId){
