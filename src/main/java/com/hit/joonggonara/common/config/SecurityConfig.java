@@ -86,7 +86,7 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer(){
         return web -> {
-            web.ignoring().requestMatchers("/user/login/reissue");
+            web.ignoring().requestMatchers("/user/login/reissue", "/api-docs","/api-docs/**","/swagger-ui/**");
         };
     }
 }

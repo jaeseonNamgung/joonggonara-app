@@ -89,6 +89,8 @@ dependencies {
 	// m1 mac os를 위한 netty-resolver-dns 종속성 추가
 	implementation 'io.netty:netty-resolver-dns-native-macos:4.1.68.Final:osx-aarch_64'
 
+	//Swagger
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
 }
 
 tasks.named('test') {
